@@ -1,15 +1,10 @@
-import type { SearchableTransaction } from "./finance";
+import type { BudgetAllocation, SearchableTransaction } from "./finance";
 
 export type Transaction = SearchableTransaction & {
   note?: string;
 };
 
-export type Budget = {
-  id: string;
-  category: string;
-  spent: number;
-  amount: number;
-};
+export type Budget = BudgetAllocation;
 
 export const financialSummary = {
   available: 4_250_000,
@@ -97,17 +92,31 @@ export const transactions: Transaction[] = [
 ];
 
 export const budgets: Budget[] = [
-  { id: "budget-food", category: "Food & Drink", spent: 420_000, amount: 800_000 },
-  { id: "budget-transport", category: "Transport", spent: 180_000, amount: 400_000 },
-  { id: "budget-entertainment", category: "Entertainment", spent: 240_000, amount: 300_000 },
-  { id: "budget-shopping", category: "Shopping", spent: 284_000, amount: 600_000 },
+  {
+    id: "budget-food",
+    category: "Food & Drink",
+    amount: 800_000,
+    monthKey: "2026-08",
+  },
+  {
+    id: "budget-transport",
+    category: "Transport",
+    amount: 400_000,
+    monthKey: "2026-08",
+  },
+  {
+    id: "budget-entertainment",
+    category: "Entertainment",
+    amount: 300_000,
+    monthKey: "2026-08",
+  },
+  {
+    id: "budget-shopping",
+    category: "Shopping",
+    amount: 600_000,
+    monthKey: "2026-08",
+  },
 ];
-
-export const budgetSummary = {
-  amount: 3_000_000,
-  spent: 1_420_000,
-  monthLabel: "Agustus 2026",
-} as const;
 
 export const userProfile = {
   name: "Bagus Aditya",

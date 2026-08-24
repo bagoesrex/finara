@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyTransactionToSummary,
+  calculateBudgetOverview,
   changeDraftType,
   filterTransactions,
   formatCompactCurrency,
@@ -10,6 +11,7 @@ import {
   parseTransactionInput,
   removeTransactionFromSummary,
   replaceTransactionInSummary,
+  upsertBudgetAllocation,
 } from "./finance";
 
 const transactions = [
@@ -233,6 +235,152 @@ describe("financial summary updates", () => {
       ...summary,
       spentThisMonth: 1_395_000,
     });
+  });
+});
+
+describe("budget calculations", () => {
+  const allocations = [
+    {
+      id: "budget-food",
+      category: "Food & Drink",
+      amount: 20_000,
+      monthKey: "2026-08",
+    },
+    {
+      id: "budget-transport",
+      category: "Transport",
+      amount: 50_000,
+      monthKey: "2026-08",
+    },
+  ];
+
+  const budgetTransactions = [
+    ...transactions,
+    {
+      id: "trx-transport",
+      description: "Naik ojek",
+      category: "Transport",
+      account: "GoPay",
+      amount: 45_000,
+      type: "EXPENSE" as const,
+      date: "2026-08-23",
+      time: "07:30",
+    },
+    {
+      id: "trx-old-food",
+      description: "Makan Juli",
+      category: "Food & Drink",
+      account: "Cash",
+      amount: 30_000,
+      type: "EXPENSE" as const,
+      date: "2026-07-31",
+      time: "12:00",
+    },
+    {
+      id: "trx-food-refund",
+      description: "Pengembalian makan",
+      category: "Food & Drink",
+      account: "Cash",
+      amount: 10_000,
+      type: "INCOME" as const,
+      date: "2026-08-22",
+      time: "13:00",
+    },
+  ];
+
+  it("derives category and total spending from matching monthly expenses", () => {
+    expect(
+      calculateBudgetOverview(allocations, budgetTransactions, "2026-08"),
+    ).toMatchObject({
+      allocated: 70_000,
+      spent: 63_000,
+      remaining: 7_000,
+      progress: 0.9,
+      budgets: [
+        {
+          id: "budget-food",
+          spent: 18_000,
+          remaining: 2_000,
+          progress: 0.9,
+          status: "near-limit",
+        },
+        {
+          id: "budget-transport",
+          spent: 45_000,
+          remaining: 5_000,
+          progress: 0.9,
+          status: "near-limit",
+        },
+      ],
+    });
+  });
+
+  it("reports an overspent category and clamps only its visual progress", () => {
+    const overview = calculateBudgetOverview(
+      [{ ...allocations[0], amount: 10_000 }],
+      budgetTransactions,
+      "2026-08",
+    );
+
+    expect(overview.budgets[0]).toMatchObject({
+      spent: 18_000,
+      remaining: -8_000,
+      progress: 1,
+      status: "over",
+    });
+  });
+
+  it("distinguishes an exact limit from an unused allocation", () => {
+    const overview = calculateBudgetOverview(
+      [
+        { ...allocations[0], amount: 18_000 },
+        {
+          id: "budget-entertainment",
+          category: "Entertainment",
+          amount: 100_000,
+          monthKey: "2026-08",
+        },
+      ],
+      budgetTransactions,
+      "2026-08",
+    );
+
+    expect(overview.budgets.map(({ status }) => status)).toEqual([
+      "limit-reached",
+      "unused",
+    ]);
+  });
+
+  it("returns a stable empty overview when no budget is configured", () => {
+    expect(calculateBudgetOverview([], budgetTransactions, "2026-08")).toEqual({
+      allocated: 0,
+      budgets: [],
+      progress: 0,
+      remaining: 0,
+      spent: 0,
+    });
+  });
+
+  it("adds a new allocation and updates an existing category without duplicates", () => {
+    const newAllocation = {
+      id: "budget-bills",
+      category: "Bills",
+      amount: 500_000,
+      monthKey: "2026-08",
+    };
+    const withBills = upsertBudgetAllocation(allocations, newAllocation);
+
+    expect(withBills).toHaveLength(3);
+    expect(
+      upsertBudgetAllocation(withBills, {
+        ...newAllocation,
+        id: "different-local-id",
+        amount: 300_000,
+      }),
+    ).toEqual([
+      ...allocations,
+      { ...newAllocation, amount: 300_000 },
+    ]);
   });
 });
 

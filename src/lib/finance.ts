@@ -28,6 +28,35 @@ export type FinanceSummary = {
   monthLabel: string;
 };
 
+export type BudgetAllocation = {
+  id: string;
+  category: string;
+  amount: number;
+  monthKey: string;
+};
+
+export type BudgetStatus =
+  | "unused"
+  | "on-track"
+  | "near-limit"
+  | "limit-reached"
+  | "over";
+
+export type BudgetProgress = BudgetAllocation & {
+  spent: number;
+  remaining: number;
+  progress: number;
+  status: BudgetStatus;
+};
+
+export type BudgetOverview = {
+  allocated: number;
+  spent: number;
+  remaining: number;
+  progress: number;
+  budgets: BudgetProgress[];
+};
+
 export type ParseResult =
   | { status: "ready"; transaction: ParsedTransaction }
   | { status: "invalid"; message: string };
@@ -304,4 +333,82 @@ export function groupTransactionsByDate<T extends SearchableTransaction>(
 export function clampProgress(spent: number, budget: number): number {
   if (budget <= 0) return 0;
   return Math.min(Math.max(spent / budget, 0), 1);
+}
+
+function getBudgetStatus(spent: number, amount: number): BudgetStatus {
+  if (spent > amount) return "over";
+  if (spent === amount && amount > 0) return "limit-reached";
+  if (spent === 0) return "unused";
+  if (spent / amount >= 0.8) return "near-limit";
+  return "on-track";
+}
+
+export function calculateBudgetOverview(
+  allocations: readonly BudgetAllocation[],
+  transactions: readonly SearchableTransaction[],
+  monthKey: string,
+): BudgetOverview {
+  const activeAllocations = allocations.filter(
+    (allocation) => allocation.monthKey === monthKey,
+  );
+  const budgetedCategories = new Set(
+    activeAllocations.map(({ category }) => category),
+  );
+  const spendingByCategory = new Map<string, number>();
+
+  for (const transaction of transactions) {
+    if (
+      transaction.type !== "EXPENSE" ||
+      !transaction.date.startsWith(monthKey) ||
+      !budgetedCategories.has(transaction.category)
+    ) {
+      continue;
+    }
+
+    spendingByCategory.set(
+      transaction.category,
+      (spendingByCategory.get(transaction.category) ?? 0) + transaction.amount,
+    );
+  }
+
+  const budgets = activeAllocations.map((allocation) => {
+    const spent = spendingByCategory.get(allocation.category) ?? 0;
+    return {
+      ...allocation,
+      spent,
+      remaining: allocation.amount - spent,
+      progress: clampProgress(spent, allocation.amount),
+      status: getBudgetStatus(spent, allocation.amount),
+    };
+  });
+  const allocated = budgets.reduce((total, budget) => total + budget.amount, 0);
+  const spent = budgets.reduce((total, budget) => total + budget.spent, 0);
+
+  return {
+    allocated,
+    budgets,
+    progress: clampProgress(spent, allocated),
+    remaining: allocated - spent,
+    spent,
+  };
+}
+
+export function upsertBudgetAllocation(
+  allocations: readonly BudgetAllocation[],
+  nextAllocation: BudgetAllocation,
+): BudgetAllocation[] {
+  const existingAllocation = allocations.find(
+    (allocation) =>
+      allocation.id === nextAllocation.id ||
+      (allocation.monthKey === nextAllocation.monthKey &&
+        allocation.category === nextAllocation.category),
+  );
+
+  if (!existingAllocation) return [...allocations, nextAllocation];
+
+  return allocations.map((allocation) =>
+    allocation.id === existingAllocation.id
+      ? { ...nextAllocation, id: existingAllocation.id }
+      : allocation,
+  );
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { MockFinanceProvider } from "@/components/mock-finance-provider";
-import { financialSummary, transactions } from "@/lib/mock-data";
+import { budgets, financialSummary, transactions } from "@/lib/mock-data";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +10,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <div className="app-shell">
         <div className="app-content" id="main-content" tabIndex={-1}>
           <MockFinanceProvider
+            initialBudgets={budgets}
             initialSummary={financialSummary}
             initialTransactions={transactions}
           >

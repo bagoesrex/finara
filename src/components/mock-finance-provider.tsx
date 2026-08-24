@@ -12,6 +12,8 @@ import {
   applyTransactionToSummary,
   removeTransactionFromSummary,
   replaceTransactionInSummary,
+  upsertBudgetAllocation,
+  type BudgetAllocation,
   type FinanceSummary,
   type ParsedTransaction,
 } from "@/lib/finance";
@@ -20,6 +22,7 @@ import type { Transaction } from "@/lib/mock-data";
 export type TransactionDraft = ParsedTransaction & { account: string };
 
 type MockFinanceState = {
+  budgets: BudgetAllocation[];
   summary: FinanceSummary;
   transactions: Transaction[];
 };
@@ -27,6 +30,7 @@ type MockFinanceState = {
 type MockFinanceContextValue = MockFinanceState & {
   addTransaction: (draft: TransactionDraft) => Transaction;
   deleteTransaction: (id: string) => void;
+  saveBudget: (budget: Omit<BudgetAllocation, "id"> & { id?: string }) => void;
   updateTransaction: (transaction: Transaction) => void;
 };
 
@@ -42,14 +46,17 @@ function currentTime(): string {
 
 export function MockFinanceProvider({
   children,
+  initialBudgets,
   initialSummary,
   initialTransactions,
 }: {
   children: ReactNode;
+  initialBudgets: BudgetAllocation[];
   initialSummary: FinanceSummary;
   initialTransactions: Transaction[];
 }) {
   const [state, setState] = useState<MockFinanceState>(() => ({
+    budgets: initialBudgets,
     summary: initialSummary,
     transactions: initialTransactions,
   }));
@@ -62,6 +69,7 @@ export function MockFinanceProvider({
     };
 
     setState((current) => ({
+      ...current,
       summary: applyTransactionToSummary(current.summary, transaction),
       transactions: [transaction, ...current.transactions],
     }));
@@ -77,6 +85,7 @@ export function MockFinanceProvider({
       if (!previousTransaction) return current;
 
       return {
+        ...current,
         summary: replaceTransactionInSummary(
           current.summary,
           previousTransaction,
@@ -95,15 +104,38 @@ export function MockFinanceProvider({
       if (!transaction) return current;
 
       return {
+        ...current,
         summary: removeTransactionFromSummary(current.summary, transaction),
         transactions: current.transactions.filter((item) => item.id !== id),
       };
     });
   }, []);
 
+  const saveBudget = useCallback(
+    (draft: Omit<BudgetAllocation, "id"> & { id?: string }) => {
+      if (!Number.isFinite(draft.amount) || draft.amount <= 0) return;
+
+      const budget: BudgetAllocation = {
+        ...draft,
+        id: draft.id ?? `local-budget-${crypto.randomUUID()}`,
+      };
+      setState((current) => ({
+        ...current,
+        budgets: upsertBudgetAllocation(current.budgets, budget),
+      }));
+    },
+    [],
+  );
+
   const value = useMemo(
-    () => ({ ...state, addTransaction, deleteTransaction, updateTransaction }),
-    [addTransaction, deleteTransaction, state, updateTransaction],
+    () => ({
+      ...state,
+      addTransaction,
+      deleteTransaction,
+      saveBudget,
+      updateTransaction,
+    }),
+    [addTransaction, deleteTransaction, saveBudget, state, updateTransaction],
   );
 
   return (
