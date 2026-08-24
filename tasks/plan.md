@@ -17,38 +17,38 @@ Build a navigable, mobile-first Finara frontend for Home, Activity, Budget, and 
 
 ### Phase 1: Foundation
 
-- [ ] Add Vitest and Lucide dependencies plus repository test command.
-- [ ] Define mock transaction/budget/profile data and finance utilities.
-- [ ] Prove formatting, parsing, grouping, and search behavior with unit tests.
+- [x] Add Vitest and Lucide dependencies plus repository test command.
+- [x] Define mock transaction/budget/profile data and finance utilities.
+- [x] Prove formatting, parsing, grouping, and search behavior with unit tests.
 
 ### Checkpoint: Foundation
 
-- [ ] Focused and full tests pass.
-- [ ] TypeScript contracts compile.
+- [x] Focused and full tests pass.
+- [x] TypeScript contracts compile.
 
 ### Phase 2: Shell and core flow
 
-- [ ] Define Finara visual tokens, base accessibility styles, and reduced-motion behavior.
-- [ ] Add centered mobile shell and persistent bottom navigation.
-- [ ] Build Home financial hierarchy and local AI preview/save interaction.
+- [x] Define Finara visual tokens, base accessibility styles, and reduced-motion behavior.
+- [x] Add centered mobile shell and persistent bottom navigation.
+- [x] Build Home financial hierarchy and local AI preview/save interaction.
 
 ### Checkpoint: Core flow
 
-- [ ] Home works at 320-480px and remains centered on desktop.
-- [ ] Input is preserved on parse failure and no save occurs before confirmation.
+- [x] Home works at 320-480px and remains centered on desktop.
+- [x] Input is preserved on parse failure and no save occurs before confirmation.
 
 ### Phase 3: Supporting pages
 
-- [ ] Build Activity list, client-side search, and dummy transaction detail.
-- [ ] Build monthly/category Budget progress.
-- [ ] Build minimal Profile/settings navigation.
+- [x] Build Activity list, client-side search, and dummy transaction detail.
+- [x] Build monthly/category Budget progress.
+- [x] Build minimal Profile/settings navigation.
 
 ### Checkpoint: Complete
 
-- [ ] All primary routes are navigable and have correct active states.
-- [ ] Keyboard, responsive, and reduced-motion behavior are verified.
-- [ ] Test, lint, typecheck, and production build pass.
-- [ ] Runtime console is clean and performance has a measured baseline where tooling permits.
+- [x] All primary routes are navigable and have correct active states.
+- [x] Keyboard, responsive, and reduced-motion behavior are verified.
+- [x] Test, lint, typecheck, and production build pass.
+- [x] Runtime console is clean and performance has a measured baseline where tooling permits.
 
 ## Risks and mitigations
 
