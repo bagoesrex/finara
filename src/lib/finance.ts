@@ -14,8 +14,18 @@ export type SearchableTransaction = {
 export type ParsedTransaction = {
   amount: number;
   category: string;
+  date: string;
   description: string;
+  time?: string;
   type: TransactionType;
+};
+
+export type FinanceSummary = {
+  available: number;
+  spentThisMonth: number;
+  incomeThisMonth: number;
+  monthKey: string;
+  monthLabel: string;
 };
 
 export type ParseResult =
@@ -29,6 +39,25 @@ const integerFormatter = new Intl.NumberFormat("id-ID", {
 const decimalFormatter = new Intl.NumberFormat("id-ID", {
   maximumFractionDigits: 2,
 });
+
+export const expenseCategories = [
+  "Food & Drink",
+  "Transport",
+  "Shopping",
+  "Bills",
+  "Entertainment",
+  "Health",
+  "Education",
+  "Other",
+] as const;
+
+export const incomeCategories = [
+  "Salary",
+  "Freelance",
+  "Business",
+  "Gift",
+  "Other",
+] as const;
 
 export function formatCurrency(amount: number): string {
   return `Rp${integerFormatter.format(Math.abs(amount))}`;
@@ -50,6 +79,19 @@ export function formatCompactCurrency(amount: number): string {
 
 function titleCaseFirst(value: string): string {
   return value ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
+}
+
+function getLocalIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function shiftIsoDate(date: string, days: number): string {
+  const [year, month, day] = date.split("-").map(Number);
+  const shiftedDate = new Date(Date.UTC(year, month - 1, day + days));
+  return shiftedDate.toISOString().slice(0, 10);
 }
 
 function parseAmount(rawValue: string, rawUnit: string | undefined): number {
@@ -89,7 +131,34 @@ function inferCategory(input: string, type: TransactionType): string {
   return "Other";
 }
 
-export function parseTransactionInput(input: string): ParseResult {
+function inferTime(input: string): string | undefined {
+  if (/\btadi pagi\b/i.test(input)) return "08:00";
+  if (/\btadi siang\b/i.test(input)) return "12:00";
+  if (/\btadi sore\b/i.test(input)) return "17:00";
+  if (/\btadi malam\b/i.test(input)) return "20:00";
+  return undefined;
+}
+
+export function categoriesForType(type: TransactionType): readonly string[] {
+  return type === "INCOME" ? incomeCategories : expenseCategories;
+}
+
+export function changeDraftType(
+  draft: ParsedTransaction,
+  type: TransactionType,
+): ParsedTransaction {
+  const categories = categoriesForType(type);
+  return {
+    ...draft,
+    type,
+    category: categories.includes(draft.category) ? draft.category : "Other",
+  };
+}
+
+export function parseTransactionInput(
+  input: string,
+  referenceDate = getLocalIsoDate(new Date()),
+): ParseResult {
   const normalizedInput = input.trim().replace(/\s+/g, " ");
   const amountMatch = normalizedInput.match(
     /(\d+(?:[.,]\d+)?)\s*(rb|ribu|k|jt|juta)?\b/i,
@@ -113,17 +182,44 @@ export function parseTransactionInput(input: string): ParseResult {
 
   const type = inferType(normalizedInput);
   const description = titleCaseFirst(
-    normalizedInput.replace(amountMatch[0], "").trim().replace(/[.,-]+$/, ""),
+    normalizedInput
+      .replace(amountMatch[0], "")
+      .replace(/\b(?:kemarin|hari ini|tadi (?:pagi|siang|sore|malam))\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[.,-]+$/, ""),
   );
+  const time = inferTime(normalizedInput);
 
   return {
     status: "ready",
     transaction: {
       amount,
       category: inferCategory(normalizedInput, type),
+      date: /\bkemarin\b/i.test(normalizedInput)
+        ? shiftIsoDate(referenceDate, -1)
+        : referenceDate,
       description: description || (type === "INCOME" ? "Income" : "Expense"),
+      ...(time ? { time } : {}),
       type,
     },
+  };
+}
+
+export function applyTransactionToSummary(
+  summary: FinanceSummary,
+  transaction: Pick<SearchableTransaction, "amount" | "date" | "type">,
+): FinanceSummary {
+  const isCurrentMonth = transaction.date.startsWith(summary.monthKey);
+  const isExpense = transaction.type === "EXPENSE";
+
+  return {
+    ...summary,
+    available: summary.available + (isExpense ? -transaction.amount : transaction.amount),
+    spentThisMonth:
+      summary.spentThisMonth + (isCurrentMonth && isExpense ? transaction.amount : 0),
+    incomeThisMonth:
+      summary.incomeThisMonth + (isCurrentMonth && !isExpense ? transaction.amount : 0),
   };
 }
 

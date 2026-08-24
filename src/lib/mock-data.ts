@@ -15,8 +15,12 @@ export const financialSummary = {
   available: 4_250_000,
   spentThisMonth: 1_420_000,
   incomeThisMonth: 5_670_000,
+  monthKey: "2026-08",
   monthLabel: "Agustus 2026",
 } as const;
+
+export const mockToday = "2026-08-25";
+export const accounts = ["BCA", "GoPay", "Cash"] as const;
 
 export const transactions: Transaction[] = [
   {

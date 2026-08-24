@@ -3,7 +3,7 @@
 import { useDeferredValue, useState } from "react";
 import { Search, X } from "lucide-react";
 import { filterTransactions, groupTransactionsByDate } from "@/lib/finance";
-import type { Transaction } from "@/lib/mock-data";
+import { useMockFinance } from "./mock-finance-provider";
 import { TransactionRow } from "./transaction-row";
 
 const dateLabels: Record<string, string> = {
@@ -20,7 +20,8 @@ function formatGroupDate(date: string): string {
   }).format(new Date(`${date}T00:00:00`));
 }
 
-export function ActivitySearch({ transactions }: { transactions: Transaction[] }) {
+export function ActivitySearch() {
+  const { transactions } = useMockFinance();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const groups = groupTransactionsByDate(
@@ -34,10 +35,12 @@ export function ActivitySearch({ transactions }: { transactions: Transaction[] }
         <label className="sr-only" htmlFor="transaction-search">Cari transaksi</label>
         <input
           id="transaction-search"
+          name="transaction-search"
           type="search"
-          placeholder="Cari transaksi, kategori, atau akun"
+          placeholder="Cari transaksi, kategori, atau akun…"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          autoComplete="off"
         />
         {query ? (
           <button type="button" onClick={() => setQuery("")} aria-label="Hapus pencarian">
