@@ -8,6 +8,8 @@ import {
   formatCurrency,
   groupTransactionsByDate,
   parseTransactionInput,
+  removeTransactionFromSummary,
+  replaceTransactionInSummary,
 } from "./finance";
 
 const transactions = [
@@ -174,6 +176,62 @@ describe("financial summary updates", () => {
       ...summary,
       available: 4_750_000,
       incomeThisMonth: 6_170_000,
+    });
+  });
+
+  it("reverses a current-month expense when it is deleted", () => {
+    expect(
+      removeTransactionFromSummary(summary, {
+        amount: 25_000,
+        date: "2026-08-25",
+        type: "EXPENSE",
+      }),
+    ).toEqual({
+      ...summary,
+      available: 4_275_000,
+      spentThisMonth: 1_395_000,
+    });
+  });
+
+  it("recalculates the delta when an expense amount is edited", () => {
+    expect(
+      replaceTransactionInSummary(
+        summary,
+        { amount: 25_000, date: "2026-08-25", type: "EXPENSE" },
+        { amount: 40_000, date: "2026-08-25", type: "EXPENSE" },
+      ),
+    ).toEqual({
+      ...summary,
+      available: 4_235_000,
+      spentThisMonth: 1_435_000,
+    });
+  });
+
+  it("moves totals between expense and income when the type is edited", () => {
+    expect(
+      replaceTransactionInSummary(
+        summary,
+        { amount: 25_000, date: "2026-08-25", type: "EXPENSE" },
+        { amount: 500_000, date: "2026-08-25", type: "INCOME" },
+      ),
+    ).toEqual({
+      ...summary,
+      available: 4_775_000,
+      spentThisMonth: 1_395_000,
+      incomeThisMonth: 6_170_000,
+    });
+  });
+
+  it("removes spending from the active month when the date is moved back", () => {
+    expect(
+      replaceTransactionInSummary(
+        summary,
+        { amount: 25_000, date: "2026-08-25", type: "EXPENSE" },
+        { amount: 25_000, date: "2026-07-31", type: "EXPENSE" },
+      ),
+    ).toEqual({
+      ...summary,
+      spentThisMonth: 1_395_000,
     });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Check, X } from "lucide-react";
 import {
   categoriesForType,
@@ -10,12 +10,34 @@ import {
 } from "@/lib/finance";
 import { accounts } from "@/lib/mock-data";
 import type { TransactionDraft } from "./mock-finance-provider";
+import { useModalFocusTrap } from "./use-modal-focus-trap";
+
+type SheetVariant = "create" | "edit";
+
+const sheetCopy: Record<
+  SheetVariant,
+  { caption: string; eyebrow: string; saveLabel: string; title: string }
+> = {
+  create: {
+    caption: "Data sementara akan hilang saat halaman dimuat ulang.",
+    eyebrow: "Periksa dulu",
+    saveLabel: "Simpan transaksi",
+    title: "Tinjau transaksi",
+  },
+  edit: {
+    caption: "Perubahan hanya berlaku selama sesi prototipe ini.",
+    eyebrow: "Perbarui data",
+    saveLabel: "Simpan perubahan",
+    title: "Edit transaksi",
+  },
+};
 
 type TransactionConfirmationSheetProps = {
   draft: TransactionDraft;
   onChange: (draft: TransactionDraft) => void;
   onClose: () => void;
   onSave: () => void;
+  variant?: SheetVariant;
 };
 
 export function TransactionConfirmationSheet({
@@ -23,53 +45,14 @@ export function TransactionConfirmationSheet({
   onChange,
   onClose,
   onSave,
+  variant = "create",
 }: TransactionConfirmationSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const isValid = draft.amount > 0 && draft.description.trim().length > 0;
+  const copy = sheetCopy[variant];
 
-  useEffect(() => {
-    const previouslyFocused = document.activeElement;
-    const scrollContainer = document.querySelector<HTMLElement>(".app-content");
-    const previousOverflow = scrollContainer?.style.overflowY;
-
-    if (scrollContainer) scrollContainer.style.overflowY = "hidden";
-    closeButtonRef.current?.focus();
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-        return;
-      }
-
-      if (event.key !== "Tab") return;
-
-      const focusableElements = sheetRef.current?.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), select:not([disabled])',
-      );
-      if (!focusableElements?.length) return;
-
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-
-      if (event.shiftKey && document.activeElement === firstElement) {
-        event.preventDefault();
-        lastElement.focus();
-      } else if (!event.shiftKey && document.activeElement === lastElement) {
-        event.preventDefault();
-        firstElement.focus();
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      if (scrollContainer) scrollContainer.style.overflowY = previousOverflow ?? "";
-      window.removeEventListener("keydown", handleKeyDown);
-      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
-    };
-  }, [onClose]);
+  useModalFocusTrap(sheetRef, closeButtonRef, onClose);
 
   function updateType(type: TransactionType) {
     onChange({ ...changeDraftType(draft, type), account: draft.account });
@@ -80,6 +63,7 @@ export function TransactionConfirmationSheet({
       <button
         className="sheet-backdrop"
         type="button"
+        tabIndex={-1}
         aria-label="Tutup tinjauan transaksi"
         onClick={onClose}
       />
@@ -94,8 +78,8 @@ export function TransactionConfirmationSheet({
         <div className="sheet-handle" aria-hidden="true" />
         <div className="sheet-heading">
           <div>
-            <p className="eyebrow">Periksa dulu</p>
-            <h2 id="confirmation-title">Tinjau transaksi</h2>
+            <p className="eyebrow">{copy.eyebrow}</p>
+            <h2 id="confirmation-title">{copy.title}</h2>
           </div>
           <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Tutup">
             <X aria-hidden="true" size={19} />
@@ -212,12 +196,12 @@ export function TransactionConfirmationSheet({
             <button className="secondary-button" type="button" onClick={onClose}>Batal</button>
             <button className="primary-button" type="submit" disabled={!isValid}>
               <Check aria-hidden="true" size={18} />
-              Simpan transaksi
+              {copy.saveLabel}
             </button>
           </div>
         </form>
         <p className="sheet-caption" id="confirmation-caption">
-          Data sementara akan hilang saat halaman dimuat ulang.
+          {copy.caption}
         </p>
       </section>
     </div>

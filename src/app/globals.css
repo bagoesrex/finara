@@ -41,6 +41,8 @@ button { color: inherit; }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; z-index: 100; top: 8px; left: 50%; padding: 10px 14px; border-radius: 10px; background: var(--ink); color: white; font-size: .78rem; font-weight: 650; transform: translate(-50%, -150%); transition: transform 150ms ease; }
+.skip-link:focus-visible { transform: translate(-50%, 0); }
 
 .app-viewport { height: 100dvh; overflow: hidden; }
 .app-shell { position: relative; display: flex; width: 100%; max-width: 480px; height: 100dvh; min-height: 0; margin: 0 auto; overflow: hidden; flex-direction: column; background: var(--surface); }
@@ -114,7 +116,7 @@ a { color: inherit; text-decoration: none; }
 .composer-form input::placeholder, .search-field input::placeholder { color: #98a19c; }
 .composer-form button { display: grid; width: 40px; height: 40px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 12px; background: var(--accent); color: white; cursor: pointer; transition: background-color 160ms ease, transform 160ms ease, opacity 160ms ease; }
 .composer-form button:hover:not(:disabled), .primary-button:hover:not(:disabled) { background: var(--accent-strong); }
-.composer-form button:active:not(:disabled), .primary-button:active, .secondary-button:active { transform: scale(.97); }
+.composer-form button:active:not(:disabled), .primary-button:active, .secondary-button:active, .danger-button:active { transform: scale(.97); }
 .composer-form button:disabled { cursor: not-allowed; opacity: .38; }
 .form-error { margin: 9px 2px 0; color: var(--expense); font-size: .76rem; }
 .quick-examples { display: flex; gap: 7px; margin-top: 11px; overflow-x: auto; scrollbar-width: none; }
@@ -147,6 +149,7 @@ a.transaction-row:active { transform: scale(.99); }
 .search-field input::-webkit-search-cancel-button { display: none; }
 .search-field button, .sheet-heading button { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
 .search-field button:hover, .sheet-heading button:hover { background: var(--border); color: var(--ink); }
+.sheet-heading button { width: 44px; height: 44px; }
 .activity-results { min-height: 300px; margin-top: 27px; }
 .transaction-group { margin-top: 26px; }
 .transaction-group:first-child { margin-top: 0; }
@@ -200,6 +203,7 @@ a.transaction-row:active { transform: scale(.99); }
 .detail-type--expense { background: var(--expense-soft); color: var(--expense); }
 .detail-type--income { background: var(--income-soft); color: var(--income); }
 .detail-hero h1 { margin: 0; font-size: 1rem; font-weight: 620; }
+.detail-hero h1, .empty-page h1 { overflow-wrap: anywhere; text-wrap: balance; }
 .detail-amount { margin: 9px 0 0; font-size: 2.25rem; font-weight: 680; letter-spacing: -.055em; }
 .detail-list { margin: 25px 0 0; }
 .detail-list > div { display: flex; min-height: 55px; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--border); }
@@ -211,7 +215,9 @@ a.transaction-row:active { transform: scale(.99); }
 .detail-note h2 { font-size: .77rem; }
 .detail-note p, .prototype-note { color: var(--muted); font-size: .75rem; line-height: 1.55; }
 .detail-note p { margin-top: 7px; }
-.prototype-note { margin: 35px 0 0; text-align: center; }
+.detail-actions { display: grid; margin-top: 30px; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detail-actions > button { width: 100%; }
+.prototype-note { margin: 24px 0 0; text-align: center; }
 
 .sheet-layer { position: fixed; z-index: 50; inset: 0; overscroll-behavior: contain; }
 .sheet-backdrop { position: absolute; inset: 0; width: 100%; border: 0; background: rgb(13 28 21 / 48%); cursor: default; animation: fade-in 180ms ease-out both; }
@@ -234,12 +240,24 @@ a.transaction-row:active { transform: scale(.99); }
 .preview-field input:hover, .preview-field select:hover { border-color: #b7cbbf; }
 .preview-field input:focus-visible, .preview-field select:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent); outline: 0; }
 .sheet-actions { display: grid; grid-template-columns: .7fr 1.3fr; gap: 9px; margin-top: 20px; }
-.primary-button, .secondary-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 7px; padding: 11px 16px; border-radius: 13px; cursor: pointer; font-size: .78rem; font-weight: 670; transition: background-color 160ms ease, transform 160ms ease; }
+.primary-button, .secondary-button, .danger-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 7px; padding: 11px 16px; border-radius: 13px; cursor: pointer; font-size: .78rem; font-weight: 670; transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease; }
 .primary-button { border: 1px solid var(--accent); background: var(--accent); color: white; }
 .primary-button:disabled { cursor: not-allowed; opacity: .48; }
 .secondary-button { border: 1px solid var(--border); background: var(--surface); }
 .secondary-button:hover { background: var(--surface-subtle); }
+.danger-button { border: 1px solid var(--expense); background: var(--expense); color: white; }
+.danger-button:hover { border-color: #8d3b2b; background: #8d3b2b; }
+.danger-button--quiet { border-color: #e5c8c0; background: var(--surface); color: var(--expense); }
+.danger-button--quiet:hover { border-color: #d9b1a6; background: var(--expense-soft); }
 .sheet-caption { margin: 10px 0 0; color: var(--faint); font-size: .65rem; line-height: 1.45; text-align: center; }
+.confirmation-sheet--compact { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+.delete-summary { display: flex; align-items: center; gap: 12px; margin-top: 22px; padding: 15px; border: 1px solid #ead4ce; border-radius: 15px; background: #fbf3f0; }
+.delete-summary > div { min-width: 0; }
+.delete-summary__icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 12px; background: var(--expense-soft); color: var(--expense); }
+.delete-summary div > strong, .delete-summary div > span { display: block; }
+.delete-summary strong { overflow-wrap: anywhere; font-size: .82rem; font-weight: 670; }
+.delete-summary div > span { margin-top: 3px; color: var(--expense); font-size: .74rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.delete-warning { margin: 14px 2px 0; color: var(--muted); font-size: .75rem; line-height: 1.55; }
 .toast { position: fixed; z-index: 45; right: max(18px, calc((100vw - 444px) / 2)); bottom: calc(var(--nav-height) + 14px + env(safe-area-inset-bottom)); left: max(18px, calc((100vw - 444px) / 2)); display: flex; min-height: 48px; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 13px; background: var(--ink); color: white; box-shadow: 0 12px 30px rgb(13 28 21 / 19%); font-size: .73rem; font-weight: 620; text-align: center; animation: toast-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 .empty-page { display: flex; min-height: 100%; align-items: center; justify-content: center; flex-direction: column; padding: 30px var(--page-padding); }
@@ -247,6 +265,7 @@ a.transaction-row:active { transform: scale(.99); }
 .empty-page h1 { font-size: 1.45rem; }
 .empty-page > p:not(.eyebrow) { max-width: 300px; margin-top: 8px; color: var(--muted); font-size: .8rem; line-height: 1.5; }
 .empty-page .primary-button { margin-top: 22px; }
+.empty-page__icon { display: grid; width: 48px; height: 48px; margin-bottom: 18px; place-items: center; border-radius: 15px; background: var(--accent-soft); color: var(--accent); }
 
 @keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -261,6 +280,7 @@ a.transaction-row:active { transform: scale(.99); }
   .balance-section > strong { font-size: 2.4rem; letter-spacing: -.055em; }
   .page-header h1 { font-size: 2rem; letter-spacing: -.045em; }
   .detail-amount, .preview-amount { font-size: 2rem; }
+  .confirmation-sheet { bottom: 20px; max-height: calc(100dvh - 40px); border-radius: 24px; }
 }
 
 @media (hover: none) and (pointer: coarse) {

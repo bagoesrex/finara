@@ -10,6 +10,8 @@ import {
 } from "react";
 import {
   applyTransactionToSummary,
+  removeTransactionFromSummary,
+  replaceTransactionInSummary,
   type FinanceSummary,
   type ParsedTransaction,
 } from "@/lib/finance";
@@ -24,6 +26,8 @@ type MockFinanceState = {
 
 type MockFinanceContextValue = MockFinanceState & {
   addTransaction: (draft: TransactionDraft) => Transaction;
+  deleteTransaction: (id: string) => void;
+  updateTransaction: (transaction: Transaction) => void;
 };
 
 const MockFinanceContext = createContext<MockFinanceContextValue | null>(null);
@@ -65,9 +69,41 @@ export function MockFinanceProvider({
     return transaction;
   }, []);
 
+  const updateTransaction = useCallback((transaction: Transaction) => {
+    setState((current) => {
+      const previousTransaction = current.transactions.find(
+        ({ id }) => id === transaction.id,
+      );
+      if (!previousTransaction) return current;
+
+      return {
+        summary: replaceTransactionInSummary(
+          current.summary,
+          previousTransaction,
+          transaction,
+        ),
+        transactions: current.transactions.map((item) =>
+          item.id === transaction.id ? transaction : item,
+        ),
+      };
+    });
+  }, []);
+
+  const deleteTransaction = useCallback((id: string) => {
+    setState((current) => {
+      const transaction = current.transactions.find((item) => item.id === id);
+      if (!transaction) return current;
+
+      return {
+        summary: removeTransactionFromSummary(current.summary, transaction),
+        transactions: current.transactions.filter((item) => item.id !== id),
+      };
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ ...state, addTransaction }),
-    [addTransaction, state],
+    () => ({ ...state, addTransaction, deleteTransaction, updateTransaction }),
+    [addTransaction, deleteTransaction, state, updateTransaction],
   );
 
   return (

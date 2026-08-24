@@ -206,21 +206,52 @@ export function parseTransactionInput(
   };
 }
 
-export function applyTransactionToSummary(
+type SummaryTransaction = Pick<SearchableTransaction, "amount" | "date" | "type">;
+
+function adjustTransactionInSummary(
   summary: FinanceSummary,
-  transaction: Pick<SearchableTransaction, "amount" | "date" | "type">,
+  transaction: SummaryTransaction,
+  direction: 1 | -1,
 ): FinanceSummary {
   const isCurrentMonth = transaction.date.startsWith(summary.monthKey);
   const isExpense = transaction.type === "EXPENSE";
+  const availableDelta = isExpense ? -transaction.amount : transaction.amount;
 
   return {
     ...summary,
-    available: summary.available + (isExpense ? -transaction.amount : transaction.amount),
+    available: summary.available + direction * availableDelta,
     spentThisMonth:
-      summary.spentThisMonth + (isCurrentMonth && isExpense ? transaction.amount : 0),
+      summary.spentThisMonth +
+      (isCurrentMonth && isExpense ? direction * transaction.amount : 0),
     incomeThisMonth:
-      summary.incomeThisMonth + (isCurrentMonth && !isExpense ? transaction.amount : 0),
+      summary.incomeThisMonth +
+      (isCurrentMonth && !isExpense ? direction * transaction.amount : 0),
   };
+}
+
+export function applyTransactionToSummary(
+  summary: FinanceSummary,
+  transaction: SummaryTransaction,
+): FinanceSummary {
+  return adjustTransactionInSummary(summary, transaction, 1);
+}
+
+export function removeTransactionFromSummary(
+  summary: FinanceSummary,
+  transaction: SummaryTransaction,
+): FinanceSummary {
+  return adjustTransactionInSummary(summary, transaction, -1);
+}
+
+export function replaceTransactionInSummary(
+  summary: FinanceSummary,
+  previousTransaction: SummaryTransaction,
+  nextTransaction: SummaryTransaction,
+): FinanceSummary {
+  return applyTransactionToSummary(
+    removeTransactionFromSummary(summary, previousTransaction),
+    nextTransaction,
+  );
 }
 
 export function filterTransactions<T extends SearchableTransaction>(

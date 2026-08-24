@@ -42,10 +42,6 @@ export function TransactionRow({ transaction }: { transaction: Transaction }) {
     </>
   );
 
-  if (transaction.id.startsWith("local-")) {
-    return <div className="transaction-row">{content}</div>;
-  }
-
   return (
     <Link className="transaction-row" href={`/activity/${transaction.id}`}>
       {content}
