@@ -1,68 +1,62 @@
-# Implementation Plan: Dummy-data Frontend MVP
+# Implementation Plan: TanStack Query Finance State
 
 ## Overview
 
-Build a navigable, mobile-first Finara frontend for Home, Activity, Budget, and Profile using deterministic dummy data. Preserve server rendering for static presentation and isolate client JavaScript to navigation state, search, and the local AI-composer interaction.
+Move the prototype's shared finance state from React component state into an in-memory TanStack Query cache without changing the existing Home, Activity, Budget, or Profile consumer contract. This establishes the client server-state boundary that a later authenticated API can replace while PostgreSQL remains the eventual source of truth.
 
 ## Architecture decisions
 
-- Keep mock records and domain types in `src/lib/`, independent from React, so a future API can replace the data source.
-- Use Server Components for route pages and narrow Client Components for interactive islands.
-- Use CSS/Tailwind transitions based on `transform` and `opacity`; avoid an animation runtime dependency.
-- Respect `prefers-reduced-motion` and preserve clear state changes without animation.
-- Use the four-route App Router structure `/`, `/activity`, `/budget`, and `/profile`.
-- Use Vitest for deterministic mock parsing/search/formatting logic.
+- Mount one Query Client inside the authenticated private-app boundary so it survives route navigation but is discarded on sign-out.
+- Keep the existing `useMockFinance` interface during the prototype migration; page components should not know whether data comes from mock state or an API.
+- Scope prototype finance query keys to the active session identity to prevent cache reuse between users.
+- Keep financial query data in memory only. Do not persist it to browser storage.
+- Use a single atomic finance snapshot for the mock adapter. Split it into resource queries when real API read contracts are introduced.
+- Preserve Server Components for route shells. A future backend may prefetch and hydrate TanStack Query, but must not render a second independently revalidated copy of the same mutable data.
 
 ## Task list
 
-### Phase 1: Foundation
+### Phase 1: Decision and contract
 
-- [x] Add Vitest and Lucide dependencies plus repository test command.
-- [x] Define mock transaction/budget/profile data and finance utilities.
-- [x] Prove formatting, parsing, grouping, and search behavior with unit tests.
+- [x] Task 1: Record the TanStack Query client-state decision in ADR 0002.
+- [x] Task 2: Define and test the session-scoped prototype query key and cache-update contract.
 
-### Checkpoint: Foundation
+### Checkpoint: Contract
 
-- [x] Focused and full tests pass.
-- [x] TypeScript contracts compile.
+- [x] The decision explains ownership, session isolation, invalidation, and the RSC boundary.
+- [x] Focused tests fail before and pass after the new cache contract exists.
 
-### Phase 2: Shell and core flow
+### Phase 2: Prototype migration
 
-- [x] Define Finara visual tokens, base accessibility styles, and reduced-motion behavior.
-- [x] Add centered mobile shell and persistent bottom navigation.
-- [x] Build Home financial hierarchy and local AI preview/save interaction.
+- [ ] Task 3: Install TanStack Query and add a private-app Query Client provider.
+- [ ] Task 4: Migrate `MockFinanceProvider` from `useState` to the Query Client without changing page consumers.
 
-### Checkpoint: Core flow
+### Checkpoint: Migration
 
-- [x] Home works at 320-480px and remains centered on desktop.
-- [x] Input is preserved on parse failure and no save occurs before confirmation.
+- [ ] Transaction, budget, and account changes remain visible across client-side route navigation.
+- [ ] Signing out unmounts the Query Client and discards the prior session cache.
 
-### Phase 3: Supporting pages
+### Phase 3: Verification
 
-- [x] Build Activity list, client-side search, and dummy transaction detail.
-- [x] Build monthly/category Budget progress.
-- [x] Build minimal Profile/settings navigation.
+- [ ] Task 5: Run tests, lint, typecheck, build, dependency audit, and browser runtime checks.
+- [ ] Task 6: Review the final diff for correctness, security, maintainability, and scope.
 
 ### Checkpoint: Complete
 
-- [x] All primary routes are navigable and have correct active states.
-- [x] Keyboard, responsive, and reduced-motion behavior are verified.
-- [x] Test, lint, typecheck, and production build pass.
-- [x] Runtime console is clean and performance has a measured baseline where tooling permits.
+- [ ] All quality gates pass.
+- [ ] No financial data is persisted in browser storage.
+- [ ] The repository is ready for the later API/database slice.
 
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Excess client JavaScript | Slower hydration | Keep pages server-rendered and use narrow interactive islands. |
-| Motion causes jank | Poor interaction quality | Animate compositor-friendly properties and keep durations short. |
-| Dummy data couples to UI | Expensive API migration | Centralize serializable domain types/data in `src/lib`. |
-| Experimental transition API | Browser/version instability | Use CSS motion now; treat View Transitions as progressive enhancement later. |
-| Visual polish harms accessibility | Excludes users | Semantic HTML, focus-visible styles, contrast, and reduced motion. |
+| Query cache is mistaken for authoritative financial storage | High | Keep the adapter explicitly prototype-only and document PostgreSQL/server validation as authoritative. |
+| Data leaks between prototype identities | High | Scope keys to the identity and own the Query Client inside the private session boundary. |
+| Server and client render separate stale copies | Medium | Treat Server Components as prefetchers for mutable query-owned data when the backend arrives. |
+| Migration changes page behavior | Medium | Preserve the existing provider interface and verify the current flows in a real browser. |
 
 ## Open questions deferred
 
-- Authentication UI and onboarding are not connected in this frontend slice.
-- Manual transaction entry beyond the AI preview is deferred.
-- Dark mode remains out of scope until the product decision is accepted.
-- Dummy saves are session-local and reset on refresh.
+- Real API mutation style remains open until authentication and backend contracts are selected.
+- Resource-level query keys, pagination, and server hydration will be finalized with the first persisted transaction slice.
+- Cross-tab or cross-device realtime synchronization is outside this prototype migration.

@@ -57,3 +57,4 @@ All specs start as **Draft**. A feature should not silently resolve its open que
 | ID | Keputusan | Status |
 | --- | --- | --- |
 | [`ADR 0001`](./decisions/0001-current-balance-as-opening-snapshot.md) | Saldo saat ini menjadi snapshot pembuka, bukan transaksi pemasukan | Accepted |
+| [`ADR 0002`](./decisions/0002-tanstack-query-for-client-finance-state.md) | TanStack Query mengelola mutable client server-state selama sesi private app | Accepted |

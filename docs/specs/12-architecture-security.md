@@ -19,6 +19,8 @@ Define system boundaries that keep financial data authoritative, user-scoped, an
 
 Only the frontend scaffold is currently installed. Database, Prisma, Zod, authentication, and LLM packages require separate implementation decisions and dependency changes.
 
+TanStack Query is accepted for mutable client server-state by [ADR 0002](../decisions/0002-tanstack-query-for-client-finance-state.md). It is a session-scoped UX cache, not an authorization boundary or source of financial truth.
+
 ## System boundary
 
 ```text

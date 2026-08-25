@@ -1,30 +1,21 @@
-# Frontend MVP Tasks
+# TanStack Query Finance State Tasks
 
-- [x] Install UI/test dependencies.
-  - Acceptance: `lucide-react` and Vitest are installed without an animation runtime.
-  - Verify: package lock is updated and `npm run test` exists.
-  - Files: `package.json`, `package-lock.json`, `vitest.config.ts`.
+- [x] Record ADR 0002 and update the decision index.
+  - Acceptance: client cache ownership, session isolation, RSC interaction, and security constraints are explicit.
+  - Verify: documentation matches the implemented provider boundary.
 
-- [x] Create and test the dummy finance domain.
-  - Acceptance: formatting, natural-language parsing, search, and date grouping are deterministic.
-  - Verify: `npm run test`.
-  - Files: `src/lib/mock-data.ts`, `src/lib/finance.ts`, `src/lib/finance.test.ts`.
+- [x] Define the prototype finance query contract with a failing test first.
+  - Acceptance: the query key is stable, finance-specific, and scoped to the active prototype identity.
+  - Verify: focused Vitest test demonstrates RED then GREEN.
 
-- [x] Build the responsive application shell.
-  - Acceptance: mobile container, persistent navigation, focus states, and reduced motion work.
-  - Verify: lint, typecheck, and responsive browser review.
-  - Files: layouts, global CSS, navigation components.
+- [ ] Add the in-memory Query Client boundary.
+  - Acceptance: one client survives private route navigation and is destroyed when the private app unmounts.
+  - Verify: typecheck and production build pass.
 
-- [x] Build Home and AI transaction preview.
-  - Acceptance: summary, recent activity, parsing preview, cancel, and local save work without silent persistence.
-  - Verify: unit tests plus browser interaction.
-  - Files: Home page and focused Home components.
+- [ ] Migrate shared mock finance state to TanStack Query.
+  - Acceptance: existing pages keep using `useMockFinance`; transaction, budget, and account mutations update the shared cache atomically.
+  - Verify: existing unit tests plus browser create/edit/delete/rename navigation checks.
 
-- [x] Build supporting primary pages.
-  - Acceptance: Activity/search/detail, Budget, and Profile are navigable and use shared dummy data.
-  - Verify: browser route and keyboard checks.
-  - Files: App Router pages and focused presentation components.
-
-- [x] Complete quality gates.
-  - Acceptance: test, lint, typecheck, build, runtime, accessibility, and performance checks pass.
-  - Verify: repository commands and real-browser inspection where available.
+- [ ] Complete quality and security gates.
+  - Acceptance: tests, lint, typecheck, build, dependency audit, and final review pass.
+  - Verify: repository commands and real-browser inspection.
