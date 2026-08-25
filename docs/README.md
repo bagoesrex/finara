@@ -4,6 +4,7 @@ Dokumentasi Finara dibagi menjadi dua lapisan:
 
 1. [`PRD.md`](./PRD.md) adalah sumber utama untuk visi, scope, dan prinsip produk.
 2. [`specs/`](./specs/) menerjemahkan PRD menjadi requirement implementasi dan acceptance criteria per domain.
+3. [`decisions/`](./decisions/) mencatat keputusan produk dan arsitektur yang menyelesaikan pertanyaan terbuka secara eksplisit.
 
 Jika spec turunan bertentangan dengan PRD, PRD berlaku sampai keputusan baru dicatat secara eksplisit. Item berlabel **Open question** belum menjadi keputusan implementasi.
 
@@ -50,3 +51,9 @@ Jika spec turunan bertentangan dengan PRD, PRD berlaku sampai keputusan baru dic
 - **Superseded**: replaced by a newer spec or ADR.
 
 All specs start as **Draft**. A feature should not silently resolve its open questions during implementation.
+
+## Decision index
+
+| ID | Keputusan | Status |
+| --- | --- | --- |
+| [`ADR 0001`](./decisions/0001-current-balance-as-opening-snapshot.md) | Saldo saat ini menjadi snapshot pembuka, bukan transaksi pemasukan | Accepted |

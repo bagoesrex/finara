@@ -8,8 +8,10 @@ import {
   formatCurrency,
   type TransactionType,
 } from "@/lib/finance";
-import { accounts } from "@/lib/mock-data";
-import type { TransactionDraft } from "./mock-finance-provider";
+import {
+  useMockFinance,
+  type TransactionDraft,
+} from "./mock-finance-provider";
 import { useModalFocusTrap } from "./use-modal-focus-trap";
 
 type SheetVariant = "create" | "edit";
@@ -49,6 +51,7 @@ export function TransactionConfirmationSheet({
 }: TransactionConfirmationSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
+  const { accounts } = useMockFinance();
   const isValid = draft.amount > 0 && draft.description.trim().length > 0;
   const copy = sheetCopy[variant];
 

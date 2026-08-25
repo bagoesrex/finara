@@ -7,7 +7,10 @@ import {
   Check,
   ChevronRight,
   MessageSquareText,
+  ReceiptText,
 } from "lucide-react";
+import { usePrototypeAuth } from "@/components/prototype-auth-provider";
+import { getInitials } from "@/lib/auth";
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -19,7 +22,8 @@ import { TransactionConfirmationSheet } from "./transaction-confirmation-sheet";
 import { TransactionRow } from "./transaction-row";
 
 export function HomeDashboard() {
-  const { addTransaction, summary, transactions } = useMockFinance();
+  const auth = usePrototypeAuth();
+  const { accounts, addTransaction, summary, transactions } = useMockFinance();
   const [input, setInput] = useState("");
   const [preview, setPreview] = useState<TransactionDraft | null>(null);
   const [error, setError] = useState("");
@@ -27,6 +31,8 @@ export function HomeDashboard() {
   const inputRef = useRef<HTMLInputElement>(null);
   const savingRef = useRef(false);
   const recentTransactions = transactions.slice(0, 4);
+  const displayName = auth.user?.name ?? "Kamu";
+  const firstName = displayName.trim().split(/\s+/)[0];
   const closePreview = useCallback(() => setPreview(null), []);
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export function HomeDashboard() {
 
     setError("");
     savingRef.current = false;
-    setPreview({ ...result.transaction, account: "BCA" });
+    setPreview({ ...result.transaction, account: accounts[0] ?? "" });
   }
 
   function saveTransaction() {
@@ -67,9 +73,15 @@ export function HomeDashboard() {
       <header className="home-header">
         <div>
           <p>Selamat datang</p>
-          <h1>Halo, Bagus</h1>
+          <h1>Halo, {firstName}</h1>
         </div>
-        <Link className="avatar" href="/profile" aria-label="Buka profil Bagus">BA</Link>
+        <Link
+          className="avatar"
+          href="/profile"
+          aria-label={`Buka profil ${displayName}`}
+        >
+          {getInitials(displayName)}
+        </Link>
       </header>
 
       <section className="balance-section" aria-labelledby="balance-title">
@@ -142,11 +154,21 @@ export function HomeDashboard() {
           </div>
           <Link href="/activity">Lihat semua <ChevronRight aria-hidden="true" size={17} /></Link>
         </div>
-        <div className="transaction-list">
-          {recentTransactions.map((transaction) => (
-            <TransactionRow key={transaction.id} transaction={transaction} />
-          ))}
-        </div>
+        {recentTransactions.length > 0 ? (
+          <div className="transaction-list">
+            {recentTransactions.map((transaction) => (
+              <TransactionRow key={transaction.id} transaction={transaction} />
+            ))}
+          </div>
+        ) : (
+          <div className="home-empty-state">
+            <ReceiptText aria-hidden="true" size={21} />
+            <div>
+              <h3>Belum ada aktivitas</h3>
+              <p>Transaksi pertama yang kamu simpan akan muncul di sini.</p>
+            </div>
+          </div>
+        )}
       </section>
 
       {preview ? (

@@ -1,24 +1,6 @@
 import type { ReactNode } from "react";
-import { BottomNavigation } from "@/components/bottom-navigation";
-import { MockFinanceProvider } from "@/components/mock-finance-provider";
-import { budgets, financialSummary, transactions } from "@/lib/mock-data";
+import { PrototypePrivateApp } from "@/components/prototype-private-app";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="app-viewport">
-      <a className="skip-link" href="#main-content">Lewati ke konten utama</a>
-      <div className="app-shell">
-        <div className="app-content" id="main-content" tabIndex={-1}>
-          <MockFinanceProvider
-            initialBudgets={budgets}
-            initialSummary={financialSummary}
-            initialTransactions={transactions}
-          >
-            {children}
-          </MockFinanceProvider>
-        </div>
-        <BottomNavigation />
-      </div>
-    </div>
-  );
+  return <PrototypePrivateApp>{children}</PrototypePrivateApp>;
 }

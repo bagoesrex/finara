@@ -22,6 +22,7 @@ import type { Transaction } from "@/lib/mock-data";
 export type TransactionDraft = ParsedTransaction & { account: string };
 
 type MockFinanceState = {
+  accounts: string[];
   budgets: BudgetAllocation[];
   summary: FinanceSummary;
   transactions: Transaction[];
@@ -46,16 +47,19 @@ function currentTime(): string {
 
 export function MockFinanceProvider({
   children,
+  initialAccounts,
   initialBudgets,
   initialSummary,
   initialTransactions,
 }: {
   children: ReactNode;
+  initialAccounts: string[];
   initialBudgets: BudgetAllocation[];
   initialSummary: FinanceSummary;
   initialTransactions: Transaction[];
 }) {
   const [state, setState] = useState<MockFinanceState>(() => ({
+    accounts: initialAccounts,
     budgets: initialBudgets,
     summary: initialSummary,
     transactions: initialTransactions,

@@ -15,6 +15,7 @@ Provide the minimum organization needed to assign every transaction to an accoun
 - **ACCT-004:** First-time onboarding creates at least one usable account before transaction entry.
 - **ACCT-005:** Account selectors show only accounts accessible to the current user.
 - **ACCT-006:** Account configuration remains compact and avoids banking-specific fields that Finara does not use.
+- **ACCT-012:** First-account onboarding records the account's current IDR balance as an opening snapshot and does not create an artificial income transaction, following [ADR 0001](../decisions/0001-current-balance-as-opening-snapshot.md).
 
 ## Default categories
 
@@ -72,7 +73,7 @@ Destructive actions must explain the effect on existing transactions before conf
 
 - Whether default categories are global records or copied per user.
 - Whether custom categories are MVP or Phase 2.
-- Account initial-balance semantics and whether balance is stored or derived.
+- Exact database representation and reconciliation lifecycle for the opening-balance snapshot.
 - Archive versus hard-delete behavior for accounts and categories.
 - Duplicate account/category names and case sensitivity.
 - Whether an account has one currency or inherits a user-wide currency.

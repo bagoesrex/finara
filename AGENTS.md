@@ -98,7 +98,9 @@ transactionDate, createdAt, updatedAt
 - Store currency amounts in a precise database representation; never use floating-point arithmetic for money.
 - Derive financial summaries from authorized database data rather than trusting values produced by an LLM.
 
-The PRD does not yet settle transfers, initial-balance semantics, stored versus derived account balances, currency strategy, timezone behavior, category ownership, soft deletion, or the complete budget schema. Treat these as explicit design decisions, not implied requirements.
+The opening-balance behavior is settled by `docs/decisions/0001-current-balance-as-opening-snapshot.md`: onboarding records the account's current balance as an opening snapshot and does not create an artificial income transaction. The exact database representation remains open.
+
+The PRD does not yet settle transfers, currency strategy, timezone behavior, category ownership, soft deletion, or the complete budget schema. Treat these as explicit design decisions, not implied requirements.
 
 ## Security and Privacy Boundaries
 

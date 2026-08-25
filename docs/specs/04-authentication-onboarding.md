@@ -27,6 +27,8 @@ Password recovery, social identity providers, email verification, multi-factor a
 - **AUTH-006:** Signing out invalidates the active server session and returns the user to a public authentication surface.
 - **AUTH-007:** Authentication errors use generic wording that does not reveal whether a specific identity exists.
 - **AUTH-008:** Redirect targets are validated and cannot send users to arbitrary external URLs.
+- **AUTH-009:** First-account setup collects a familiar account name, one MVP account type, and the account's current IDR balance.
+- **AUTH-010:** The current balance is recorded as an opening snapshot, not as an income transaction, following [ADR 0001](../decisions/0001-current-balance-as-opening-snapshot.md).
 
 ## Primary flows
 
@@ -78,5 +80,4 @@ Submission controls must prevent accidental duplicate requests while preserving 
 - Authentication provider/library and session strategy.
 - Required identity fields and whether email verification is mandatory.
 - Password recovery and social-login scope.
-- First-account fields, including initial balance and currency.
 - Account deletion and personal-data deletion flow.
