@@ -1,11 +1,11 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
   useContext,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
 import {
@@ -26,17 +26,15 @@ import {
   type FinanceAccount,
 } from "@/lib/accounts";
 import type { Transaction } from "@/lib/mock-data";
+import {
+  prototypeFinanceQueryKey,
+  updatePrototypeFinanceQueryData,
+  type PrototypeFinanceState,
+} from "@/lib/prototype-finance-query";
 
 export type TransactionDraft = ParsedTransaction & { account: string };
 
-type MockFinanceState = {
-  accounts: FinanceAccount[];
-  budgets: BudgetAllocation[];
-  summary: FinanceSummary;
-  transactions: Transaction[];
-};
-
-type MockFinanceContextValue = MockFinanceState & {
+type MockFinanceContextValue = PrototypeFinanceState & {
   addTransaction: (draft: TransactionDraft) => Transaction;
   deleteTransaction: (id: string) => void;
   renameAccount: (id: string, name: string) => void;
@@ -60,19 +58,38 @@ export function MockFinanceProvider({
   initialBudgets,
   initialSummary,
   initialTransactions,
+  sessionKey,
 }: {
   children: ReactNode;
   initialAccounts: FinanceAccount[];
   initialBudgets: BudgetAllocation[];
   initialSummary: FinanceSummary;
   initialTransactions: Transaction[];
+  sessionKey: string;
 }) {
-  const [state, setState] = useState<MockFinanceState>(() => ({
-    accounts: initialAccounts,
-    budgets: initialBudgets,
-    summary: initialSummary,
-    transactions: initialTransactions,
-  }));
+  const queryClient = useQueryClient();
+  const initialState = useMemo<PrototypeFinanceState>(
+    () => ({
+      accounts: initialAccounts,
+      budgets: initialBudgets,
+      summary: initialSummary,
+      transactions: initialTransactions,
+    }),
+    [initialAccounts, initialBudgets, initialSummary, initialTransactions],
+  );
+  const { data: state } = useQuery({
+    initialData: initialState,
+    queryFn: () => initialState,
+    queryKey: prototypeFinanceQueryKey(sessionKey),
+    // The prototype has no external source to refetch. Persisted API queries
+    // will use the Query Client's finite default instead.
+    staleTime: "static",
+  });
+  const updateState = useCallback(
+    (updater: (current: PrototypeFinanceState) => PrototypeFinanceState) =>
+      updatePrototypeFinanceQueryData(queryClient, sessionKey, updater),
+    [queryClient, sessionKey],
+  );
 
   const addTransaction = useCallback((draft: TransactionDraft) => {
     const transaction: Transaction = {
@@ -81,7 +98,7 @@ export function MockFinanceProvider({
       time: draft.time ?? currentTime(),
     };
 
-    setState((current) => ({
+    updateState((current) => ({
       ...current,
       accounts: applyTransactionToAccounts(current.accounts, transaction),
       summary: applyTransactionToSummary(current.summary, transaction),
@@ -89,10 +106,10 @@ export function MockFinanceProvider({
     }));
 
     return transaction;
-  }, []);
+  }, [updateState]);
 
   const updateTransaction = useCallback((transaction: Transaction) => {
-    setState((current) => {
+    updateState((current) => {
       const previousTransaction = current.transactions.find(
         ({ id }) => id === transaction.id,
       );
@@ -115,10 +132,10 @@ export function MockFinanceProvider({
         ),
       };
     });
-  }, []);
+  }, [updateState]);
 
   const deleteTransaction = useCallback((id: string) => {
-    setState((current) => {
+    updateState((current) => {
       const transaction = current.transactions.find((item) => item.id === id);
       if (!transaction) return current;
 
@@ -129,10 +146,10 @@ export function MockFinanceProvider({
         transactions: current.transactions.filter((item) => item.id !== id),
       };
     });
-  }, []);
+  }, [updateState]);
 
   const renameAccount = useCallback((id: string, name: string) => {
-    setState((current) => {
+    updateState((current) => {
       const validation = validateAccountName(name, current.accounts, id);
       if (validation.status === "invalid") return current;
 
@@ -145,7 +162,7 @@ export function MockFinanceProvider({
 
       return { ...current, ...renamed };
     });
-  }, []);
+  }, [updateState]);
 
   const saveBudget = useCallback(
     (draft: Omit<BudgetAllocation, "id"> & { id?: string }) => {
@@ -155,12 +172,12 @@ export function MockFinanceProvider({
         ...draft,
         id: draft.id ?? `local-budget-${crypto.randomUUID()}`,
       };
-      setState((current) => ({
+      updateState((current) => ({
         ...current,
         budgets: upsertBudgetAllocation(current.budgets, budget),
       }));
     },
-    [],
+    [updateState],
   );
 
   const value = useMemo(

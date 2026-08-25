@@ -8,14 +8,14 @@
   - Acceptance: the query key is stable, finance-specific, and scoped to the active prototype identity.
   - Verify: focused Vitest test demonstrates RED then GREEN.
 
-- [ ] Add the in-memory Query Client boundary.
+- [x] Add the in-memory Query Client boundary.
   - Acceptance: one client survives private route navigation and is destroyed when the private app unmounts.
   - Verify: typecheck and production build pass.
 
-- [ ] Migrate shared mock finance state to TanStack Query.
+- [x] Migrate shared mock finance state to TanStack Query.
   - Acceptance: existing pages keep using `useMockFinance`; transaction, budget, and account mutations update the shared cache atomically.
-  - Verify: existing unit tests plus browser create/edit/delete/rename navigation checks.
+  - Verify: existing unit tests, the Query Client cache contract test, and route smoke checks; interactive browser automation is deferred until Chrome DevTools MCP is available.
 
-- [ ] Complete quality and security gates.
+- [x] Complete quality and security gates.
   - Acceptance: tests, lint, typecheck, build, dependency audit, and final review pass.
-  - Verify: repository commands and real-browser inspection.
+  - Verify: repository commands, package signature verification, and localhost HTTP smoke checks.

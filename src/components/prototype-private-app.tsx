@@ -4,6 +4,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { MockFinanceProvider } from "@/components/mock-finance-provider";
+import { PrototypeQueryProvider } from "@/components/prototype-query-provider";
 import type { PrototypeAccount, PrototypeUser } from "@/lib/auth";
 import { createOnboardingSummary } from "@/lib/auth";
 import {
@@ -58,19 +59,22 @@ function ReadyPrivateApp({
       <a className="skip-link" href="#main-content">
         Lewati ke konten utama
       </a>
-      <div className="app-shell">
-        <MockFinanceProvider
-          initialAccounts={initialFinance.accounts}
-          initialBudgets={initialFinance.budgets}
-          initialSummary={initialFinance.summary}
-          initialTransactions={initialFinance.transactions}
-        >
-          <div className="app-content" id="main-content" tabIndex={-1}>
-            {children}
-          </div>
-        </MockFinanceProvider>
-        <BottomNavigation />
-      </div>
+      <PrototypeQueryProvider>
+        <div className="app-shell">
+          <MockFinanceProvider
+            initialAccounts={initialFinance.accounts}
+            initialBudgets={initialFinance.budgets}
+            initialSummary={initialFinance.summary}
+            initialTransactions={initialFinance.transactions}
+            sessionKey={user.id}
+          >
+            <div className="app-content" id="main-content" tabIndex={-1}>
+              {children}
+            </div>
+          </MockFinanceProvider>
+          <BottomNavigation />
+        </div>
+      </PrototypeQueryProvider>
     </div>
   );
 }

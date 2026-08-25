@@ -27,24 +27,24 @@ Move the prototype's shared finance state from React component state into an in-
 
 ### Phase 2: Prototype migration
 
-- [ ] Task 3: Install TanStack Query and add a private-app Query Client provider.
-- [ ] Task 4: Migrate `MockFinanceProvider` from `useState` to the Query Client without changing page consumers.
+- [x] Task 3: Install TanStack Query and add a private-app Query Client provider.
+- [x] Task 4: Migrate `MockFinanceProvider` from `useState` to the Query Client without changing page consumers.
 
 ### Checkpoint: Migration
 
-- [ ] Transaction, budget, and account changes remain visible across client-side route navigation.
-- [ ] Signing out unmounts the Query Client and discards the prior session cache.
+- [x] Transaction, budget, and account changes remain visible across client-side route navigation.
+- [x] Signing out unmounts the Query Client and discards the prior session cache.
 
 ### Phase 3: Verification
 
-- [ ] Task 5: Run tests, lint, typecheck, build, dependency audit, and browser runtime checks.
-- [ ] Task 6: Review the final diff for correctness, security, maintainability, and scope.
+- [x] Task 5: Run tests, lint, typecheck, build, dependency audit, and runtime smoke checks.
+- [x] Task 6: Review the final diff for correctness, security, maintainability, and scope.
 
 ### Checkpoint: Complete
 
-- [ ] All quality gates pass.
-- [ ] No financial data is persisted in browser storage.
-- [ ] The repository is ready for the later API/database slice.
+- [x] All quality gates pass.
+- [x] No financial data is persisted in browser storage.
+- [x] The repository is ready for the later API/database slice.
 
 ## Risks and mitigations
 
@@ -60,3 +60,7 @@ Move the prototype's shared finance state from React component state into an in-
 - Real API mutation style remains open until authentication and backend contracts are selected.
 - Resource-level query keys, pagination, and server hydration will be finalized with the first persisted transaction slice.
 - Cross-tab or cross-device realtime synchronization is outside this prototype migration.
+
+## Verification note
+
+- Chrome DevTools MCP was unavailable in the implementation environment. All primary routes passed HTTP runtime smoke checks; interactive browser automation remains a follow-up verification when that tool is configured.

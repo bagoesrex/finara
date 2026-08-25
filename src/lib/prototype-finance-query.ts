@@ -19,19 +19,20 @@ export function updatePrototypeFinanceQueryData(
   sessionKey: string,
   updater: (current: PrototypeFinanceState) => PrototypeFinanceState,
 ): PrototypeFinanceState {
-  let nextState: PrototypeFinanceState | undefined;
-
-  queryClient.setQueryData<PrototypeFinanceState>(
+  const nextState = queryClient.setQueryData<PrototypeFinanceState>(
     prototypeFinanceQueryKey(sessionKey),
     (current) => {
       if (!current) {
         throw new Error("Prototype finance query is not initialized");
       }
 
-      nextState = updater(current);
-      return nextState;
+      return updater(current);
     },
   );
 
-  return nextState as PrototypeFinanceState;
+  if (!nextState) {
+    throw new Error("Prototype finance query update failed");
+  }
+
+  return nextState;
 }
