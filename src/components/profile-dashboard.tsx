@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  ChevronRight,
   CircleHelp,
   Coins,
   Languages,
@@ -9,19 +11,20 @@ import {
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
+import { useMockFinance } from "@/components/mock-finance-provider";
 import { usePrototypeAuth } from "@/components/prototype-auth-provider";
 import { getInitials } from "@/lib/auth";
 import { PageHeader } from "@/components/page-header";
 
 export function ProfileDashboard() {
   const auth = usePrototypeAuth();
+  const { accounts } = useMockFinance();
   const router = useRouter();
   const name = auth.user?.name ?? "Pengguna Finara";
   const email = auth.user?.email ?? "Belum tersedia";
-  const accountName = auth.account?.name ?? "Belum tersedia";
+  const accountName = accounts[0]?.name ?? "Belum tersedia";
   const isDemo = auth.user?.kind === "demo";
   const preferences = [
-    { icon: WalletCards, label: "Akun utama", value: accountName },
     { icon: Coins, label: "Mata uang", value: "Rupiah (IDR)" },
     { icon: Languages, label: "Bahasa", value: "Indonesia" },
     { icon: ShieldCheck, label: "Mode data", value: "Hanya sesi ini" },
@@ -44,6 +47,25 @@ export function ProfileDashboard() {
           <h2>{name}</h2>
           <p>{email}</p>
         </div>
+      </section>
+
+      <section className="section-block" aria-labelledby="finance-settings-title">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Keuangan</p>
+            <h2 id="finance-settings-title">Pengaturan pencatatan</h2>
+          </div>
+        </div>
+        <Link className="settings-link" href="/profile/finance">
+          <span className="settings-link__icon" aria-hidden="true">
+            <WalletCards size={20} />
+          </span>
+          <span className="settings-link__copy">
+            <strong>Akun & kategori</strong>
+            <small>{accounts.length} akun · Utama: {accountName}</small>
+          </span>
+          <ChevronRight aria-hidden="true" size={18} />
+        </Link>
       </section>
 
       <section className="section-block" aria-labelledby="preferences-title">

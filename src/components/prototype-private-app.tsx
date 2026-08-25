@@ -28,7 +28,7 @@ function ReadyPrivateApp({
   const initialFinance = useMemo(() => {
     if (user.kind === "demo") {
       return {
-        accounts: [...demoAccounts],
+        accounts: demoAccounts.map((demoAccount) => ({ ...demoAccount })),
         budgets: demoBudgets,
         summary: financialSummary,
         transactions: demoTransactions,
@@ -36,7 +36,14 @@ function ReadyPrivateApp({
     }
 
     return {
-      accounts: [account.name],
+      accounts: [
+        {
+          id: "account-primary",
+          name: account.name,
+          type: account.type,
+          currentBalance: account.currentBalance,
+        },
+      ],
       budgets: [],
       summary: createOnboardingSummary(account.currentBalance, {
         monthKey: financialSummary.monthKey,
@@ -44,7 +51,7 @@ function ReadyPrivateApp({
       }),
       transactions: [],
     };
-  }, [account.currentBalance, account.name, user.kind]);
+  }, [account.currentBalance, account.name, account.type, user.kind]);
 
   return (
     <div className="app-viewport">

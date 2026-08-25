@@ -1,4 +1,5 @@
 import type { BudgetAllocation, SearchableTransaction } from "./finance";
+import type { FinanceAccount } from "./accounts";
 
 export type Transaction = SearchableTransaction & {
   note?: string;
@@ -15,7 +16,26 @@ export const financialSummary = {
 } as const;
 
 export const mockToday = "2026-08-25";
-export const accounts = ["BCA", "GoPay", "Cash"] as const;
+export const accounts: FinanceAccount[] = [
+  {
+    id: "account-bca",
+    name: "BCA",
+    type: "BANK",
+    currentBalance: 3_550_000,
+  },
+  {
+    id: "account-gopay",
+    name: "GoPay",
+    type: "EWALLET",
+    currentBalance: 450_000,
+  },
+  {
+    id: "account-cash",
+    name: "Cash",
+    type: "CASH",
+    currentBalance: 250_000,
+  },
+];
 
 export const transactions: Transaction[] = [
   {

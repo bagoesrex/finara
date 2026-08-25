@@ -17,12 +17,20 @@ import {
   type FinanceSummary,
   type ParsedTransaction,
 } from "@/lib/finance";
+import {
+  applyTransactionToAccounts,
+  removeTransactionFromAccounts,
+  renameAccountReferences,
+  replaceTransactionInAccounts,
+  validateAccountName,
+  type FinanceAccount,
+} from "@/lib/accounts";
 import type { Transaction } from "@/lib/mock-data";
 
 export type TransactionDraft = ParsedTransaction & { account: string };
 
 type MockFinanceState = {
-  accounts: string[];
+  accounts: FinanceAccount[];
   budgets: BudgetAllocation[];
   summary: FinanceSummary;
   transactions: Transaction[];
@@ -31,6 +39,7 @@ type MockFinanceState = {
 type MockFinanceContextValue = MockFinanceState & {
   addTransaction: (draft: TransactionDraft) => Transaction;
   deleteTransaction: (id: string) => void;
+  renameAccount: (id: string, name: string) => void;
   saveBudget: (budget: Omit<BudgetAllocation, "id"> & { id?: string }) => void;
   updateTransaction: (transaction: Transaction) => void;
 };
@@ -53,7 +62,7 @@ export function MockFinanceProvider({
   initialTransactions,
 }: {
   children: ReactNode;
-  initialAccounts: string[];
+  initialAccounts: FinanceAccount[];
   initialBudgets: BudgetAllocation[];
   initialSummary: FinanceSummary;
   initialTransactions: Transaction[];
@@ -74,6 +83,7 @@ export function MockFinanceProvider({
 
     setState((current) => ({
       ...current,
+      accounts: applyTransactionToAccounts(current.accounts, transaction),
       summary: applyTransactionToSummary(current.summary, transaction),
       transactions: [transaction, ...current.transactions],
     }));
@@ -90,6 +100,11 @@ export function MockFinanceProvider({
 
       return {
         ...current,
+        accounts: replaceTransactionInAccounts(
+          current.accounts,
+          previousTransaction,
+          transaction,
+        ),
         summary: replaceTransactionInSummary(
           current.summary,
           previousTransaction,
@@ -109,9 +124,26 @@ export function MockFinanceProvider({
 
       return {
         ...current,
+        accounts: removeTransactionFromAccounts(current.accounts, transaction),
         summary: removeTransactionFromSummary(current.summary, transaction),
         transactions: current.transactions.filter((item) => item.id !== id),
       };
+    });
+  }, []);
+
+  const renameAccount = useCallback((id: string, name: string) => {
+    setState((current) => {
+      const validation = validateAccountName(name, current.accounts, id);
+      if (validation.status === "invalid") return current;
+
+      const renamed = renameAccountReferences(
+        current.accounts,
+        current.transactions,
+        id,
+        validation.name,
+      );
+
+      return { ...current, ...renamed };
     });
   }, []);
 
@@ -136,10 +168,18 @@ export function MockFinanceProvider({
       ...state,
       addTransaction,
       deleteTransaction,
+      renameAccount,
       saveBudget,
       updateTransaction,
     }),
-    [addTransaction, deleteTransaction, saveBudget, state, updateTransaction],
+    [
+      addTransaction,
+      deleteTransaction,
+      renameAccount,
+      saveBudget,
+      state,
+      updateTransaction,
+    ],
   );
 
   return (

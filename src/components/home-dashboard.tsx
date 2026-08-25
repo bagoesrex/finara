@@ -52,7 +52,7 @@ export function HomeDashboard() {
 
     setError("");
     savingRef.current = false;
-    setPreview({ ...result.transaction, account: accounts[0] ?? "" });
+    setPreview({ ...result.transaction, account: accounts[0]?.name ?? "" });
   }
 
   function saveTransaction() {

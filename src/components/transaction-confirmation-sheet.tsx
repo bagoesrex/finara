@@ -177,7 +177,7 @@ export function TransactionConfirmationSheet({
                 onChange={(event) => onChange({ ...draft, account: event.target.value })}
               >
                 {accounts.map((account) => (
-                  <option key={account} value={account}>{account}</option>
+                  <option key={account.id} value={account.name}>{account.name}</option>
                 ))}
               </select>
             </label>

@@ -1,8 +1,8 @@
 import type { FinanceSummary } from "./finance";
+import { ACCOUNT_TYPES, type AccountType } from "./accounts";
 
-export const ACCOUNT_TYPES = ["CASH", "BANK", "EWALLET"] as const;
-
-export type AccountType = (typeof ACCOUNT_TYPES)[number];
+export { ACCOUNT_TYPES };
+export type { AccountType };
 
 export type PrototypeUser = {
   id: string;

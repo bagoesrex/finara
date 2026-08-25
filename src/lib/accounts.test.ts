@@ -1,0 +1,133 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  applyTransactionToAccounts,
+  removeTransactionFromAccounts,
+  renameAccountReferences,
+  replaceTransactionInAccounts,
+  validateAccountName,
+  type FinanceAccount,
+} from "./accounts";
+import type { SearchableTransaction } from "./finance";
+
+const accounts: FinanceAccount[] = [
+  {
+    id: "account-bca",
+    name: "BCA",
+    type: "BANK",
+    currentBalance: 3_800_000,
+  },
+  {
+    id: "account-gopay",
+    name: "GoPay",
+    type: "EWALLET",
+    currentBalance: 450_000,
+  },
+];
+
+const transactions: SearchableTransaction[] = [
+  {
+    id: "trx-coffee",
+    description: "Kopi susu",
+    category: "Food & Drink",
+    account: "GoPay",
+    amount: 18_000,
+    type: "EXPENSE",
+    date: "2026-08-25",
+    time: "08:20",
+  },
+  {
+    id: "trx-salary",
+    description: "Gaji Agustus",
+    category: "Salary",
+    account: "BCA",
+    amount: 5_000_000,
+    type: "INCOME",
+    date: "2026-08-21",
+    time: "09:00",
+  },
+];
+
+describe("account name validation", () => {
+  it("trims a valid familiar name", () => {
+    expect(validateAccountName("  Bank Harian  ", accounts, "account-bca")).toEqual({
+      status: "valid",
+      name: "Bank Harian",
+    });
+  });
+
+  it("rejects blank and oversized names", () => {
+    expect(validateAccountName("   ", accounts, "account-bca")).toEqual({
+      status: "invalid",
+      message: "Masukkan nama akun.",
+    });
+    expect(validateAccountName("a".repeat(41), accounts, "account-bca")).toEqual({
+      status: "invalid",
+      message: "Nama akun maksimal 40 karakter.",
+    });
+  });
+
+  it("rejects a case-insensitive duplicate but allows the current account name", () => {
+    expect(validateAccountName(" gopay ", accounts, "account-bca")).toEqual({
+      status: "invalid",
+      message: "Nama ini sudah dipakai akun lain.",
+    });
+    expect(validateAccountName(" bca ", accounts, "account-bca")).toEqual({
+      status: "valid",
+      name: "bca",
+    });
+  });
+});
+
+describe("account reference updates", () => {
+  it("renames the account and every matching transaction reference", () => {
+    const renamed = renameAccountReferences(
+      accounts,
+      transactions,
+      "account-gopay",
+      "Dompet Digital",
+    );
+
+    expect(renamed.accounts[1].name).toBe("Dompet Digital");
+    expect(renamed.transactions[0].account).toBe("Dompet Digital");
+    expect(renamed.transactions[1].account).toBe("BCA");
+  });
+
+  it("keeps references unchanged when the account does not exist", () => {
+    expect(
+      renameAccountReferences(accounts, transactions, "missing", "Baru"),
+    ).toEqual({ accounts, transactions });
+  });
+});
+
+describe("account balance updates", () => {
+  it("applies and reverses an expense on the selected account", () => {
+    const withExpense = applyTransactionToAccounts(accounts, transactions[0]);
+    expect(withExpense[1].currentBalance).toBe(432_000);
+
+    expect(
+      removeTransactionFromAccounts(withExpense, transactions[0])[1]
+        .currentBalance,
+    ).toBe(450_000);
+  });
+
+  it("moves the balance effect when an edited transaction changes accounts and type", () => {
+    const nextTransaction: SearchableTransaction = {
+      ...transactions[0],
+      account: "BCA",
+      amount: 50_000,
+      type: "INCOME",
+    };
+
+    const updated = replaceTransactionInAccounts(
+      accounts,
+      transactions[0],
+      nextTransaction,
+    );
+
+    expect(updated).toMatchObject([
+      { name: "BCA", currentBalance: 3_850_000 },
+      { name: "GoPay", currentBalance: 468_000 },
+    ]);
+  });
+});
