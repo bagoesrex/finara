@@ -20,7 +20,7 @@
   - Verify: `npm run db:check`.
   - Files: a narrowly scoped script and `package.json`.
 
-- [ ] Complete the domain decision checkpoint before creating tables.
+- [x] Complete the domain decision checkpoint before creating tables.
   - Acceptance: money, currency, opening snapshot, timezone, and category ownership decisions are accepted and documented.
   - Verify: accepted ADR/spec updates have no unresolved contradiction.
 

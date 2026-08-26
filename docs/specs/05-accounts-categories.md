@@ -38,6 +38,8 @@ Income categories:
 - Gift
 - Other
 
+Onboarding creates user-owned copies of these defaults following [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md). Default categories are not shared private records.
+
 ## Category requirements
 
 - **ACCT-007:** Each category is valid for either income or expense so incompatible categories are not offered during entry.
@@ -77,9 +79,7 @@ Default categories are view-only until category ownership and lifecycle are deci
 
 ## Open questions
 
-- Whether default categories are global records or copied per user.
 - Whether custom categories are MVP or Phase 2.
-- Exact database representation and reconciliation lifecycle for the opening-balance snapshot.
+- Editing and reconciliation lifecycle for the opening-balance snapshot.
 - Archive versus hard-delete behavior for accounts and categories.
 - Duplicate account/category names and case sensitivity.
-- Whether an account has one currency or inherits a user-wide currency.

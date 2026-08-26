@@ -30,7 +30,7 @@ Establish a verified, server-only PostgreSQL connection for Finara before replac
 
 ### Phase 2: Domain decision gate
 
-- [ ] Task 4: Propose and obtain approval for money, currency, opening snapshot, timezone, and category ownership semantics.
+- [x] Task 4: Propose and obtain approval for money, currency, opening snapshot, timezone, and category ownership semantics.
 - [ ] Task 5: Record accepted decisions and create the first reviewable migration.
 
 ### Checkpoint: Schema

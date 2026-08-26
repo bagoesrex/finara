@@ -5,7 +5,7 @@
 
 ## Objective
 
-Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction, but this document remains conceptual until every open question is accepted.
+Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md); the document remains Draft while the remaining lifecycle and transaction questions are open.
 
 ## Core relationships
 
@@ -20,7 +20,7 @@ Category 1---* Transaction
 Category 1---* Budget
 ```
 
-If default categories are implemented as global shared records, `User 1---* Category` changes to a mixed system/user ownership model. That decision must precede the Prisma schema.
+Default categories are copied into user-owned records, so `User 1---* Category` remains the authorization boundary.
 
 ## Entity requirements
 
@@ -44,11 +44,13 @@ id
 userId
 name
 type: CASH | BANK | E_WALLET
+openingBalance: whole IDR as BIGINT
+openingBalanceAt: UTC timestamp
 createdAt
 updatedAt
 ```
 
-An initial balance, currency, archive timestamp, and stored balance are not accepted fields yet; they depend on open product decisions.
+Current balance is derived later from the opening snapshot and authorized transactions. It is not stored as a second mutable balance field. Archive behavior remains unresolved.
 
 ### Category
 
@@ -56,10 +58,9 @@ Minimum proposed fields:
 
 ```text
 id
-userId?          // depends on system-category ownership decision
+userId
 name
 type: INCOME | EXPENSE
-icon?
 createdAt
 updatedAt
 ```
@@ -127,7 +128,7 @@ Index choices must be validated against real query plans after query shapes are 
 
 ## Balance and summary rules
 
-Balances and summaries are computed from authorized database data. The final formula depends on initial-balance and transfer decisions. Model arithmetic must live in tested server-side domain/application code, not React components or prompts.
+Balances and summaries are computed from authorized database data. Account balance begins with the non-negative opening snapshot; transaction effects will be finalized with the transfer decision. Model arithmetic must live in tested server-side domain/application code, not React components or prompts.
 
 ## Phase 2 entities
 
@@ -149,13 +150,9 @@ The following are explicitly deferred and do not belong in the MVP schema withou
 
 ## Open questions
 
-- Integer minor units versus PostgreSQL/Prisma decimal for money.
-- Single user currency versus per-account/per-transaction currency.
-- Initial balance and stored-versus-derived account balance.
-- Timezone and representation of transaction date/time.
-- Global default categories versus user-owned copies.
 - Custom categories in MVP.
 - Soft delete and audit requirements.
 - Transfer representation.
 - Total budget versus category-only budgets and period uniqueness.
 - Merchant, note, and AI provenance fields.
+- Intra-day transaction time and natural-language semantics beyond the date-only MVP.

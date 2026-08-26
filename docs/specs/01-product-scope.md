@@ -52,6 +52,7 @@ The product must feel like a finance application with an intelligent interaction
 - Do not add an analytics surface merely because data is available.
 - Do not expand a personal-finance feature into business accounting.
 - Do not present AI output as professional financial advice.
+- MVP financial values use whole IDR amounts and `Asia/Jakarta` calendar-date semantics, following [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md).
 
 ## Acceptance criteria
 
@@ -63,7 +64,6 @@ The product must feel like a finance application with an intelligent interaction
 
 ## Open questions
 
-- Which exact locale and currency combinations are supported at MVP launch?
 - Is the launch language Indonesian only, or must English be available immediately?
 - What quantitative target defines successful week-one retention?
 - Which transaction samples form the baseline dataset for measuring parsing success?
