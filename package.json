@@ -5,7 +5,11 @@
   "scripts": {
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
     "db:check": "node --conditions=react-server --import tsx scripts/check-database.ts",
+    "db:test:onboarding": "node --conditions=react-server --import tsx scripts/check-onboarding-schema.ts",
     "predev": "npm run db:generate",
     "dev": "next dev",
     "prebuild": "npm run db:generate",

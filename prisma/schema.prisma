@@ -6,3 +6,48 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum AccountType {
+  CASH
+  BANK
+  E_WALLET
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id         String     @id @default(uuid()) @db.Uuid
+  accounts   Account[]
+  categories Category[]
+  createdAt  DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime   @updatedAt @db.Timestamptz(3)
+}
+
+model Account {
+  id               String      @id @default(uuid()) @db.Uuid
+  userId           String      @db.Uuid
+  user             User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  name             String
+  type             AccountType
+  openingBalance   BigInt      @db.BigInt
+  openingBalanceAt DateTime    @default(now()) @db.Timestamptz(3)
+  createdAt        DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([userId])
+}
+
+model Category {
+  id        String       @id @default(uuid()) @db.Uuid
+  userId    String       @db.Uuid
+  user      User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  name      String
+  type      CategoryType
+  createdAt DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime     @updatedAt @db.Timestamptz(3)
+
+  @@index([userId, type])
+}
