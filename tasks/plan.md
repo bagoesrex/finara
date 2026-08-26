@@ -1,66 +1,83 @@
-# Implementation Plan: TanStack Query Finance State
+# Implementation Plan: PostgreSQL Foundation and First Persisted Slice
 
 ## Overview
 
-Move the prototype's shared finance state from React component state into an in-memory TanStack Query cache without changing the existing Home, Activity, Budget, or Profile consumer contract. This establishes the client server-state boundary that a later authenticated API can replace while PostgreSQL remains the eventual source of truth.
+Establish a verified, server-only PostgreSQL connection for Finara before replacing prototype finance data. The first increment configures Prisma ORM against the user's local `finara_db` without creating financial tables. Schema semantics and authentication remain explicit checkpoints before persisted onboarding or transaction APIs are exposed.
 
 ## Architecture decisions
 
-- Mount one Query Client inside the authenticated private-app boundary so it survives route navigation but is discarded on sign-out.
-- Keep the existing `useMockFinance` interface during the prototype migration; page components should not know whether data comes from mock state or an API.
-- Scope prototype finance query keys to the active session identity to prevent cache reuse between users.
-- Keep financial query data in memory only. Do not persist it to browser storage.
-- Use a single atomic finance snapshot for the mock adapter. Split it into resource queries when real API read contracts are introduced.
-- Preserve Server Components for route shells. A future backend may prefetch and hydrate TanStack Query, but must not render a second independently revalidated copy of the same mutable data.
+- Use Prisma ORM 7.10.0 with the PostgreSQL driver adapter. Prisma 7 remains supported, has an official Next.js integration guide, and matches the repository's accepted Prisma Schema Language direction.
+- Keep `DATABASE_URL` in an ignored root environment file. Commit only a placeholder example and never expose the value through a `NEXT_PUBLIC_` variable.
+- Put the Prisma client behind a `server-only` module and reuse one development instance to avoid hot-reload connection churn.
+- Generate the Prisma client before build and type checking; generated source is reproducible and excluded from Git and lint.
+- Do not create domain tables until money, opening-balance representation, timezone, and category ownership decisions are accepted.
+- Do not expose financial endpoints until a real server-side authentication/session implementation is selected.
 
 ## Task list
 
-### Phase 1: Decision and contract
+### Phase 1: Database foundation
 
-- [x] Task 1: Record the TanStack Query client-state decision in ADR 0002.
-- [x] Task 2: Define and test the session-scoped prototype query key and cache-update contract.
+- [x] Task 1: Add the pinned Prisma/PostgreSQL toolchain and safe environment conventions.
+- [x] Task 2: Add an empty PostgreSQL Prisma schema, CLI configuration, and server-only client factory.
+- [x] Task 3: Prove the configured database connection with a read-only query.
 
-### Checkpoint: Contract
+### Checkpoint: Connection
 
-- [x] The decision explains ownership, session isolation, invalidation, and the RSC boundary.
-- [x] Focused tests fail before and pass after the new cache contract exists.
+- [x] Prisma schema validation and client generation pass.
+- [x] A read-only `SELECT 1` succeeds against local `finara_db`.
+- [x] Git does not track or reveal the local database credential.
+- [x] Existing tests, lint, type checking, and production build pass.
 
-### Phase 2: Prototype migration
+### Phase 2: Domain decision gate
 
-- [x] Task 3: Install TanStack Query and add a private-app Query Client provider.
-- [x] Task 4: Migrate `MockFinanceProvider` from `useState` to the Query Client without changing page consumers.
+- [ ] Task 4: Propose and obtain approval for money, currency, opening snapshot, timezone, and category ownership semantics.
+- [ ] Task 5: Record accepted decisions and create the first reviewable migration.
 
-### Checkpoint: Migration
+### Checkpoint: Schema
 
-- [x] Transaction, budget, and account changes remain visible across client-side route navigation.
-- [x] Signing out unmounts the Query Client and discards the prior session cache.
+- [ ] The migration represents only accepted MVP entities and invariants.
+- [ ] Exact money round-tripping and opening-balance calculations have tests.
 
-### Phase 3: Verification
+### Phase 3: Persisted onboarding vertical slice
 
-- [x] Task 5: Run tests, lint, typecheck, build, dependency audit, and runtime smoke checks.
-- [x] Task 6: Review the final diff for correctness, security, maintainability, and scope.
+- [ ] Task 6: Select and document authentication/session implementation.
+- [ ] Task 7: Persist authenticated user and first-account onboarding through a server-only application service.
+- [ ] Task 8: Read the authoritative account snapshot on Home.
+
+### Checkpoint: Onboarding
+
+- [ ] Private data cannot be read without a valid server session.
+- [ ] Returning initialized users skip onboarding.
+- [ ] Opening balance is a snapshot and creates no artificial income transaction.
+
+### Phase 4: First TanStack Query resource
+
+- [ ] Task 9: Add authenticated transaction list and create contracts.
+- [ ] Task 10: Replace the prototype snapshot adapter with transaction resource queries and authoritative mutation invalidation.
 
 ### Checkpoint: Complete
 
-- [x] All quality gates pass.
-- [x] No financial data is persisted in browser storage.
-- [x] The repository is ready for the later API/database slice.
+- [ ] Creating a transaction updates affected pages without a browser reload.
+- [ ] PostgreSQL remains authoritative and every financial operation is user-scoped on the server.
 
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Query cache is mistaken for authoritative financial storage | High | Keep the adapter explicitly prototype-only and document PostgreSQL/server validation as authoritative. |
-| Data leaks between prototype identities | High | Scope keys to the identity and own the Query Client inside the private session boundary. |
-| Server and client render separate stale copies | Medium | Treat Server Components as prefetchers for mutable query-owned data when the backend arrives. |
-| Migration changes page behavior | Medium | Preserve the existing provider interface and verify the current flows in a real browser. |
+| Local database password enters Git history | High | Store it only in ignored `.env`; commit a placeholder example and run secret-diff checks. |
+| Schema encodes unresolved product behavior | High | Keep the initial schema model-free and require the domain decision checkpoint before migration. |
+| Database code leaks into Client Components | High | Mark the client factory `server-only` and expose narrow DTOs through a later DAL. |
+| Prisma client connections multiply during hot reload | Medium | Cache one development client instance on `globalThis`. |
+| Prototype UI is partially backed by real data | Medium | Migrate one complete authenticated vertical slice at a time. |
 
-## Open questions deferred
+## Open questions
 
-- Real API mutation style remains open until authentication and backend contracts are selected.
-- Resource-level query keys, pagination, and server hydration will be finalized with the first persisted transaction slice.
-- Cross-tab or cross-device realtime synchronization is outside this prototype migration.
+- Authentication provider and session strategy.
+- Exact money, currency, opening snapshot, timezone, and category ownership semantics.
+- Mutation transport choice after authentication: Route Handlers, Server Actions, or a deliberate mix.
 
-## Verification note
+## Verification notes
 
-- Chrome DevTools MCP was unavailable in the implementation environment. All primary routes passed HTTP runtime smoke checks; interactive browser automation remains a follow-up verification when that tool is configured.
+- Prisma Client and the PostgreSQL adapter completed a read-only identity and `SELECT 1` check against the configured local database.
+- The Prisma CLI currently brings `deepmerge-ts` 7.1.5 through `@prisma/config`. npm reports GHSA-ggr8-5vv4-36mx as high severity; this path is dev-optional, receives only repository-controlled Prisma configuration, and is not bundled into the application runtime. npm offers only an incompatible Prisma 6.12 downgrade, while Prisma 8 is still a release candidate in the registry as of this increment.
+- The restricted Windows sandbox causes Node `os.userInfo()` to fail before `tsx` starts. The read-only runtime connection check succeeds outside that sandbox; application quality commands succeed inside it.

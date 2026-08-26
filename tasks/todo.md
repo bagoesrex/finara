@@ -1,21 +1,29 @@
-# TanStack Query Finance State Tasks
+# PostgreSQL Foundation Tasks
 
-- [x] Record ADR 0002 and update the decision index.
-  - Acceptance: client cache ownership, session isolation, RSC interaction, and security constraints are explicit.
-  - Verify: documentation matches the implemented provider boundary.
+- [x] Add Prisma 7.10.0, the PostgreSQL adapter/driver, and safe database scripts.
+  - Acceptance: runtime and CLI packages are pinned compatibly; build/typecheck regenerate the client.
+  - Verify: inspect the lockfile, run package signatures/audit, and run `npm run db:validate`.
+  - Files: `package.json`, `package-lock.json`.
 
-- [x] Define the prototype finance query contract with a failing test first.
-  - Acceptance: the query key is stable, finance-specific, and scoped to the active prototype identity.
-  - Verify: focused Vitest test demonstrates RED then GREEN.
+- [x] Configure local and example database environments.
+  - Acceptance: the real connection string is ignored; the committed example contains placeholders only.
+  - Verify: `git check-ignore` matches the real env file and `git diff` contains no password.
+  - Files: `.gitignore`, `.env`, `.env.example`.
 
-- [x] Add the in-memory Query Client boundary.
-  - Acceptance: one client survives private route navigation and is destroyed when the private app unmounts.
-  - Verify: typecheck and production build pass.
+- [x] Add the model-free Prisma foundation and server-only client.
+  - Acceptance: Prisma targets PostgreSQL, emits the supported generated client, and cannot be imported into client code.
+  - Verify: `npm run db:generate`, runtime client connection check, lint, and typecheck.
+  - Files: `prisma.config.ts`, `prisma/schema.prisma`, `src/server/db/client.ts`, focused test.
 
-- [x] Migrate shared mock finance state to TanStack Query.
-  - Acceptance: existing pages keep using `useMockFinance`; transaction, budget, and account mutations update the shared cache atomically.
-  - Verify: existing unit tests, the Query Client cache contract test, and route smoke checks; interactive browser automation is deferred until Chrome DevTools MCP is available.
+- [x] Verify the real local database connection read-only.
+  - Acceptance: the application driver connects to `finara_db` and `SELECT 1` returns successfully without mutating schema or rows.
+  - Verify: `npm run db:check`.
+  - Files: a narrowly scoped script and `package.json`.
 
-- [x] Complete quality and security gates.
-  - Acceptance: tests, lint, typecheck, build, dependency audit, and final review pass.
-  - Verify: repository commands, package signature verification, and localhost HTTP smoke checks.
+- [ ] Complete the domain decision checkpoint before creating tables.
+  - Acceptance: money, currency, opening snapshot, timezone, and category ownership decisions are accepted and documented.
+  - Verify: accepted ADR/spec updates have no unresolved contradiction.
+
+- [ ] Select authentication before implementing persisted onboarding.
+  - Acceptance: session identity is server-resolved and credential endpoints have an approved security design.
+  - Verify: authentication ADR and abuse-case tests exist before financial endpoints.
