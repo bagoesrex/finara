@@ -2,7 +2,7 @@
 
 ## Overview
 
-Establish a verified, server-only PostgreSQL foundation for Finara before replacing prototype finance data. The database connection and first accepted onboarding schema are now in place. Authentication remains an explicit checkpoint before persisted onboarding or transaction APIs are exposed.
+Establish a verified, server-only PostgreSQL foundation for Finara before replacing prototype finance data. The database, first onboarding schema, and authentication foundation are now in place. Persisted onboarding is the next vertical slice before transaction APIs are exposed.
 
 ## Architecture decisions
 
@@ -41,7 +41,7 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 
 ### Phase 3: Persisted onboarding vertical slice
 
-- [x] Task 6: Select and document authentication/session implementation.
+- [x] Task 6: Select, implement, and verify the authentication/session foundation.
 - [ ] Task 7: Persist authenticated user and first-account onboarding through a server-only application service.
 - [ ] Task 8: Read the authoritative account snapshot on Home.
 
@@ -80,5 +80,8 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 - Prisma Client and the PostgreSQL adapter completed a read-only identity and `SELECT 1` check against the configured local database.
 - Migration `20260826193516_init_onboarding` creates only `User`, `Account`, and `Category`, including user ownership, exact `BIGINT` opening balances, timezone-aware timestamps, and a nonnegative opening-balance database constraint.
 - The onboarding schema integration check round-trips a value above JavaScript's safe-integer limit and confirms PostgreSQL rejects a negative opening balance, then removes all temporary rows.
+- Migration `20260828120000_add_better_auth` extends the existing user boundary and adds isolated credential, session, verification, and rate-limit tables. Existing development users receive unique non-deliverable placeholder identities instead of being deleted.
+- The auth integration check verifies registration without email enumeration, non-plaintext credential storage, database-session resolution and immediate sign-out revocation, generic login failures, and three-attempt login and registration rate limits, then removes all synthetic rows.
+- Client IP headers remain deployment-specific: Finara accepts a configured single-value header only when a trusted reverse proxy overwrites it; otherwise Better Auth uses its safe fallback behavior.
 - The Prisma CLI currently brings `deepmerge-ts` 7.1.5 through `@prisma/config`. npm reports GHSA-ggr8-5vv4-36mx as high severity; this path is dev-optional, receives only repository-controlled Prisma configuration, and is not bundled into the application runtime. npm offers only an incompatible Prisma 6.12 downgrade, while Prisma 8 is still a release candidate in the registry as of this increment.
-- The restricted Windows sandbox causes Node `os.userInfo()` to fail before `tsx` starts. The read-only runtime connection check succeeds outside that sandbox; application quality commands succeed inside it.
+- The restricted Windows sandbox causes Node `os.userInfo()` to fail before `tsx` starts. Database verification here used a process-only test preloader to supply a stable sandbox user ID; the committed project scripts remain standard and need no workaround in a normal shell.

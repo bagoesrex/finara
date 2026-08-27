@@ -16,7 +16,7 @@ Next.js recommends using an authentication library rather than implementing cred
 
 Finara will use Better Auth 1.7.2 with its Prisma adapter and PostgreSQL-backed sessions.
 
-- Enable only email/password authentication for the MVP. Registration requires name, email, and a password between 8 and 128 characters.
+- Enable only email/password authentication for the MVP. Registration requires name, email, and a password between 8 and 128 characters. Disable automatic sign-in after the raw sign-up request so first-time and duplicate-email responses remain indistinguishable; the application flow signs in after a successful registration attempt.
 - Use Better Auth's default `scrypt` password hashing. Passwords and password hashes never enter Finara DTOs, client state, or logs.
 - Reuse Finara's `User` model as the Better Auth user and financial ownership boundary. Add the identity fields Better Auth requires rather than creating a second user record that could drift from domain ownership.
 - Map Better Auth's remaining core models to `AuthIdentity`, `AuthSession`, and `AuthVerification`. This avoids ambiguity with Finara's financial `Account` model.
@@ -24,6 +24,7 @@ Finara will use Better Auth 1.7.2 with its Prisma adapter and PostgreSQL-backed 
 - Use opaque database sessions with the default seven-day rolling expiry and daily refresh. Do not enable session cookie caching so session revocation and sign-out take effect on the next server validation.
 - Mount Better Auth on `/api/auth/[...all]`. Authentication endpoints are the only public mutation surface in this increment.
 - Keep Better Auth's CSRF, origin, and redirect checks enabled. Trusted origins come from server-only configuration, and application redirects use internal relative paths.
+- Resolve client IPs with Better Auth's safe defaults. A deployment may set `BETTER_AUTH_TRUSTED_IP_HEADER` only when its reverse proxy overwrites that single-value header; arbitrary forwarded headers are not trusted.
 - Treat route protection as navigation assistance only. Every later financial read and mutation must resolve the database session in a server-only data-access layer and scope its query by `session.user.id`.
 - Keep `BETTER_AUTH_SECRET` and deployment origin configuration server-only. Commit placeholders only.
 
@@ -47,6 +48,7 @@ Email verification, password recovery, OAuth/social providers, MFA, account dele
 ### Required controls
 
 - Credential stuffing and brute force are bounded by database-backed rate limiting.
+- A deployment-specific client-IP header is accepted only from an origin reachable through a proxy that overwrites or sanitizes it; otherwise the header remains unset and Better Auth fails closed to a shared fallback bucket.
 - Registration and sign-in failures use generic application copy and do not perform client-visible email-existence probes.
 - Cookies remain `httpOnly`, `sameSite=lax`, and `secure` whenever the configured origin uses HTTPS.
 - CSRF/origin checks and redirect validation are never disabled.

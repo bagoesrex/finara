@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import "dotenv/config";
 
 import { db } from "../src/server/db/client";
@@ -8,7 +9,12 @@ async function verifyExactMoneyAndOwnership() {
   let userId: string | undefined;
 
   try {
-    const user = await db.user.create({ data: {} });
+    const user = await db.user.create({
+      data: {
+        email: `schema-check-${randomUUID()}@example.test`,
+        name: "Schema Check",
+      },
+    });
     userId = user.id;
 
     const account = await db.account.create({
@@ -45,7 +51,12 @@ async function verifyNegativeOpeningBalanceIsRejected() {
   let rejected = false;
 
   try {
-    const user = await db.user.create({ data: {} });
+    const user = await db.user.create({
+      data: {
+        email: `schema-check-${randomUUID()}@example.test`,
+        name: "Schema Check",
+      },
+    });
     userId = user.id;
 
     try {
