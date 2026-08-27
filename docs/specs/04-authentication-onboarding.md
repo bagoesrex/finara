@@ -60,6 +60,8 @@ Submission controls must prevent accidental duplicate requests while preserving 
 
 ## Security and privacy
 
+- Authentication follows [ADR 0004](../decisions/0004-better-auth-with-database-sessions.md): Better Auth email/password with opaque PostgreSQL sessions and database-backed rate limiting.
+- The MVP identity fields are name, email, and password. Email verification is not required until an email-delivery and recovery flow is separately accepted.
 - Session and user identity are resolved on the server.
 - Financial ownership is never inferred from a client-provided user identifier.
 - Authentication secrets, session tokens, and provider keys never appear in client-readable environment variables or logs.
@@ -77,7 +79,5 @@ Submission controls must prevent accidental duplicate requests while preserving 
 
 ## Open questions
 
-- Authentication provider/library and session strategy.
-- Required identity fields and whether email verification is mandatory.
 - Password recovery and social-login scope.
 - Account deletion and personal-data deletion flow.

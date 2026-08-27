@@ -11,7 +11,8 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 - Put the Prisma client behind a `server-only` module and reuse one development instance to avoid hot-reload connection churn.
 - Generate the Prisma client before build and type checking; generated source is reproducible and excluded from Git and lint.
 - Create domain tables only after money, opening-balance representation, timezone, and category ownership decisions are accepted and recorded.
-- Do not expose financial endpoints until a real server-side authentication/session implementation is selected.
+- Use Better Auth 1.7.2 with email/password, PostgreSQL-backed opaque sessions, database rate limiting, and server-side ownership checks following ADR 0004.
+- Do not expose financial endpoints until the selected authentication/session implementation is verified.
 
 ## Task list
 
@@ -40,7 +41,7 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 
 ### Phase 3: Persisted onboarding vertical slice
 
-- [ ] Task 6: Select and document authentication/session implementation.
+- [x] Task 6: Select and document authentication/session implementation.
 - [ ] Task 7: Persist authenticated user and first-account onboarding through a server-only application service.
 - [ ] Task 8: Read the authoritative account snapshot on Home.
 
@@ -72,7 +73,6 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 
 ## Open questions
 
-- Authentication provider and session strategy.
 - Mutation transport choice after authentication: Route Handlers, Server Actions, or a deliberate mix.
 
 ## Verification notes

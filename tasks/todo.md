@@ -28,6 +28,10 @@
   - Acceptance: only `User`, `Account`, and `Category` are persisted, with user ownership and the accepted IDR opening-snapshot invariants.
   - Verify: migration status is current and `npm run db:test:onboarding` passes without leaving temporary rows.
 
-- [ ] Select authentication before implementing persisted onboarding.
+- [x] Select authentication before implementing persisted onboarding.
   - Acceptance: session identity is server-resolved and credential endpoints have an approved security design.
   - Verify: authentication ADR and abuse-case tests exist before financial endpoints.
+
+- [ ] Implement and verify the Better Auth foundation.
+  - Acceptance: credential, session, verification, and rate-limit models cannot collide with financial accounts; public auth endpoints use server-only configuration.
+  - Verify: schema migration, registration/session/sign-out integration checks, rate-limit abuse test, lint, typecheck, and build pass.
