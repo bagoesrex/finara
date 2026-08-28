@@ -11,6 +11,7 @@
     "db:check": "node --conditions=react-server --import tsx scripts/check-database.ts",
     "db:test:onboarding": "node --conditions=react-server --import tsx scripts/check-onboarding-schema.ts",
     "db:test:persisted-onboarding": "node --conditions=react-server --import tsx scripts/check-persisted-onboarding.ts",
+    "db:test:transactions": "node --conditions=react-server --import tsx scripts/check-transaction-schema.ts",
     "db:test:auth": "node --conditions=react-server --import tsx scripts/check-auth-foundation.ts",
     "app:test:auth-flow": "node --conditions=react-server --import tsx scripts/check-auth-onboarding-flow.ts",
     "predev": "npm run db:generate",

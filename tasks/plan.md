@@ -55,7 +55,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 4: Persisted transaction lifecycle
 
-- [ ] Task 9: Add the accepted transaction schema, migration, constraints, and database integration checks.
+- [x] Task 9: Add the accepted transaction schema, migration, constraints, and database integration checks.
 - [ ] Task 10: Add typed, authenticated transaction list/create/detail/update/delete contracts and application services.
 - [ ] Task 11: Hydrate TanStack Query from Server Components and replace prototype transaction list/create state.
 - [ ] Task 12: Persist edit and soft delete, then invalidate all affected authoritative query resources.
@@ -89,3 +89,4 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Client IP headers remain deployment-specific: Finara accepts a configured single-value header only when a trusted reverse proxy overwrites it; otherwise Better Auth uses its safe fallback behavior.
 - The Prisma CLI currently brings `deepmerge-ts` 7.1.5 through `@prisma/config`. npm reports GHSA-ggr8-5vv4-36mx as high severity; this path is dev-optional, receives only repository-controlled Prisma configuration, and is not bundled into the application runtime. npm offers only an incompatible Prisma 6.12 downgrade, while Prisma 8 is still a release candidate in the registry as of this increment.
 - The restricted Windows sandbox causes Node `os.userInfo()` to fail before `tsx` starts. Database verification here used a process-only test preloader to supply a stable sandbox user ID; the committed project scripts remain standard and need no workaround in a normal shell.
+- Migrations `20260828150239_add_transactions` and `20260828150500_add_transaction_checks` add exact positive-IDR transactions, database-enforced same-user account/category references, category/type compatibility, per-user create idempotency, optional Jakarta local time, and soft deletion. `npm run db:test:transactions` verifies precision and every integrity boundary without leaving synthetic rows.

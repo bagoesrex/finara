@@ -40,7 +40,7 @@
   - Acceptance: authenticated setup creates the first account and default categories exactly once; returning users skip onboarding; opening balance creates no transaction.
   - Verify: application-service tests, unauthorized action checks, and the complete HTTP auth/onboarding smoke flow.
 
-- [ ] Add the accepted transaction database model and migration.
+- [x] Add the accepted transaction database model and migration.
   - Acceptance: positive exact IDR, per-user idempotency, same-user account/category ownership, category/type compatibility, optional Jakarta local time, and soft delete are enforced.
   - Verify: migration status and a database integration check covering precision, invalid references, duplicate retries, summaries, and deleted-row exclusion.
 

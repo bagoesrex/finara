@@ -13,9 +13,11 @@ enum AccountType {
   E_WALLET
 }
 
-enum CategoryType {
+enum TransactionType {
   INCOME
   EXPENSE
+
+  @@map("CategoryType")
 }
 
 model User {
@@ -26,6 +28,7 @@ model User {
   image          String?
   accounts       Account[]
   categories     Category[]
+  transactions   Transaction[]
   authSessions   AuthSession[]
   authIdentities AuthIdentity[]
   createdAt      DateTime       @default(now()) @db.Timestamptz(3)
@@ -89,6 +92,7 @@ model Account {
   id               String      @id @default(uuid()) @db.Uuid
   userId           String      @db.Uuid
   user             User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  transactions     Transaction[]
   name             String
   type             AccountType
   openingBalance   BigInt      @db.BigInt
@@ -97,16 +101,43 @@ model Account {
   updatedAt        DateTime    @updatedAt @db.Timestamptz(3)
 
   @@index([userId])
+  @@unique([id, userId])
 }
 
 model Category {
-  id        String       @id @default(uuid()) @db.Uuid
-  userId    String       @db.Uuid
-  user      User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  name      String
-  type      CategoryType
-  createdAt DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt DateTime     @updatedAt @db.Timestamptz(3)
+  id           String          @id @default(uuid()) @db.Uuid
+  userId       String          @db.Uuid
+  user         User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  name         String
+  type         TransactionType
+  transactions Transaction[]
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([userId, type])
+  @@unique([id, userId, type])
+}
+
+model Transaction {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @db.Uuid
+  user              User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  accountId         String          @db.Uuid
+  account           Account         @relation(fields: [accountId, userId], references: [id, userId], onDelete: Restrict)
+  categoryId        String          @db.Uuid
+  category          Category        @relation(fields: [categoryId, userId, type], references: [id, userId, type], onDelete: Restrict)
+  type              TransactionType
+  amount            BigInt          @db.BigInt
+  description       String
+  transactionDate   DateTime        @db.Date
+  transactionTime   DateTime?       @db.Time(0)
+  clientRequestId   String          @db.Uuid
+  deletedAt         DateTime?       @db.Timestamptz(3)
+  createdAt         DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, clientRequestId])
+  @@index([userId, deletedAt, transactionDate(sort: Desc), createdAt(sort: Desc)])
+  @@index([accountId, deletedAt, transactionDate])
+  @@index([categoryId, deletedAt, transactionDate])
 }
