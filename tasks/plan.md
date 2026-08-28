@@ -2,7 +2,7 @@
 
 ## Overview
 
-Establish a verified, server-only PostgreSQL foundation for Finara before replacing prototype finance data. The database, first onboarding schema, and authentication foundation are now in place. Persisted onboarding is the next vertical slice before transaction APIs are exposed.
+Establish a verified, server-only PostgreSQL foundation, complete persisted onboarding, and replace prototype transaction state with an authorized PostgreSQL/TanStack Query vertical slice.
 
 ## Architecture decisions
 
@@ -13,6 +13,8 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 - Create domain tables only after money, opening-balance representation, timezone, and category ownership decisions are accepted and recorded.
 - Use Better Auth 1.7.2 with email/password, PostgreSQL-backed opaque sessions, database rate limiting, and server-side ownership checks following ADR 0004.
 - Do not expose financial endpoints until the selected authentication/session implementation is verified.
+- Use authenticated Route Handlers for transaction resource contracts while Server Components call application services directly for initial query hydration.
+- Use positive whole-rupiah transaction amounts, database-backed idempotency, and soft deletion following ADR 0005.
 
 ## Task list
 
@@ -42,19 +44,21 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 ### Phase 3: Persisted onboarding vertical slice
 
 - [x] Task 6: Select, implement, and verify the authentication/session foundation.
-- [ ] Task 7: Persist authenticated user and first-account onboarding through a server-only application service.
-- [ ] Task 8: Read the authoritative account snapshot on Home.
+- [x] Task 7: Persist authenticated user and first-account onboarding through a server-only application service.
+- [x] Task 8: Read the authoritative account snapshot on Home.
 
 ### Checkpoint: Onboarding
 
-- [ ] Private data cannot be read without a valid server session.
-- [ ] Returning initialized users skip onboarding.
-- [ ] Opening balance is a snapshot and creates no artificial income transaction.
+- [x] Private data cannot be read without a valid server session.
+- [x] Returning initialized users skip onboarding.
+- [x] Opening balance is a snapshot and creates no artificial income transaction.
 
-### Phase 4: First TanStack Query resource
+### Phase 4: Persisted transaction lifecycle
 
-- [ ] Task 9: Add authenticated transaction list and create contracts.
-- [ ] Task 10: Replace the prototype snapshot adapter with transaction resource queries and authoritative mutation invalidation.
+- [ ] Task 9: Add the accepted transaction schema, migration, constraints, and database integration checks.
+- [ ] Task 10: Add typed, authenticated transaction list/create/detail/update/delete contracts and application services.
+- [ ] Task 11: Hydrate TanStack Query from Server Components and replace prototype transaction list/create state.
+- [ ] Task 12: Persist edit and soft delete, then invalidate all affected authoritative query resources.
 
 ### Checkpoint: Complete
 
@@ -73,7 +77,7 @@ Establish a verified, server-only PostgreSQL foundation for Finara before replac
 
 ## Open questions
 
-- Mutation transport choice after authentication: Route Handlers, Server Actions, or a deliberate mix.
+- Restore and permanent-retention behavior for soft-deleted transactions; neither is required by the current MVP.
 
 ## Verification notes
 

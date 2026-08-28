@@ -5,7 +5,7 @@
 
 ## Objective
 
-Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md); the document remains Draft while the remaining lifecycle and transaction questions are open.
+Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md). Positive transaction amounts, optional local time, idempotent creation, and soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md); the document remains Draft while budget and category lifecycle questions are open.
 
 ## Core relationships
 
@@ -77,14 +77,17 @@ userId
 accountId
 categoryId
 type: INCOME | EXPENSE
-amount
-description
-transactionDate
+amount: positive whole IDR as BIGINT
+description: required trimmed text
+transactionDate: Asia/Jakarta calendar date
+transactionTime?: local wall-clock time
+clientRequestId: UUID unique per user
+deletedAt?: UTC timestamp
 createdAt
 updatedAt
 ```
 
-Potential fields such as `note`, `merchant`, `transactionTime`, `timezone`, `currency`, `deletedAt`, and AI provenance require explicit approval.
+Separate `note`, `merchant`, `timezone`, `currency`, and AI-provenance fields remain deferred.
 
 ### Budget
 
@@ -128,7 +131,7 @@ Index choices must be validated against real query plans after query shapes are 
 
 ## Balance and summary rules
 
-Balances and summaries are computed from authorized database data. Account balance begins with the non-negative opening snapshot; transaction effects will be finalized with the transfer decision. Model arithmetic must live in tested server-side domain/application code, not React components or prompts.
+Balances and summaries are computed from authorized, non-deleted database data. Account balance begins with the non-negative opening snapshot, adds positive `INCOME` amounts, and subtracts positive `EXPENSE` amounts. Transfers are outside the MVP. Model arithmetic must live in tested server-side domain/application code, not React components or prompts.
 
 ## Phase 2 entities
 
@@ -151,8 +154,7 @@ The following are explicitly deferred and do not belong in the MVP schema withou
 ## Open questions
 
 - Custom categories in MVP.
-- Soft delete and audit requirements.
-- Transfer representation.
+- Restore UI, audit history, and permanent-retention policy for soft-deleted records.
 - Total budget versus category-only budgets and period uniqueness.
 - Merchant, note, and AI provenance fields.
-- Intra-day transaction time and natural-language semantics beyond the date-only MVP.
+- Multi-timezone behavior beyond the single `Asia/Jakarta` MVP.

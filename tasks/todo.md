@@ -35,3 +35,23 @@
 - [x] Implement and verify the Better Auth foundation.
   - Acceptance: credential, session, verification, and rate-limit models cannot collide with financial accounts; public auth endpoints use server-only configuration.
   - Verify: schema migration, registration/session/sign-out integration checks, rate-limit abuse test, lint, typecheck, and build pass.
+
+- [x] Persist onboarding atomically and read the authoritative Home account snapshot.
+  - Acceptance: authenticated setup creates the first account and default categories exactly once; returning users skip onboarding; opening balance creates no transaction.
+  - Verify: application-service tests, unauthorized action checks, and the complete HTTP auth/onboarding smoke flow.
+
+- [ ] Add the accepted transaction database model and migration.
+  - Acceptance: positive exact IDR, per-user idempotency, same-user account/category ownership, category/type compatibility, optional Jakarta local time, and soft delete are enforced.
+  - Verify: migration status and a database integration check covering precision, invalid references, duplicate retries, summaries, and deleted-row exclusion.
+
+- [ ] Add authenticated transaction resource contracts and services.
+  - Acceptance: paginated list, detail, create, edit, and delete use stable DTOs; every operation derives owner identity from the server session.
+  - Verify: contract/service tests cover invalid input, unauthenticated access, cross-user access, incompatible category types, and generic errors.
+
+- [ ] Hydrate TanStack Query and persist transaction create/list.
+  - Acceptance: initial private-app data is server-prefetched; a confirmed transaction is persisted once and appears on Home and Activity without browser reload.
+  - Verify: focused query/mutation tests plus runtime create and cross-page navigation smoke.
+
+- [ ] Persist transaction edit and soft delete.
+  - Acceptance: detail edits and confirmed deletion update lists, balances, summaries, and budget-derived views through targeted invalidation; deleted rows remain excluded from normal reads.
+  - Verify: service/API/query tests, runtime edit/delete smoke, lint, typecheck, and production build.

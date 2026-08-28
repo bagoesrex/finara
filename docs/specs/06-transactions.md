@@ -20,7 +20,7 @@ A transaction minimally identifies:
 - transaction date
 - created and updated timestamps
 
-Time and note are displayed or collected only when relevant. Their persistence shape is defined in the data-model spec.
+The accepted storage and lifecycle semantics are defined by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md). Time remains optional and description is the single MVP free-text field.
 
 ## Manual entry requirements
 
@@ -69,9 +69,6 @@ Time and note are displayed or collected only when relevant. Their persistence s
 
 ## Open questions
 
-- Whether amount is stored as an integer minor unit or database decimal.
-- Whether amount is always positive with direction represented by `type`.
-- Exact time and timezone semantics for natural-language phrases such as `tadi pagi`.
-- Whether merchant, description, and note are separate fields.
-- Soft delete, audit history, and undo behavior.
-- Transfer support between accounts; it is not currently part of the PRD transaction types.
+- Restore UX and permanent-retention policy for soft-deleted transactions.
+- Whether merchant, note, and AI provenance become separate post-MVP fields.
+- Transfer semantics if transfers enter product scope after the MVP.
