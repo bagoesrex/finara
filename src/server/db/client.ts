@@ -14,8 +14,15 @@ const globalForDatabase = globalThis as unknown as {
   finaraDatabase: PrismaClient | undefined;
 };
 
+function supportsCurrentSchema(client: PrismaClient | undefined) {
+  // A generated client can outlive a schema change in globalThis during next dev.
+  return client !== undefined && "transaction" in client;
+}
+
 export const db =
-  globalForDatabase.finaraDatabase ?? new PrismaClient({ adapter });
+  (supportsCurrentSchema(globalForDatabase.finaraDatabase)
+    ? globalForDatabase.finaraDatabase
+    : undefined) ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") {
   globalForDatabase.finaraDatabase = db;

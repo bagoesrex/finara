@@ -46,6 +46,7 @@ For the MVP transaction lifecycle:
 - Treat inaccessible transaction, account, and category IDs as not found; do not reveal cross-user existence.
 - Enforce ownership and category compatibility in both application logic and database constraints.
 - Keep errors generic at the HTTP boundary and never log transaction payloads by default.
+- Accept mutation bodies only as `application/json` and reject browser requests whose `Origin` or Fetch Metadata identifies a cross-origin mutation.
 - Test unauthenticated access, cross-user references, incompatible category types, invalid money/dates, idempotent retry, and exclusion of soft-deleted rows.
 
 ## Consequences

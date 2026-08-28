@@ -44,7 +44,7 @@
   - Acceptance: positive exact IDR, per-user idempotency, same-user account/category ownership, category/type compatibility, optional Jakarta local time, and soft delete are enforced.
   - Verify: migration status and a database integration check covering precision, invalid references, duplicate retries, summaries, and deleted-row exclusion.
 
-- [ ] Add authenticated transaction resource contracts and services.
+- [x] Add authenticated transaction resource contracts and services.
   - Acceptance: paginated list, detail, create, edit, and delete use stable DTOs; every operation derives owner identity from the server session.
   - Verify: contract/service tests cover invalid input, unauthenticated access, cross-user access, incompatible category types, and generic errors.
 
