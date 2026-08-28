@@ -14,7 +14,7 @@ describe("onboarding input contract", () => {
       data: {
         accountName: "BCA Utama",
         accountType: "BANK",
-        currentBalance: 4_250_000n,
+        currentBalance: BigInt("4250000"),
       },
     });
   });
@@ -28,7 +28,7 @@ describe("onboarding input contract", () => {
       }),
     ).toMatchObject({
       success: true,
-      data: { currentBalance: 0n },
+      data: { currentBalance: BigInt(0) },
     });
   });
 
