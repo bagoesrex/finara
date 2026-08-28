@@ -1,65 +1,142 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
-import { Banknote, Building2, Check, Smartphone } from "lucide-react";
-import { usePrototypeAuth } from "@/components/prototype-auth-provider";
+import { useRouter } from "next/navigation";
 import {
-  ACCOUNT_TYPES,
-  validateAccountSetup,
-  type AccountSetupErrors,
-  type AccountType,
-} from "@/lib/auth";
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { Banknote, Building2, Check, Smartphone } from "lucide-react";
+
+import { AuthField } from "@/app/(auth)/_components/auth-field";
+import { focusFirstError } from "@/app/(auth)/_components/focus-first-error";
+import {
+  completeOnboardingAction,
+  type OnboardingActionState,
+} from "@/app/(auth)/onboarding/actions";
+import { authClient } from "@/lib/auth-client";
 import { formatCurrency } from "@/lib/finance";
-import { AuthField } from "./auth-field";
-import { focusFirstError } from "./focus-first-error";
+import {
+  ONBOARDING_ACCOUNT_TYPES,
+  parseOnboardingInput,
+  type OnboardingAccountType,
+  type OnboardingFieldErrors,
+} from "@/lib/onboarding";
 
 const accountChoices = [
-  { type: ACCOUNT_TYPES[0], label: "Cash", icon: Banknote },
-  { type: ACCOUNT_TYPES[1], label: "Bank", icon: Building2 },
-  { type: ACCOUNT_TYPES[2], label: "E-Wallet", icon: Smartphone },
+  { type: ONBOARDING_ACCOUNT_TYPES[0], label: "Cash", icon: Banknote },
+  { type: ONBOARDING_ACCOUNT_TYPES[1], label: "Bank", icon: Building2 },
+  { type: ONBOARDING_ACCOUNT_TYPES[2], label: "E-Wallet", icon: Smartphone },
 ] as const;
 
-export function OnboardingForm() {
-  const { completeOnboarding, signOut, user } = usePrototypeAuth();
+const initialActionState: OnboardingActionState = {
+  status: "idle",
+  revision: 0,
+};
+
+export function OnboardingForm({ email }: { email: string }) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [actionState, formAction, isPending] = useActionState(
+    completeOnboardingAction,
+    initialActionState,
+  );
   const [name, setName] = useState("");
-  const [type, setType] = useState<AccountType>("BANK");
+  const [type, setType] = useState<OnboardingAccountType>("BANK");
   const [balanceInput, setBalanceInput] = useState("0");
-  const [errors, setErrors] = useState<AccountSetupErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const submittingRef = useRef(false);
-  const currentBalance =
-    balanceInput.trim() === "" ? Number.NaN : Number(balanceInput);
+  const [clientErrors, setClientErrors] = useState<OnboardingFieldErrors>({});
+  const [dismissedServerErrors, setDismissedServerErrors] = useState<
+    Partial<Record<keyof OnboardingFieldErrors, number>>
+  >({});
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
+  const currentBalance = Number(balanceInput);
   const formattedBalance =
-    Number.isSafeInteger(currentBalance) && currentBalance >= 0
+    /^\d+$/.test(balanceInput.trim()) &&
+    Number.isSafeInteger(currentBalance) &&
+    currentBalance >= 0
       ? formatCurrency(currentBalance)
       : "—";
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (submittingRef.current) return;
+  useEffect(() => {
+    if (actionState.status !== "error" || !actionState.fieldErrors) return;
 
-    const nextErrors = validateAccountSetup({
-      name,
-      type,
-      currentBalance,
+    if (formRef.current) {
+      focusFirstError(formRef.current, Object.keys(actionState.fieldErrors));
+    }
+  }, [actionState]);
+
+  function fieldError(field: keyof OnboardingFieldErrors) {
+    return (
+      clientErrors[field] ??
+      (dismissedServerErrors[field] === actionState.revision
+        ? undefined
+        : actionState.fieldErrors?.[field])
+    );
+  }
+
+  function clearFieldError(field: keyof OnboardingFieldErrors) {
+    setClientErrors((current) =>
+      current[field] ? { ...current, [field]: undefined } : current,
+    );
+    setDismissedServerErrors((current) =>
+      current[field] === actionState.revision
+        ? current
+        : { ...current, [field]: actionState.revision },
+    );
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    const parsedInput = parseOnboardingInput({
+      accountName: name,
+      accountType: type,
+      currentBalance: balanceInput,
     });
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) {
-      focusFirstError(event.currentTarget, Object.keys(nextErrors));
+
+    if (parsedInput.success) {
+      setClientErrors({});
       return;
     }
 
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    completeOnboarding({
-      name: name.trim(),
-      type,
-      currentBalance,
-    });
+    event.preventDefault();
+    setClientErrors(parsedInput.fieldErrors);
+    focusFirstError(event.currentTarget, Object.keys(parsedInput.fieldErrors));
   }
 
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    setSignOutError("");
+
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        setSignOutError("Belum berhasil keluar. Coba lagi.");
+        setIsSigningOut(false);
+        return;
+      }
+
+      router.replace("/welcome");
+      router.refresh();
+    } catch {
+      setSignOutError("Belum berhasil keluar. Coba lagi.");
+      setIsSigningOut(false);
+    }
+  }
+
+  const accountNameError = fieldError("accountName");
+  const accountTypeError = fieldError("accountType");
+  const currentBalanceError = fieldError("currentBalance");
+
   return (
-    <form className="auth-form onboarding-form" onSubmit={handleSubmit} noValidate>
+    <form
+      ref={formRef}
+      action={formAction}
+      className="auth-form onboarding-form"
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <AuthField
         id="account-name"
         label="Nama akun"
@@ -67,17 +144,18 @@ export function OnboardingForm() {
         placeholder="Contoh: BCA, GoPay, atau Cash…"
         autoComplete="off"
         value={name}
-        error={errors.name}
+        error={accountNameError}
         onChange={(event) => {
           setName(event.target.value);
-          if (errors.name) {
-            setErrors((current) => ({ ...current, name: undefined }));
-          }
+          clearFieldError("accountName");
         }}
         required
       />
 
-      <fieldset className="account-type-field">
+      <fieldset
+        className="account-type-field"
+        aria-describedby={accountTypeError ? "account-type-error" : undefined}
+      >
         <legend>Jenis akun</legend>
         <div className="account-type-options">
           {accountChoices.map(({ type: value, label, icon: Icon }) => (
@@ -87,11 +165,12 @@ export function OnboardingForm() {
                 name="accountType"
                 value={value}
                 checked={type === value}
+                aria-describedby={
+                  accountTypeError ? "account-type-error" : undefined
+                }
                 onChange={() => {
                   setType(value);
-                  if (errors.type) {
-                    setErrors((current) => ({ ...current, type: undefined }));
-                  }
+                  clearFieldError("accountType");
                 }}
               />
               <Icon aria-hidden="true" size={20} />
@@ -99,7 +178,11 @@ export function OnboardingForm() {
             </label>
           ))}
         </div>
-        {errors.type ? <small role="alert">{errors.type}</small> : null}
+        {accountTypeError ? (
+          <small id="account-type-error" role="alert">
+            {accountTypeError}
+          </small>
+        ) : null}
       </fieldset>
 
       <label className="auth-field balance-input-field" htmlFor="current-balance">
@@ -115,22 +198,21 @@ export function OnboardingForm() {
             min="0"
             step="1"
             value={balanceInput}
-            aria-describedby="balance-help"
-            aria-invalid={Boolean(errors.currentBalance)}
+            aria-describedby={
+              currentBalanceError ? "current-balance-error" : "balance-help"
+            }
+            aria-invalid={Boolean(currentBalanceError)}
             onChange={(event) => {
               setBalanceInput(event.target.value);
-              if (errors.currentBalance) {
-                setErrors((current) => ({
-                  ...current,
-                  currentBalance: undefined,
-                }));
-              }
+              clearFieldError("currentBalance");
             }}
             required
           />
         </div>
-        {errors.currentBalance ? (
-          <small role="alert">{errors.currentBalance}</small>
+        {currentBalanceError ? (
+          <small id="current-balance-error" role="alert">
+            {currentBalanceError}
+          </small>
         ) : (
           <small id="balance-help">
             Ini titik awal saldo, bukan transaksi pemasukan.
@@ -146,16 +228,34 @@ export function OnboardingForm() {
         <Check aria-hidden="true" size={20} />
       </section>
 
-      <button className="primary-button auth-submit" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Menyiapkan Home…" : "Selesai dan buka Home"}
+      {actionState.message ? (
+        <p className="auth-prototype-note" role="alert">
+          {actionState.message}
+        </p>
+      ) : null}
+
+      {signOutError ? (
+        <p className="auth-prototype-note" role="alert">
+          {signOutError}
+        </p>
+      ) : null}
+
+      <button
+        className="primary-button auth-submit"
+        type="submit"
+        disabled={isPending || isSigningOut}
+      >
+        {isPending ? "Menyiapkan Home…" : "Selesai dan buka Home"}
       </button>
-      <button className="auth-reset-button" type="button" onClick={signOut}>
-        Batal dan mulai ulang
+      <button
+        className="auth-reset-button"
+        type="button"
+        disabled={isPending || isSigningOut}
+        onClick={handleSignOut}
+      >
+        {isSigningOut ? "Keluar…" : "Batal dan keluar"}
       </button>
-      <p className="auth-prototype-note">
-        Setup untuk {user?.email ?? "akun baru"} hanya tersimpan selama sesi
-        prototipe ini.
-      </p>
+      <p className="auth-prototype-note">Setup akun untuk {email}.</p>
     </form>
   );
 }

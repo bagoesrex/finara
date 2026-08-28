@@ -9,7 +9,7 @@ import {
   MessageSquareText,
   ReceiptText,
 } from "lucide-react";
-import { usePrototypeAuth } from "@/components/prototype-auth-provider";
+import { useViewer } from "@/components/viewer-provider";
 import { getInitials } from "@/lib/auth";
 import {
   formatCompactCurrency,
@@ -22,7 +22,7 @@ import { TransactionConfirmationSheet } from "./transaction-confirmation-sheet";
 import { TransactionRow } from "./transaction-row";
 
 export function HomeDashboard() {
-  const auth = usePrototypeAuth();
+  const viewer = useViewer();
   const { accounts, addTransaction, summary, transactions } = useMockFinance();
   const [input, setInput] = useState("");
   const [preview, setPreview] = useState<TransactionDraft | null>(null);
@@ -31,7 +31,7 @@ export function HomeDashboard() {
   const inputRef = useRef<HTMLInputElement>(null);
   const savingRef = useRef(false);
   const recentTransactions = transactions.slice(0, 4);
-  const displayName = auth.user?.name ?? "Kamu";
+  const displayName = viewer.name || "Kamu";
   const firstName = displayName.trim().split(/\s+/)[0];
   const closePreview = useCallback(() => setPreview(null), []);
 

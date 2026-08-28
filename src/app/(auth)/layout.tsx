@@ -1,6 +1,16 @@
 import type { ReactNode } from "react";
-import { PrototypeAuthShell } from "@/components/prototype-auth-shell";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
-  return <PrototypeAuthShell>{children}</PrototypeAuthShell>;
+  return (
+    <div className="auth-viewport">
+      <a className="skip-link" href="#auth-content">
+        Lewati ke konten utama
+      </a>
+      <div className="auth-shell">
+        <div className="auth-content" id="auth-content" tabIndex={-1}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 }

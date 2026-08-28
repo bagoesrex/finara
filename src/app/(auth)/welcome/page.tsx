@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArrowRight,
   MessageSquareText,
   ScanSearch,
   WalletCards,
 } from "lucide-react";
+import { getPrivateAppState } from "@/server/auth/private-app";
 
 export const metadata: Metadata = { title: "Selamat datang" };
 
@@ -27,13 +29,23 @@ const benefits = [
   },
 ];
 
-export default function WelcomePage() {
+export default async function WelcomePage() {
+  const state = await getPrivateAppState();
+
+  if (state.status === "ready") {
+    redirect("/");
+  }
+
+  if (state.status === "needs-onboarding") {
+    redirect("/onboarding");
+  }
+
   return (
     <main className="auth-page welcome-page page-enter">
       <header className="auth-brand">
         <span aria-hidden="true">F</span>
         <strong>Finara</strong>
-        <small>Frontend preview</small>
+        <small>Personal finance</small>
       </header>
 
       <section className="welcome-hero" aria-labelledby="welcome-title">
@@ -61,10 +73,10 @@ export default function WelcomePage() {
         <Link className="primary-button" href="/register">
           Mulai sekarang <ArrowRight aria-hidden="true" size={18} />
         </Link>
-        <p>Sudah pernah mencoba? <Link href="/login">Masuk ke demo</Link></p>
+        <p>Sudah punya akun? <Link href="/login">Masuk</Link></p>
       </div>
       <p className="welcome-disclaimer">
-        Ini prototipe frontend. Data akan kembali ke awal setelah reload.
+        Akun dan saldo awalmu disimpan dengan aman setelah kamu konfirmasi.
       </p>
     </main>
   );

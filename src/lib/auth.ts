@@ -1,34 +1,4 @@
 import type { FinanceSummary } from "./finance";
-import { ACCOUNT_TYPES, type AccountType } from "./accounts";
-
-export { ACCOUNT_TYPES };
-export type { AccountType };
-
-export type PrototypeUser = {
-  id: string;
-  name: string;
-  email: string;
-  kind: "demo" | "new";
-};
-
-export type PrototypeAccount = {
-  name: string;
-  type: AccountType;
-  currentBalance: number;
-};
-
-export type PrototypeAuthState =
-  | { status: "signed-out"; user: null; account: null }
-  | {
-      status: "needs-onboarding";
-      user: PrototypeUser;
-      account: null;
-    }
-  | {
-      status: "ready";
-      user: PrototypeUser;
-      account: PrototypeAccount;
-    };
 
 export type RegistrationInput = {
   name: string;
@@ -38,25 +8,14 @@ export type RegistrationInput = {
 
 export type SignInInput = Pick<RegistrationInput, "email" | "password">;
 
-export type AccountSetupInput = {
-  name: string;
-  type: string;
-  currentBalance: number;
-};
-
 export type RegistrationErrors = Partial<
   Record<keyof RegistrationInput, string>
 >;
 
 export type SignInErrors = Partial<Record<keyof SignInInput, string>>;
 
-export type AccountSetupErrors = Partial<
-  Record<keyof AccountSetupInput, string>
->;
-
 type MonthReference = Pick<FinanceSummary, "monthKey" | "monthLabel">;
 
-const accountTypeSet = new Set<string>(ACCOUNT_TYPES);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateRegistration(
@@ -85,28 +44,6 @@ export function validateSignIn(input: SignInInput): SignInErrors {
   }
   if (!input.password) {
     errors.password = "Masukkan password.";
-  }
-
-  return errors;
-}
-
-export function validateAccountSetup(
-  input: AccountSetupInput,
-): AccountSetupErrors {
-  const errors: AccountSetupErrors = {};
-
-  if (!input.name.trim()) {
-    errors.name = "Masukkan nama akun.";
-  }
-  if (!accountTypeSet.has(input.type)) {
-    errors.type = "Pilih jenis akun yang tersedia.";
-  }
-  if (
-    !Number.isSafeInteger(input.currentBalance) ||
-    input.currentBalance < 0
-  ) {
-    errors.currentBalance =
-      "Saldo harus berupa Rupiah utuh dan tidak negatif.";
   }
 
   return errors;

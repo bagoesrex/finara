@@ -12,23 +12,27 @@ import { initializeOnboarding } from "@/server/onboarding/service";
 
 export type OnboardingActionState = {
   status: "idle" | "error";
+  revision: number;
   message?: string;
   fieldErrors?: OnboardingFieldErrors;
 };
 
-export const initialOnboardingActionState: OnboardingActionState = {
-  status: "idle",
-};
-
 export async function completeOnboardingAction(
-  _previousState: OnboardingActionState,
+  previousState: OnboardingActionState,
   formData: FormData,
 ): Promise<OnboardingActionState> {
+  const revision =
+    Number.isSafeInteger(previousState.revision) &&
+    previousState.revision >= 0 &&
+    previousState.revision < Number.MAX_SAFE_INTEGER
+      ? previousState.revision + 1
+      : 1;
   const viewer = await getSessionViewer();
 
   if (!viewer) {
     return {
       status: "error",
+      revision,
       message: "Sesi kamu sudah berakhir. Masuk lagi untuk melanjutkan.",
     };
   }
@@ -42,6 +46,7 @@ export async function completeOnboardingAction(
   if (!parsedInput.success) {
     return {
       status: "error",
+      revision,
       fieldErrors: parsedInput.fieldErrors,
     };
   }
@@ -51,6 +56,7 @@ export async function completeOnboardingAction(
   } catch {
     return {
       status: "error",
+      revision,
       message: "Akun belum berhasil disimpan. Coba lagi.",
     };
   }

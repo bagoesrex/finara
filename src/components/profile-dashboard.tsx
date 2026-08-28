@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ChevronRight,
   CircleHelp,
@@ -12,27 +13,44 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useMockFinance } from "@/components/mock-finance-provider";
-import { usePrototypeAuth } from "@/components/prototype-auth-provider";
+import { useViewer } from "@/components/viewer-provider";
+import { authClient } from "@/lib/auth-client";
 import { getInitials } from "@/lib/auth";
 import { PageHeader } from "@/components/page-header";
 
 export function ProfileDashboard() {
-  const auth = usePrototypeAuth();
+  const viewer = useViewer();
   const { accounts } = useMockFinance();
   const router = useRouter();
-  const name = auth.user?.name ?? "Pengguna Finara";
-  const email = auth.user?.email ?? "Belum tersedia";
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState("");
+  const name = viewer.name || "Pengguna Finara";
+  const email = viewer.email;
   const accountName = accounts[0]?.name ?? "Belum tersedia";
-  const isDemo = auth.user?.kind === "demo";
   const preferences = [
     { icon: Coins, label: "Mata uang", value: "Rupiah (IDR)" },
     { icon: Languages, label: "Bahasa", value: "Indonesia" },
-    { icon: ShieldCheck, label: "Mode data", value: "Hanya sesi ini" },
+    { icon: ShieldCheck, label: "Akun", value: "Tersimpan" },
   ];
 
-  function handleSignOut() {
-    auth.signOut();
-    router.replace("/welcome");
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    setSignOutError("");
+
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        setSignOutError("Belum berhasil keluar. Coba lagi.");
+        setIsSigningOut(false);
+        return;
+      }
+
+      router.replace("/welcome");
+      router.refresh();
+    } catch {
+      setSignOutError("Belum berhasil keluar. Coba lagi.");
+      setIsSigningOut(false);
+    }
   }
 
   return (
@@ -85,22 +103,31 @@ export function ProfileDashboard() {
         </dl>
       </section>
 
-      <section className="support-note" aria-label="Status prototipe">
+      <section className="support-note" aria-label="Batas versi saat ini">
         <CircleHelp aria-hidden="true" size={20} />
         <div>
-          <h2>Mode prototipe</h2>
+          <h2>Preview MVP</h2>
           <p>
-            {isDemo
-              ? "Kamu sedang melihat skenario data Bagus."
-              : "Data onboarding dan transaksi hanya hidup selama sesi ini."}
+            Akun dan saldo awal sudah tersimpan. Transaksi percobaan masih hanya
+            hidup selama sesi browser ini.
           </p>
         </div>
       </section>
 
-      <button className="profile-signout" type="button" onClick={handleSignOut}>
+      <button
+        className="profile-signout"
+        type="button"
+        disabled={isSigningOut}
+        onClick={handleSignOut}
+      >
         <LogOut aria-hidden="true" size={18} />
-        Keluar dari prototipe
+        {isSigningOut ? "Keluar…" : "Keluar"}
       </button>
+      {signOutError ? (
+        <p className="auth-prototype-note" role="alert">
+          {signOutError}
+        </p>
+      ) : null}
       <p className="app-version">Finara preview | 0.1.0</p>
     </main>
   );

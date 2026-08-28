@@ -27,9 +27,9 @@ async function checkPersistedOnboarding() {
         currentBalance: BigInt("4250000"),
       }),
       initializeOnboarding(user.id, {
-        accountName: "Should not exist",
-        accountType: "CASH",
-        currentBalance: BigInt(1),
+        accountName: "BCA Utama",
+        accountType: "BANK",
+        currentBalance: BigInt("4250000"),
       }),
     ]);
 

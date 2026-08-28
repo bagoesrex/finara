@@ -14,10 +14,10 @@ Define system boundaries that keep financial data authoritative, user-scoped, an
 - Tailwind CSS 4.
 - Next.js server capabilities / Node.js application backend.
 - PostgreSQL with Prisma ORM.
-- Zod for untrusted-boundary validation when installed.
+- Zod for untrusted-boundary validation.
 - An LLM provider with structured output and tool calling.
 
-Only the frontend scaffold is currently installed. Database, Prisma, Zod, authentication, and LLM packages require separate implementation decisions and dependency changes.
+PostgreSQL, Prisma, Zod, and Better Auth are installed. The current persisted slice covers database-backed email/password sessions, first-account onboarding, user-owned default categories, and a server-derived opening balance on Home. Transaction, budget, and AI persistence remain future slices; an LLM provider is not selected or installed.
 
 TanStack Query is accepted for mutable client server-state by [ADR 0002](../decisions/0002-tanstack-query-for-client-finance-state.md). It is a session-scoped UX cache, not an authorization boundary or source of financial truth.
 
@@ -129,7 +129,6 @@ Do not create all directories preemptively; introduce a boundary when its first 
 
 ## Open questions
 
-- Authentication provider and session implementation.
 - LLM provider and regional/data-processing terms.
 - Hosting, managed PostgreSQL provider, and deployment regions.
 - API style for client mutations: Server Actions, Route Handlers, or a deliberate mix.

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { PrototypeAuthProvider } from "@/components/prototype-auth-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,9 +16,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id">
-      <body>
-        <PrototypeAuthProvider>{children}</PrototypeAuthProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

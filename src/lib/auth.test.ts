@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   createOnboardingSummary,
   getInitials,
-  validateAccountSetup,
   validateRegistration,
   validateSignIn,
 } from "./auth";
@@ -38,25 +37,6 @@ describe("authentication form validation", () => {
 });
 
 describe("first-account setup", () => {
-  it("accepts zero and a positive integer as a current balance", () => {
-    expect(
-      validateAccountSetup({ name: "Cash", type: "CASH", currentBalance: 0 }),
-    ).toEqual({});
-    expect(
-      validateAccountSetup({ name: "BCA", type: "BANK", currentBalance: 4_250_000 }),
-    ).toEqual({});
-  });
-
-  it("rejects incomplete, negative, fractional, and unknown account values", () => {
-    expect(
-      validateAccountSetup({ name: "", type: "OTHER", currentBalance: -0.5 }),
-    ).toEqual({
-      name: "Masukkan nama akun.",
-      type: "Pilih jenis akun yang tersedia.",
-      currentBalance: "Saldo harus berupa Rupiah utuh dan tidak negatif.",
-    });
-  });
-
   it("turns the current balance into an opening snapshot without fake activity", () => {
     expect(
       createOnboardingSummary(1_750_000, {

@@ -23,13 +23,13 @@ current account balance = opening snapshot + income after snapshot - expenses af
 - A current balance of `0` is valid.
 - Negative and fractional IDR values are rejected in the current onboarding flow. Debt and overdraft behavior remain outside the MVP until explicitly specified.
 - The snapshot does not appear in Activity and does not affect current-month income or spending.
-- The frontend prototype keeps this value only in memory. [ADR 0003](./0003-idr-money-and-user-owned-onboarding-schema.md) defines the persisted amount and timestamp representation.
+- PostgreSQL persists the snapshot as an exact `BIGINT` amount with an effective timestamp, following [ADR 0003](./0003-idr-money-and-user-owned-onboarding-schema.md).
 
 ## Consequences
 
 - New users reach a meaningful Home without fabricating financial activity.
 - Monthly income and expense summaries remain based only on real transactions.
-- A future backend needs an auditable snapshot amount and effective timestamp or an equivalent representation.
+- The persisted account retains an auditable snapshot amount and effective timestamp without creating Activity history.
 - Editing or reconciling an opening snapshot requires a separate specification before implementation.
 - [ADR 0003](./0003-idr-money-and-user-owned-onboarding-schema.md) fixes IDR as the single MVP currency.
 
