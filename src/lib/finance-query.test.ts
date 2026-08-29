@@ -138,9 +138,11 @@ describe("finance query keys and invalidation", () => {
       "user-a",
       transactionDto.id,
     );
+    const budgetKey = financeQueryKeys.budgetOverview("user-a", "2026-08");
     queryClient.setQueryData(snapshotKey, snapshotDto);
     queryClient.setQueryData(listKey, { pages: [], pageParams: [] });
     queryClient.setQueryData(detailKey, transactionDto);
+    queryClient.setQueryData(budgetKey, {});
 
     await invalidateFinanceResources(queryClient, {
       monthKey: "2026-08",
@@ -151,6 +153,7 @@ describe("finance query keys and invalidation", () => {
     expect(queryClient.getQueryState(snapshotKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(detailKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(budgetKey)?.isInvalidated).toBe(true);
   });
 });
 

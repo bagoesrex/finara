@@ -18,6 +18,14 @@ import {
 import { useViewer } from "@/components/viewer-provider";
 import { validateAccountName, type FinanceAccount } from "@/lib/accounts";
 import {
+  adaptBudgetOverview,
+  createBudgetRequest,
+  fetchBudgetOverview,
+  invalidateBudgetResource,
+  updateBudgetRequest,
+  type BudgetMutationDraft,
+} from "@/lib/budget-query";
+import {
   adaptFinanceSnapshot,
   adaptTransaction,
   createTransactionRequest,
@@ -33,21 +41,15 @@ import {
   type TransactionDraft,
   type TransactionListFilters,
 } from "@/lib/finance-query";
-import {
-  upsertBudgetAllocation,
-  type BudgetAllocation,
-  type FinanceSummary,
-} from "@/lib/finance";
+import type { FinanceSummary } from "@/lib/finance";
 
 type FinanceContextValue = {
   accountNameOverrides: Readonly<Record<string, string>>;
   accounts: FinanceAccount[];
   addTransaction: (draft: TransactionDraft) => Promise<FinanceTransaction>;
-  budgets: BudgetAllocation[];
   categories: FinanceCategory[];
   deleteTransaction: (id: string) => Promise<void>;
   renameAccount: (id: string, name: string) => void;
-  saveBudget: (budget: Omit<BudgetAllocation, "id"> & { id?: string }) => void;
   summary: FinanceSummary;
   transactions: FinanceTransaction[];
   updateTransaction: (
@@ -89,7 +91,6 @@ export function FinanceProvider({
 }) {
   const viewer = useViewer();
   const queryClient = useQueryClient();
-  const [budgets, setBudgets] = useState<BudgetAllocation[]>([]);
   const [accountNameOverrides, setAccountNameOverrides] = useState<
     Record<string, string>
   >({});
@@ -183,19 +184,6 @@ export function FinanceProvider({
     },
     [accounts],
   );
-  const saveBudget = useCallback(
-    (draft: Omit<BudgetAllocation, "id"> & { id?: string }) => {
-      if (!Number.isFinite(draft.amount) || draft.amount <= 0) return;
-      setBudgets((current) =>
-        upsertBudgetAllocation(current, {
-          ...draft,
-          id: draft.id ?? `local-budget-${crypto.randomUUID()}`,
-        }),
-      );
-    },
-    [],
-  );
-
   const value = useMemo<FinanceContextValue | null>(() => {
     if (!snapshotQuery.data || !transactionQuery.data) return null;
 
@@ -203,11 +191,9 @@ export function FinanceProvider({
       accountNameOverrides,
       accounts,
       addTransaction,
-      budgets,
       categories: snapshotQuery.data.categories,
       deleteTransaction,
       renameAccount,
-      saveBudget,
       summary: snapshotQuery.data.summary,
       transactions,
       updateTransaction,
@@ -216,10 +202,8 @@ export function FinanceProvider({
     accountNameOverrides,
     accounts,
     addTransaction,
-    budgets,
     deleteTransaction,
     renameAccount,
-    saveBudget,
     snapshotQuery.data,
     transactionQuery.data,
     transactions,
@@ -306,4 +290,47 @@ export function useTransactionDetail(transactionId: string) {
   }, [accountNameOverrides, query.data]);
 
   return { ...query, data: transaction };
+}
+
+export function useBudgetOverview(monthKey: string) {
+  const viewer = useViewer();
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: financeQueryKeys.budgetOverview(viewer.id, monthKey),
+    queryFn: () => fetchBudgetOverview(monthKey),
+    select: adaptBudgetOverview,
+  });
+  const invalidate = useCallback(
+    () =>
+      invalidateBudgetResource(queryClient, {
+        monthKey,
+        viewerId: viewer.id,
+      }),
+    [monthKey, queryClient, viewer.id],
+  );
+  const { isPending: isCreating, mutateAsync: createBudget } = useMutation({
+    mutationFn: createBudgetRequest,
+    onSuccess: invalidate,
+  });
+  const { isPending: isUpdating, mutateAsync: updateBudget } = useMutation({
+    mutationFn: updateBudgetRequest,
+    onSuccess: invalidate,
+  });
+  const saveBudget = useCallback(
+    async (draft: BudgetMutationDraft) => {
+      if (draft.id) {
+        await updateBudget(draft);
+      } else {
+        await createBudget(draft);
+      }
+    },
+    [createBudget, updateBudget],
+  );
+
+  return {
+    ...query,
+    isSaving: isCreating || isUpdating,
+    overview: query.data,
+    saveBudget,
+  };
 }

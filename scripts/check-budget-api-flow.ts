@@ -8,6 +8,17 @@ import { db } from "../src/server/db/client";
 import { initializeOnboarding } from "../src/server/onboarding/service";
 
 const baseUrl = process.env.FINARA_TEST_BASE_URL ?? "http://localhost:3000";
+const localRuntimeRateLimitKeys = [
+  "0000:0000:0000:0000:0000:0000:0000:0000|/sign-up/email",
+  "0000:0000:0000:0000:0000:0000:0000:0000|/sign-in/email",
+];
+
+async function resetLocalRuntimeRateLimits() {
+  if (new URL(baseUrl).hostname !== "localhost") return;
+  await db.authRateLimit.deleteMany({
+    where: { key: { in: localRuntimeRateLimitKeys } },
+  });
+}
 
 async function request(path: string, init?: RequestInit) {
   return fetch(new URL(path, baseUrl), { redirect: "manual", ...init });
@@ -52,6 +63,7 @@ async function checkBudgetApiFlow() {
   const userIds: string[] = [];
 
   try {
+    await resetLocalRuntimeRateLimits();
     assert.equal((await request("/api/budgets?month=2026-08")).status, 401);
 
     const owner = await registerAndSignIn("Runtime Budget Owner");
@@ -228,6 +240,15 @@ async function checkBudgetApiFlow() {
     assert.equal(updateResponse.status, 200);
     assert.equal((await apiData<BudgetDto>(updateResponse)).amount, "90000");
 
+    const budgetPage = await request("/budget", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(budgetPage.status, 200);
+    const budgetHtml = await budgetPage.text();
+    assert.match(budgetHtml, /Food &amp; Drink/);
+    assert.match(budgetHtml, /Rp90\.000/);
+    assert.doesNotMatch(budgetHtml, /Penyimpanan anggaran segera menyusul/);
+
     const otherOverview = await apiData<BudgetOverviewDto>(
       await request("/api/budgets?month=2026-08", {
         headers: { cookie: otherUser.cookie },
@@ -244,6 +265,7 @@ async function checkBudgetApiFlow() {
       await db.account.deleteMany({ where: { userId: { in: userIds } } });
       await db.user.deleteMany({ where: { id: { in: userIds } } });
     }
+    await resetLocalRuntimeRateLimits();
   }
 }
 

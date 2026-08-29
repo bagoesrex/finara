@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Check, X } from "lucide-react";
+
 import { formatCurrency } from "@/lib/finance";
 import { useModalFocusTrap } from "./use-modal-focus-trap";
 
@@ -9,12 +10,17 @@ export type BudgetAllocationDraft = {
   id?: string;
   amount: number;
   category: string;
+  categoryId: string;
   monthKey: string;
 };
 
+type BudgetCategoryOption = { id: string; name: string };
+
 type BudgetAllocationSheetProps = {
-  availableCategories: readonly string[];
+  availableCategories: readonly BudgetCategoryOption[];
   draft: BudgetAllocationDraft;
+  error?: string;
+  isSaving: boolean;
   onChange: (draft: BudgetAllocationDraft) => void;
   onClose: () => void;
   onSave: () => void;
@@ -23,6 +29,8 @@ type BudgetAllocationSheetProps = {
 export function BudgetAllocationSheet({
   availableCategories,
   draft,
+  error,
+  isSaving,
   onChange,
   onClose,
   onSave,
@@ -30,7 +38,13 @@ export function BudgetAllocationSheet({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const isEditing = Boolean(draft.id);
-  const isValid = draft.amount > 0 && draft.category.length > 0;
+  const isValid =
+    Number.isSafeInteger(draft.amount) &&
+    draft.amount > 0 &&
+    draft.categoryId.length > 0;
+  const descriptionIds = error
+    ? "budget-sheet-caption budget-sheet-error"
+    : "budget-sheet-caption";
 
   useModalFocusTrap(sheetRef, closeButtonRef, onClose);
 
@@ -41,6 +55,7 @@ export function BudgetAllocationSheet({
         type="button"
         tabIndex={-1}
         aria-label="Tutup pengaturan anggaran"
+        disabled={isSaving}
         onClick={onClose}
       />
       <section
@@ -49,7 +64,8 @@ export function BudgetAllocationSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby="budget-sheet-title"
-        aria-describedby="budget-sheet-caption"
+        aria-describedby={descriptionIds}
+        aria-busy={isSaving}
       >
         <div className="sheet-handle" aria-hidden="true" />
         <div className="sheet-heading">
@@ -59,7 +75,13 @@ export function BudgetAllocationSheet({
               {isEditing ? "Edit anggaran" : "Atur anggaran"}
             </h2>
           </div>
-          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Tutup">
+          <button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Tutup"
+            disabled={isSaving}
+          >
             <X aria-hidden="true" size={19} />
           </button>
         </div>
@@ -69,7 +91,7 @@ export function BudgetAllocationSheet({
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            if (isValid) onSave();
+            if (isValid && !isSaving) onSave();
           }}
         >
           <div className="preview-form-grid budget-form-grid">
@@ -77,14 +99,25 @@ export function BudgetAllocationSheet({
               <span>Kategori</span>
               <select
                 name="category"
-                value={draft.category}
-                disabled={isEditing}
-                onChange={(event) =>
-                  onChange({ ...draft, category: event.target.value })
-                }
+                value={draft.categoryId}
+                disabled={isEditing || isSaving}
+                onChange={(event) => {
+                  const category = availableCategories.find(
+                    (option) => option.id === event.target.value,
+                  );
+                  if (category) {
+                    onChange({
+                      ...draft,
+                      category: category.name,
+                      categoryId: category.id,
+                    });
+                  }
+                }}
               >
                 {availableCategories.map((category) => (
-                  <option key={category} value={category}>{category}</option>
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -95,8 +128,12 @@ export function BudgetAllocationSheet({
                 type="number"
                 inputMode="numeric"
                 min="1"
+                max={Number.MAX_SAFE_INTEGER}
                 step="1"
                 value={draft.amount || ""}
+                disabled={isSaving}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "budget-sheet-error" : undefined}
                 onChange={(event) =>
                   onChange({ ...draft, amount: event.target.valueAsNumber || 0 })
                 }
@@ -106,13 +143,32 @@ export function BudgetAllocationSheet({
             </label>
           </div>
 
+          {error ? (
+            <p className="form-error" id="budget-sheet-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+
           <div className="sheet-actions">
-            <button className="secondary-button" type="button" onClick={onClose}>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={onClose}
+              disabled={isSaving}
+            >
               Batal
             </button>
-            <button className="primary-button" type="submit" disabled={!isValid}>
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={!isValid || isSaving}
+            >
               <Check aria-hidden="true" size={18} />
-              {isEditing ? "Simpan perubahan" : "Tambah anggaran"}
+              {isSaving
+                ? "Menyimpan..."
+                : isEditing
+                  ? "Simpan perubahan"
+                  : "Tambah anggaran"}
             </button>
           </div>
         </form>

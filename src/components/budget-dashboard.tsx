@@ -1,22 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, CircleHelp, Pencil, Plus } from "lucide-react";
-import {
-  calculateBudgetOverview,
-  expenseCategories,
-  formatCompactCurrency,
-  formatCurrency,
-  type BudgetProgress,
-} from "@/lib/finance";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, Pencil, Plus } from "lucide-react";
+
+import type { ClientBudgetProgress } from "@/lib/budget-query";
+import { FinanceRequestError } from "@/lib/finance-query";
+import { formatCompactCurrency, formatCurrency } from "@/lib/finance";
 import {
   BudgetAllocationSheet,
   type BudgetAllocationDraft,
 } from "./budget-allocation-sheet";
-import { useFinance, useTransactionList } from "./finance-provider";
+import { useBudgetOverview, useFinance } from "./finance-provider";
 import { PageHeader } from "./page-header";
 
-function getRemainingCopy(budget: BudgetProgress): string {
+function getRemainingCopy(budget: ClientBudgetProgress): string {
   if (budget.status === "over") {
     return `Lewat ${formatCurrency(Math.abs(budget.remaining))}`;
   }
@@ -25,10 +22,9 @@ function getRemainingCopy(budget: BudgetProgress): string {
   return `Sisa ${formatCurrency(budget.remaining)}`;
 }
 
-function getBudgetInsight(budgets: readonly BudgetProgress[]): string {
+function getBudgetInsight(budgets: readonly ClientBudgetProgress[]): string {
   const mostUsed = budgets.toSorted(
-    (first, second) =>
-      second.spent / second.amount - first.spent / first.amount,
+    (first, second) => second.progress - first.progress,
   )[0];
 
   if (!mostUsed || mostUsed.spent === 0) {
@@ -46,43 +42,34 @@ function getBudgetInsight(budgets: readonly BudgetProgress[]): string {
   return `Pemakaian tertinggi ada di ${mostUsed.category}, sebesar ${formatCompactCurrency(mostUsed.spent)}.`;
 }
 
+function mutationErrorMessage(error: unknown) {
+  return error instanceof FinanceRequestError
+    ? error.message
+    : "Anggaran belum dapat disimpan. Coba lagi.";
+}
+
 export function BudgetDashboard() {
-  const { budgets, saveBudget, summary } = useFinance();
-  const transactionFilters = useMemo(
-    () => ({ month: summary.monthKey }),
-    [summary.monthKey],
-  );
-  const transactionQuery = useTransactionList(transactionFilters);
-  const {
-    fetchNextPage,
-    hasNextPage,
-    isError: hasTransactionError,
-    isFetchingNextPage,
-  } = transactionQuery;
+  const { categories, summary } = useFinance();
+  const budgetQuery = useBudgetOverview(summary.monthKey);
   const [draft, setDraft] = useState<BudgetAllocationDraft | null>(null);
+  const [saveError, setSaveError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
-  const savingRef = useRef(false);
-  const overview = useMemo(
-    () =>
-      calculateBudgetOverview(
-        budgets,
-        transactionQuery.transactions,
-        summary.monthKey,
-      ),
-    [budgets, summary.monthKey, transactionQuery.transactions],
-  );
-  const availableCategories = useMemo(
-    () => {
-      const allocatedCategories = new Set(
-        overview.budgets.map(({ category }) => category),
-      );
-      return expenseCategories.filter(
-        (category) => !allocatedCategories.has(category),
-      );
-    },
-    [overview.budgets],
-  );
-  const closeSheet = useCallback(() => setDraft(null), []);
+  const overview = budgetQuery.overview;
+  const availableCategories = useMemo(() => {
+    const allocatedCategoryIds = new Set(
+      overview?.budgets.map(({ categoryId }) => categoryId) ?? [],
+    );
+    return categories
+      .filter(
+        (category) =>
+          category.type === "EXPENSE" &&
+          !allocatedCategoryIds.has(category.id),
+      )
+      .map((category) => ({ id: category.id, name: category.name }));
+  }, [categories, overview?.budgets]);
+  const closeSheet = useCallback(() => {
+    if (!budgetQuery.isSaving) setDraft(null);
+  }, [budgetQuery.isSaving]);
 
   useEffect(() => {
     if (!savedMessage) return;
@@ -90,53 +77,46 @@ export function BudgetDashboard() {
     return () => window.clearTimeout(timeout);
   }, [savedMessage]);
 
-  useEffect(() => {
-    if (
-      hasNextPage &&
-      !isFetchingNextPage &&
-      !hasTransactionError
-    ) {
-      void fetchNextPage();
-    }
-  }, [
-    fetchNextPage,
-    hasNextPage,
-    hasTransactionError,
-    isFetchingNextPage,
-  ]);
-
   function startCreate() {
     const category = availableCategories[0];
     if (!category) return;
-    savingRef.current = false;
+    setSaveError("");
     setSavedMessage("");
-    setDraft({ amount: 500_000, category, monthKey: summary.monthKey });
+    setDraft({
+      amount: 500_000,
+      category: category.name,
+      categoryId: category.id,
+      monthKey: summary.monthKey,
+    });
   }
 
-  function startEdit(budget: BudgetProgress) {
-    savingRef.current = false;
+  function startEdit(budget: ClientBudgetProgress) {
+    setSaveError("");
     setSavedMessage("");
     setDraft({
       id: budget.id,
       amount: budget.amount,
       category: budget.category,
+      categoryId: budget.categoryId,
       monthKey: budget.monthKey,
     });
   }
 
-  function saveAllocation() {
-    if (!draft || savingRef.current || draft.amount <= 0) return;
-    savingRef.current = true;
-    saveBudget(draft);
-    setDraft(null);
-    setSavedMessage(
-      `${draft.category} berhasil ${draft.id ? "diperbarui" : "ditambahkan"}.`,
-    );
+  async function saveAllocation() {
+    if (!draft || budgetQuery.isSaving || draft.amount <= 0) return;
+    setSaveError("");
+
+    try {
+      await budgetQuery.saveBudget(draft);
+      setDraft(null);
+      setSavedMessage(
+        `${draft.category} berhasil ${draft.id ? "diperbarui" : "ditambahkan"}.`,
+      );
+    } catch (error) {
+      setSaveError(mutationErrorMessage(error));
+    }
   }
 
-  const summaryIsOver = overview.remaining < 0;
-  const summaryLabel = summaryIsOver ? "Melebihi anggaran" : "Sisa anggaran";
-  const summaryValue = Math.abs(overview.remaining);
   const pageHeader = (
     <PageHeader
       eyebrow={summary.monthLabel}
@@ -145,17 +125,17 @@ export function BudgetDashboard() {
     />
   );
 
-  if (hasTransactionError) {
+  if (!overview && budgetQuery.isError) {
     return (
       <main className="page page-enter">
         {pageHeader}
         <section className="empty-state" role="alert">
-          <h2>Pengeluaran belum dapat dimuat</h2>
+          <h2>Anggaran belum dapat dimuat</h2>
           <p>Periksa koneksi lalu coba lagi.</p>
           <button
             className="secondary-button"
             type="button"
-            onClick={() => transactionQuery.refetch()}
+            onClick={() => void budgetQuery.refetch()}
           >
             Coba lagi
           </button>
@@ -164,21 +144,21 @@ export function BudgetDashboard() {
     );
   }
 
-  if (
-    transactionQuery.isPending ||
-    isFetchingNextPage ||
-    hasNextPage
-  ) {
+  if (!overview) {
     return (
       <main className="page page-enter">
         {pageHeader}
         <section className="empty-state" role="status" aria-live="polite">
-          <h2>Memuat pengeluaran bulan ini</h2>
+          <h2>Memuat anggaran bulan ini</h2>
           <p>Mohon tunggu sebentar.</p>
         </section>
       </main>
     );
   }
+
+  const summaryIsOver = overview.remaining < 0;
+  const summaryLabel = summaryIsOver ? "Melebihi anggaran" : "Sisa anggaran";
+  const summaryValue = Math.abs(overview.remaining);
 
   return (
     <main className="page page-enter">
@@ -197,7 +177,7 @@ export function BudgetDashboard() {
           role="progressbar"
           aria-label="Anggaran kategori bulan ini terpakai"
           aria-valuemin={0}
-          aria-valuemax={overview.allocated}
+          aria-valuemax={Math.max(overview.allocated, 1)}
           aria-valuenow={Math.min(overview.spent, overview.allocated)}
           aria-valuetext={`${formatCurrency(overview.spent)} dari ${formatCurrency(overview.allocated)}`}
         >
@@ -216,7 +196,7 @@ export function BudgetDashboard() {
             className="section-action"
             type="button"
             onClick={startCreate}
-            disabled={availableCategories.length === 0}
+            disabled={availableCategories.length === 0 || budgetQuery.isSaving}
           >
             <Plus aria-hidden="true" size={16} />Atur
           </button>
@@ -243,6 +223,7 @@ export function BudgetDashboard() {
                       className="budget-edit-button"
                       type="button"
                       onClick={() => startEdit(budget)}
+                      disabled={budgetQuery.isSaving}
                       aria-label={`Ubah anggaran ${budget.category}`}
                     >
                       <Pencil aria-hidden="true" size={15} />Ubah
@@ -271,7 +252,12 @@ export function BudgetDashboard() {
         ) : (
           <div className="budget-empty">
             <p>Belum ada batas pengeluaran untuk bulan ini.</p>
-            <button className="secondary-button" type="button" onClick={startCreate}>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={startCreate}
+              disabled={availableCategories.length === 0 || budgetQuery.isSaving}
+            >
               <Plus aria-hidden="true" size={17} />Atur anggaran pertama
             </button>
           </div>
@@ -284,24 +270,22 @@ export function BudgetDashboard() {
         <p>{getBudgetInsight(overview.budgets)}</p>
       </aside>
 
-      <aside className="support-note finance-note" aria-label="Batas penyimpanan anggaran">
-        <CircleHelp aria-hidden="true" size={20} />
-        <div>
-          <h2>Penyimpanan anggaran segera menyusul</h2>
-          <p>
-            Anggaran saat ini hanya berlaku selama sesi ini dan akan diatur
-            ulang setelah halaman dimuat ulang.
-          </p>
-        </div>
-      </aside>
-
       {draft ? (
         <BudgetAllocationSheet
-          availableCategories={draft.id ? [draft.category] : availableCategories}
+          availableCategories={
+            draft.id
+              ? [{ id: draft.categoryId, name: draft.category }]
+              : availableCategories
+          }
           draft={draft}
-          onChange={setDraft}
+          error={saveError}
+          isSaving={budgetQuery.isSaving}
+          onChange={(nextDraft) => {
+            setSaveError("");
+            setDraft(nextDraft);
+          }}
           onClose={closeSheet}
-          onSave={saveAllocation}
+          onSave={() => void saveAllocation()}
         />
       ) : null}
 

@@ -102,6 +102,10 @@ export const financeQueryKeys = {
       "detail",
       transactionId,
     ] as const,
+  budgets: (viewerId: string) =>
+    [...financeQueryKeys.root(viewerId), "budgets"] as const,
+  budgetOverview: (viewerId: string, monthKey: string) =>
+    [...financeQueryKeys.budgets(viewerId), "overview", monthKey] as const,
 };
 
 function toSafeClientMoney(value: string, requirePositive = false) {
@@ -200,7 +204,7 @@ export function shouldRetryFinanceRequest(
   return failureCount < 2;
 }
 
-async function readApiData(response: Response) {
+export async function readApiData(response: Response) {
   const body = await response.json().catch(() => null);
 
   if (!response.ok) {
@@ -232,7 +236,7 @@ async function readApiData(response: Response) {
   return body.data;
 }
 
-async function financeFetch(path: string, init?: RequestInit) {
+export async function financeFetch(path: string, init?: RequestInit) {
   return fetch(path, {
     cache: "no-store",
     credentials: "same-origin",
@@ -309,6 +313,9 @@ export async function invalidateFinanceResources(
     }),
     queryClient.invalidateQueries({
       queryKey: financeQueryKeys.transactionLists(scope.viewerId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: financeQueryKeys.budgets(scope.viewerId),
     }),
   ];
 
