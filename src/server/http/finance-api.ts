@@ -6,6 +6,11 @@ import type {
   ApiSuccessResponse,
 } from "@/lib/api";
 import type { ContractParseResult } from "@/lib/transactions";
+import { NvidiaConfigurationError } from "@/server/ai/config";
+import {
+  NvidiaInvalidResponseError,
+  NvidiaUnavailableError,
+} from "@/server/ai/nvidia-client";
 import {
   BudgetConflictError,
   BudgetNotFoundError,
@@ -204,6 +209,18 @@ export function handleFinanceApiError(error: unknown) {
       409,
       "IDEMPOTENCY_CONFLICT",
       "Permintaan ini sudah dipakai untuk transaksi yang berbeda.",
+    );
+  }
+
+  if (
+    error instanceof NvidiaConfigurationError ||
+    error instanceof NvidiaInvalidResponseError ||
+    error instanceof NvidiaUnavailableError
+  ) {
+    return apiError(
+      503,
+      "AI_UNAVAILABLE",
+      "AI belum dapat memproses transaksi. Coba lagi atau isi manual.",
     );
   }
 

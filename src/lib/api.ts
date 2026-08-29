@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | "NOT_FOUND"
   | "BUDGET_CONFLICT"
   | "IDEMPOTENCY_CONFLICT"
+  | "AI_UNAVAILABLE"
   | "INTERNAL_ERROR";
 
 export type ApiErrorResponse = {
