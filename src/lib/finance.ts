@@ -92,6 +92,10 @@ export function formatCurrency(amount: number): string {
   return `Rp${integerFormatter.format(Math.abs(amount))}`;
 }
 
+export function formatSignedCurrency(amount: number): string {
+  return `${amount < 0 ? "−" : ""}${formatCurrency(amount)}`;
+}
+
 export function formatCompactCurrency(amount: number): string {
   const absoluteAmount = Math.abs(amount);
 

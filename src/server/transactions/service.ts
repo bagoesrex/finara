@@ -332,7 +332,7 @@ export async function getFinanceSnapshot(
   monthKey: string,
 ): Promise<FinanceSnapshotDto> {
   const monthRange = getMonthDateRange(monthKey);
-  const [accounts, categories, accountSums, monthlyExpense] =
+  const [accounts, categories, accountSums, monthlyExpense, monthlyIncome] =
     await db.$transaction([
       db.account.findMany({
         where: { userId },
@@ -360,6 +360,15 @@ export async function getFinanceSnapshot(
           userId,
           deletedAt: null,
           type: "EXPENSE",
+          transactionDate: { gte: monthRange.start, lt: monthRange.end },
+        },
+        _sum: { amount: true },
+      }),
+      db.transaction.aggregate({
+        where: {
+          userId,
+          deletedAt: null,
+          type: "INCOME",
           transactionDate: { gte: monthRange.start, lt: monthRange.end },
         },
         _sum: { amount: true },
@@ -401,6 +410,7 @@ export async function getFinanceSnapshot(
     monthLabel: monthLabel.charAt(0).toLocaleUpperCase("id-ID") + monthLabel.slice(1),
     availableBalance: availableBalance.toString(),
     monthlyExpense: (monthlyExpense._sum.amount ?? BigInt(0)).toString(),
+    monthlyIncome: (monthlyIncome._sum.amount ?? BigInt(0)).toString(),
     accounts: accountDtos,
     categories,
   };

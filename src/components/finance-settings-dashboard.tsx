@@ -12,13 +12,9 @@ import {
 } from "lucide-react";
 import { AccountRenameSheet } from "@/components/account-rename-sheet";
 import { PageHeader } from "@/components/page-header";
-import { useMockFinance } from "@/components/mock-finance-provider";
+import { useFinance } from "@/components/finance-provider";
 import { accountTypeLabels } from "@/lib/accounts";
-import {
-  expenseCategories,
-  formatCurrency,
-  incomeCategories,
-} from "@/lib/finance";
+import { formatSignedCurrency } from "@/lib/finance";
 
 function CategoryList({ categories }: { categories: readonly string[] }) {
   return (
@@ -34,7 +30,7 @@ function CategoryList({ categories }: { categories: readonly string[] }) {
 }
 
 export function FinanceSettingsDashboard() {
-  const { accounts, renameAccount, transactions } = useMockFinance();
+  const { accounts, categories, renameAccount } = useFinance();
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState("");
   const editingAccount = accounts.find(({ id }) => id === editingAccountId);
@@ -53,7 +49,7 @@ export function FinanceSettingsDashboard() {
   function saveAccountName(id: string, name: string) {
     renameAccount(id, name);
     setEditingAccountId(null);
-    setSavedMessage("Nama akun berhasil diperbarui.");
+    setSavedMessage("Nama akun diperbarui untuk sesi ini.");
   }
 
   return (
@@ -81,28 +77,20 @@ export function FinanceSettingsDashboard() {
           <>
             <div className="account-total">
               <span>Saldo gabungan</span>
-              <strong>{formatCurrency(totalBalance)}</strong>
+              <strong>{formatSignedCurrency(totalBalance)}</strong>
             </div>
             <ul className="account-list" role="list">
-              {accounts.map((account) => {
-                const transactionCount = transactions.filter(
-                  ({ account: transactionAccount }) =>
-                    transactionAccount === account.name,
-                ).length;
-
-                return (
+              {accounts.map((account) => (
                   <li key={account.id}>
                     <span className="finance-row-icon" aria-hidden="true">
                       <WalletCards size={19} />
                     </span>
                     <div className="account-copy">
                       <strong>{account.name}</strong>
-                      <small>
-                        {accountTypeLabels[account.type]} · {transactionCount} transaksi
-                      </small>
+                      <small>{accountTypeLabels[account.type]}</small>
                     </div>
                     <div className="account-balance">
-                      <strong>{formatCurrency(account.currentBalance)}</strong>
+                      <strong>{formatSignedCurrency(account.currentBalance)}</strong>
                       <button
                         type="button"
                         onClick={() => setEditingAccountId(account.id)}
@@ -113,8 +101,7 @@ export function FinanceSettingsDashboard() {
                       </button>
                     </div>
                   </li>
-                );
-              })}
+              ))}
             </ul>
           </>
         ) : (
@@ -133,21 +120,29 @@ export function FinanceSettingsDashboard() {
         </div>
         <div className="category-group">
           <h3>Pengeluaran</h3>
-          <CategoryList categories={expenseCategories} />
+          <CategoryList
+            categories={categories
+              .filter(({ type }) => type === "EXPENSE")
+              .map(({ name }) => name)}
+          />
         </div>
         <div className="category-group">
           <h3>Pemasukan</h3>
-          <CategoryList categories={incomeCategories} />
+          <CategoryList
+            categories={categories
+              .filter(({ type }) => type === "INCOME")
+              .map(({ name }) => name)}
+          />
         </div>
       </section>
 
-      <section className="support-note finance-note" aria-label="Batas prototipe">
+      <section className="support-note finance-note" aria-label="Batas pengaturan">
         <CircleHelp aria-hidden="true" size={20} />
         <div>
-          <h2>Kategori masih tetap</h2>
+          <h2>Pengaturan masih terbatas</h2>
           <p>
-            Kategori bawaan belum bisa diubah sampai aturan kepemilikan dan
-            duplikat kategori ditetapkan.
+            Perubahan nama akun hanya berlaku sampai halaman dimuat ulang.
+            Kategori belum bisa diubah sampai aturan pengelolaannya ditetapkan.
           </p>
         </div>
       </section>

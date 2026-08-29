@@ -24,14 +24,23 @@ Finara will use TanStack Query v5 for mutable server state consumed by Client Co
 - Successful mutations update from an authoritative response or invalidate every affected query key. Finara will not optimistically recalculate authoritative balances or budget totals until rollback and reconciliation behavior is explicitly tested.
 - Query keys may contain an opaque session scope for client cache isolation, but the server never trusts a client-supplied user identifier for authorization.
 
-The current dummy-data prototype keeps its existing `useMockFinance` consumer interface and stores one atomic, session-scoped finance snapshot in the Query Client. This is a migration adapter, not the final API shape. Resource-specific queries and filters will be introduced with the first persisted backend slice.
+The first persisted slice now uses viewer-scoped resource keys for the monthly
+finance snapshot, transaction lists (including filters and cursors), and
+transaction details. The private Server Component layout fetches directly from
+the application services and dehydrates those values. Client query functions
+then read the same contracts through authenticated Route Handlers.
+
+Transaction create, edit, and soft-delete mutations wait for the affected
+snapshot and list invalidations before reporting success. Detail responses may
+be seeded from a mutation response, but authoritative summaries are never
+recalculated optimistically in the browser.
 
 ## Consequences
 
 - Changes made on one Finara route are immediately available to other routes without a full page reload.
 - Loading, error, mutation, retry, and later optimistic UI behavior have one established client-state mechanism.
 - Private cache data cannot survive logout or be recovered from browser storage.
-- The backend migration can replace the mock query source without rewriting every page component at once.
+- Transaction screens share API-backed cache entries without keeping a parallel mock source.
 - Cross-tab and cross-device changes are not pushed automatically. They require focus refetching, polling, or a later realtime transport.
 - If a future screen renders the same mutable value in both a Server Component and a query-owned Client Component, its revalidation strategy must update both or be redesigned around one owner.
 
@@ -43,7 +52,7 @@ The current dummy-data prototype keeps its existing `useMockFinance` consumer in
 
 ### React Context with component state
 
-This is the current prototype implementation. It is small, but it has no query lifecycle, invalidation semantics, or direct migration path to API-backed server state.
+This was the original prototype implementation. It is small, but it has no query lifecycle, invalidation semantics, or direct migration path to API-backed server state.
 
 ### Persisted browser cache
 

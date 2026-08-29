@@ -3,18 +3,22 @@
 import { useRef } from "react";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import { formatCurrency } from "@/lib/finance";
-import type { Transaction } from "@/lib/mock-data";
+import type { FinanceTransaction } from "@/lib/finance-query";
 import { useModalFocusTrap } from "./use-modal-focus-trap";
 
 type DeleteTransactionDialogProps = {
   onClose: () => void;
   onConfirm: () => void;
-  transaction: Transaction;
+  error?: string;
+  isDeleting?: boolean;
+  transaction: FinanceTransaction;
 };
 
 export function DeleteTransactionDialog({
   onClose,
   onConfirm,
+  error,
+  isDeleting = false,
   transaction,
 }: DeleteTransactionDialogProps) {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -27,6 +31,7 @@ export function DeleteTransactionDialog({
       <button
         className="sheet-backdrop"
         type="button"
+        disabled={isDeleting}
         tabIndex={-1}
         aria-label="Batalkan penghapusan transaksi"
         onClick={onClose}
@@ -45,7 +50,12 @@ export function DeleteTransactionDialog({
             <p className="eyebrow">Konfirmasi</p>
             <h2 id="delete-title">Hapus transaksi?</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Tutup">
+          <button
+            type="button"
+            disabled={isDeleting}
+            onClick={onClose}
+            aria-label="Tutup"
+          >
             <X aria-hidden="true" size={19} />
           </button>
         </div>
@@ -66,19 +76,26 @@ export function DeleteTransactionDialog({
           Transaksi akan dihapus dari aktivitas dan seluruh ringkasan keuangan
           akan dihitung ulang.
         </p>
+        {error ? <p className="form-error" role="alert">{error}</p> : null}
 
         <div className="sheet-actions">
           <button
             ref={cancelButtonRef}
             className="secondary-button"
             type="button"
+            disabled={isDeleting}
             onClick={onClose}
           >
             Batal
           </button>
-          <button className="danger-button" type="button" onClick={onConfirm}>
+          <button
+            className="danger-button"
+            type="button"
+            disabled={isDeleting}
+            onClick={onConfirm}
+          >
             <Trash2 aria-hidden="true" size={17} />
-            Hapus transaksi
+            {isDeleting ? "Menghapusâ€¦" : "Hapus transaksi"}
           </button>
         </div>
       </section>

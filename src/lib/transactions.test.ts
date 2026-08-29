@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getMonthDateRange,
+  getDateKeyInTimeZone,
   getMonthKeyInTimeZone,
   parseCreateTransactionInput,
   parseListTransactionsInput,
@@ -122,5 +123,14 @@ describe("month date ranges", () => {
         "Asia/Jakarta",
       ),
     ).toBe("2026-09");
+  });
+
+  it("derives the Jakarta calendar date at the UTC day boundary", () => {
+    expect(
+      getDateKeyInTimeZone(
+        new Date("2026-08-28T18:00:00.000Z"),
+        "Asia/Jakarta",
+      ),
+    ).toBe("2026-08-29");
   });
 });

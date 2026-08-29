@@ -1,5 +1,3 @@
-import type { FinanceAccount } from "./accounts";
-
 export type Viewer = {
   id: string;
   name: string;
@@ -9,4 +7,4 @@ export type Viewer = {
 export type PrivateAppState =
   | { status: "signed-out" }
   | { status: "needs-onboarding"; viewer: Viewer }
-  | { status: "ready"; viewer: Viewer; accounts: FinanceAccount[] };
+  | { status: "ready"; viewer: Viewer };

@@ -1,8 +1,18 @@
+import { QueryClient, dehydrate } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import { PrototypePrivateApp } from "@/components/prototype-private-app";
+import { PrivateApp } from "@/components/private-app";
+import {
+  financeQueryKeys,
+  type HydratedTransactionData,
+} from "@/lib/finance-query";
+import { getMonthKeyInTimeZone } from "@/lib/transactions";
 import { getPrivateAppState } from "@/server/auth/private-app";
+import {
+  getFinanceSnapshot,
+  listTransactions,
+} from "@/server/transactions/service";
 
 export default async function MainLayout({ children }: { children: ReactNode }) {
   const state = await getPrivateAppState();
@@ -15,9 +25,34 @@ export default async function MainLayout({ children }: { children: ReactNode }) 
     redirect("/onboarding");
   }
 
+  const monthKey = getMonthKeyInTimeZone(new Date());
+  const [snapshot, transactionPage] = await Promise.all([
+    getFinanceSnapshot(state.viewer.id, monthKey),
+    listTransactions(state.viewer.id, {
+      cursor: undefined,
+      limit: 20,
+      month: undefined,
+      search: undefined,
+      type: undefined,
+    }),
+  ]);
+  const queryClient = new QueryClient();
+  queryClient.setQueryData(
+    financeQueryKeys.snapshot(state.viewer.id, monthKey),
+    snapshot,
+  );
+  queryClient.setQueryData<HydratedTransactionData>(
+    financeQueryKeys.transactionList(state.viewer.id, {}),
+    { pages: [transactionPage], pageParams: [null] },
+  );
+
   return (
-    <PrototypePrivateApp accounts={state.accounts} viewer={state.viewer}>
+    <PrivateApp
+      dehydratedState={dehydrate(queryClient)}
+      monthKey={monthKey}
+      viewer={state.viewer}
+    >
       {children}
-    </PrototypePrivateApp>
+    </PrivateApp>
   );
 }

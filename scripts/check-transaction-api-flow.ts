@@ -86,6 +86,7 @@ async function checkTransactionApiFlow() {
     assert.ok(account);
     assert.ok(category);
     assert.equal(snapshot.availableBalance, "321000");
+    assert.equal(snapshot.monthlyIncome, "0");
 
     const crossOriginMutation = await request("/api/transactions", {
       method: "POST",
@@ -193,6 +194,14 @@ async function checkTransactionApiFlow() {
     assert.equal(createResponse.status, 201);
     const created = await apiData<TransactionDto>(createResponse);
 
+    for (const path of ["/", "/activity"]) {
+      const pageResponse = await request(path, {
+        headers: { cookie: owner.cookie },
+      });
+      assert.equal(pageResponse.status, 200);
+      assert.match(await pageResponse.text(), /Makan ayam/);
+    }
+
     const retryResponse = await request("/api/transactions", {
       method: "POST",
       headers: {
@@ -281,6 +290,12 @@ async function checkTransactionApiFlow() {
     assert.equal(updateResponse.status, 200);
     assert.equal((await apiData<TransactionDto>(updateResponse)).amount, "30000");
 
+    const updatedHome = await request("/", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(updatedHome.status, 200);
+    assert.match(await updatedHome.text(), /Makan siang/);
+
     const changedSnapshot = await apiData<FinanceSnapshotDto>(
       await request("/api/finance/snapshot?month=2026-08", {
         headers: { cookie: owner.cookie },
@@ -288,6 +303,7 @@ async function checkTransactionApiFlow() {
     );
     assert.equal(changedSnapshot.availableBalance, "291000");
     assert.equal(changedSnapshot.monthlyExpense, "30000");
+    assert.equal(changedSnapshot.monthlyIncome, "0");
 
     const deleteResponse = await request(`/api/transactions/${created.id}`, {
       method: "DELETE",
@@ -310,6 +326,13 @@ async function checkTransactionApiFlow() {
     );
     assert.equal(restoredSnapshot.availableBalance, "321000");
     assert.equal(restoredSnapshot.monthlyExpense, "0");
+    assert.equal(restoredSnapshot.monthlyIncome, "0");
+
+    const restoredHome = await request("/", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(restoredHome.status, 200);
+    assert.doesNotMatch(await restoredHome.text(), /Makan siang/);
   } finally {
     if (userIds.length > 0) {
       await db.transaction.deleteMany({ where: { userId: { in: userIds } } });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, Pencil, Plus } from "lucide-react";
+import { Check, CircleHelp, Pencil, Plus } from "lucide-react";
 import {
   calculateBudgetOverview,
   expenseCategories,
@@ -13,7 +13,8 @@ import {
   BudgetAllocationSheet,
   type BudgetAllocationDraft,
 } from "./budget-allocation-sheet";
-import { useMockFinance } from "./mock-finance-provider";
+import { useFinance, useTransactionList } from "./finance-provider";
+import { PageHeader } from "./page-header";
 
 function getRemainingCopy(budget: BudgetProgress): string {
   if (budget.status === "over") {
@@ -46,13 +47,29 @@ function getBudgetInsight(budgets: readonly BudgetProgress[]): string {
 }
 
 export function BudgetDashboard() {
-  const { budgets, saveBudget, summary, transactions } = useMockFinance();
+  const { budgets, saveBudget, summary } = useFinance();
+  const transactionFilters = useMemo(
+    () => ({ month: summary.monthKey }),
+    [summary.monthKey],
+  );
+  const transactionQuery = useTransactionList(transactionFilters);
+  const {
+    fetchNextPage,
+    hasNextPage,
+    isError: hasTransactionError,
+    isFetchingNextPage,
+  } = transactionQuery;
   const [draft, setDraft] = useState<BudgetAllocationDraft | null>(null);
   const [savedMessage, setSavedMessage] = useState("");
   const savingRef = useRef(false);
   const overview = useMemo(
-    () => calculateBudgetOverview(budgets, transactions, summary.monthKey),
-    [budgets, summary.monthKey, transactions],
+    () =>
+      calculateBudgetOverview(
+        budgets,
+        transactionQuery.transactions,
+        summary.monthKey,
+      ),
+    [budgets, summary.monthKey, transactionQuery.transactions],
   );
   const availableCategories = useMemo(
     () => {
@@ -72,6 +89,21 @@ export function BudgetDashboard() {
     const timeout = window.setTimeout(() => setSavedMessage(""), 3200);
     return () => window.clearTimeout(timeout);
   }, [savedMessage]);
+
+  useEffect(() => {
+    if (
+      hasNextPage &&
+      !isFetchingNextPage &&
+      !hasTransactionError
+    ) {
+      void fetchNextPage();
+    }
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    hasTransactionError,
+    isFetchingNextPage,
+  ]);
 
   function startCreate() {
     const category = availableCategories[0];
@@ -105,9 +137,52 @@ export function BudgetDashboard() {
   const summaryIsOver = overview.remaining < 0;
   const summaryLabel = summaryIsOver ? "Melebihi anggaran" : "Sisa anggaran";
   const summaryValue = Math.abs(overview.remaining);
+  const pageHeader = (
+    <PageHeader
+      eyebrow={summary.monthLabel}
+      title="Anggaran"
+      description="Atur batas per kategori dan lihat pemakaiannya."
+    />
+  );
+
+  if (hasTransactionError) {
+    return (
+      <main className="page page-enter">
+        {pageHeader}
+        <section className="empty-state" role="alert">
+          <h2>Pengeluaran belum dapat dimuat</h2>
+          <p>Periksa koneksi lalu coba lagi.</p>
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => transactionQuery.refetch()}
+          >
+            Coba lagi
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  if (
+    transactionQuery.isPending ||
+    isFetchingNextPage ||
+    hasNextPage
+  ) {
+    return (
+      <main className="page page-enter">
+        {pageHeader}
+        <section className="empty-state" role="status" aria-live="polite">
+          <h2>Memuat pengeluaran bulan ini</h2>
+          <p>Mohon tunggu sebentar.</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
-    <>
+    <main className="page page-enter">
+      {pageHeader}
       <section className="budget-summary" aria-labelledby="budget-summary-title">
         <div>
           <p id="budget-summary-title">{summaryLabel}</p>
@@ -209,6 +284,17 @@ export function BudgetDashboard() {
         <p>{getBudgetInsight(overview.budgets)}</p>
       </aside>
 
+      <aside className="support-note finance-note" aria-label="Batas penyimpanan anggaran">
+        <CircleHelp aria-hidden="true" size={20} />
+        <div>
+          <h2>Penyimpanan anggaran segera menyusul</h2>
+          <p>
+            Anggaran saat ini hanya berlaku selama sesi ini dan akan diatur
+            ulang setelah halaman dimuat ulang.
+          </p>
+        </div>
+      </aside>
+
       {draft ? (
         <BudgetAllocationSheet
           availableCategories={draft.id ? [draft.category] : availableCategories}
@@ -224,6 +310,6 @@ export function BudgetDashboard() {
           <Check aria-hidden="true" size={17} />{savedMessage}
         </div>
       ) : null}
-    </>
+    </main>
   );
 }

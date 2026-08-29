@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/finance";
-import type { Transaction } from "@/lib/mock-data";
+import type { FinanceTransaction } from "@/lib/finance-query";
 
 const categoryIcons: Record<string, LucideIcon> = {
   "Food & Drink": Coffee,
@@ -24,7 +24,11 @@ const categoryIcons: Record<string, LucideIcon> = {
   Other: ArrowUpRight,
 };
 
-export function TransactionRow({ transaction }: { transaction: Transaction }) {
+export function TransactionRow({
+  transaction,
+}: {
+  transaction: FinanceTransaction;
+}) {
   const Icon = categoryIcons[transaction.category] ?? ArrowUpRight;
   const isExpense = transaction.type === "EXPENSE";
   const content = (

@@ -57,13 +57,13 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 - [x] Task 9: Add the accepted transaction schema, migration, constraints, and database integration checks.
 - [x] Task 10: Add typed, authenticated transaction list/create/detail/update/delete contracts and application services.
-- [ ] Task 11: Hydrate TanStack Query from Server Components and replace prototype transaction list/create state.
-- [ ] Task 12: Persist edit and soft delete, then invalidate all affected authoritative query resources.
+- [x] Task 11: Hydrate TanStack Query from Server Components and replace prototype transaction list/create state.
+- [x] Task 12: Persist edit and soft delete, then invalidate all affected authoritative query resources.
 
 ### Checkpoint: Complete
 
-- [ ] Creating a transaction updates affected pages without a browser reload.
-- [ ] PostgreSQL remains authoritative and every financial operation is user-scoped on the server.
+- [x] Creating a transaction updates affected pages without a browser reload.
+- [x] PostgreSQL remains authoritative and every financial operation is user-scoped on the server.
 
 ## Risks and mitigations
 
@@ -92,3 +92,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Migrations `20260828150239_add_transactions` and `20260828150500_add_transaction_checks` add exact positive-IDR transactions, database-enforced same-user account/category references, category/type compatibility, per-user create idempotency, optional Jakarta local time, and soft deletion. `npm run db:test:transactions` verifies precision and every integrity boundary without leaving synthetic rows.
 - Transaction Route Handlers expose precise string-money DTOs for snapshot, cursor-paginated list, create, detail, edit, and soft delete. Service and HTTP checks cover malformed/oversized input, non-JSON and cross-origin mutations, invalid references, mismatched category types, cross-user access, idempotent retry/conflict, summary changes, and tombstone exclusion.
 - The development Prisma singleton now replaces a generated client that predates the `Transaction` delegate. This keeps `next dev` hot reload usable after an additive schema generation while preserving the normal single-client behavior.
+- The private app now server-prefetches viewer-scoped snapshot and transaction-list queries, dehydrates string-money DTOs, and uses authenticated browser query functions after hydration. Successful create, edit, and soft-delete mutations await snapshot, list, and affected-detail invalidation before the UI reports success.
+- Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, and finance settings now read persisted account/category/transaction projections; the UI explicitly labels account rename and budgets as session-only until their own persisted slices are implemented.
+- `npm test` passes 67 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flow pass, including authenticated SSR hydration on Home and Activity, cross-user denial, idempotent create, edit, soft delete, and summary reconciliation.
+- Chrome DevTools MCP was not available in this environment, so the no-reload behavior is covered by focused query invalidation tests and the production HTTP hydration smoke rather than an automated real-browser interaction.

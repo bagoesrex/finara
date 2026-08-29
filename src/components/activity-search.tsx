@@ -1,18 +1,15 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
-import { filterTransactions, groupTransactionsByDate } from "@/lib/finance";
-import { useMockFinance } from "./mock-finance-provider";
+import { groupTransactionsByDate } from "@/lib/finance";
+import { getDateKeyInTimeZone } from "@/lib/transactions";
+import { PageHeader } from "./page-header";
+import { useFinance, useTransactionList } from "./finance-provider";
 import { TransactionRow } from "./transaction-row";
 
-const dateLabels: Record<string, string> = {
-  "2026-08-25": "Hari ini",
-  "2026-08-24": "Kemarin",
-};
-
-function formatGroupDate(date: string): string {
-  if (dateLabels[date]) return dateLabels[date];
+function formatGroupDate(date: string, today: string): string {
+  if (date === today) return "Hari ini";
 
   return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
@@ -21,12 +18,15 @@ function formatGroupDate(date: string): string {
 }
 
 export function ActivitySearch() {
-  const { transactions } = useMockFinance();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
-  const groups = groupTransactionsByDate(
-    filterTransactions(transactions, deferredQuery),
+  const filters = useMemo(
+    () => ({ search: deferredQuery || undefined }),
+    [deferredQuery],
   );
+  const transactionQuery = useTransactionList(filters);
+  const groups = groupTransactionsByDate(transactionQuery.transactions);
+  const today = getDateKeyInTimeZone(new Date());
 
   return (
     <section aria-label="Daftar transaksi">
@@ -49,10 +49,31 @@ export function ActivitySearch() {
         ) : null}
       </div>
 
-      <div className="activity-results" aria-live="polite">
-        {groups.length ? groups.map((group) => (
+      <div
+        className="activity-results"
+        aria-busy={transactionQuery.isPending || transactionQuery.isFetchingNextPage}
+        aria-live="polite"
+      >
+        {transactionQuery.isPending ? (
+          <div className="empty-state" role="status">
+            <h2>Memuat transaksi</h2>
+            <p>Mohon tunggu sebentar.</p>
+          </div>
+        ) : transactionQuery.isError ? (
+          <div className="empty-state" role="alert">
+            <h2>Aktivitas belum dapat dimuat</h2>
+            <p>Periksa koneksi lalu coba lagi.</p>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => transactionQuery.refetch()}
+            >
+              Coba lagi
+            </button>
+          </div>
+        ) : groups.length ? groups.map((group) => (
           <section className="transaction-group" key={group.date}>
-            <h2>{formatGroupDate(group.date)}</h2>
+            <h2>{formatGroupDate(group.date, today)}</h2>
             <div>
               {group.transactions.map((transaction) => (
                 <TransactionRow key={transaction.id} transaction={transaction} />
@@ -62,11 +83,40 @@ export function ActivitySearch() {
         )) : (
           <div className="empty-state">
             <Search aria-hidden="true" size={22} />
-            <h2>Tidak ada hasil</h2>
-            <p>Coba kata kunci lain atau periksa ejaannya.</p>
+            <h2>{deferredQuery ? "Tidak ada hasil" : "Belum ada transaksi"}</h2>
+            <p>
+              {deferredQuery
+                ? "Coba kata kunci lain atau periksa ejaannya."
+                : "Transaksi yang disimpan akan muncul di sini."}
+            </p>
           </div>
         )}
+        {transactionQuery.hasNextPage ? (
+          <button
+            className="secondary-button"
+            type="button"
+            disabled={transactionQuery.isFetchingNextPage}
+            onClick={() => transactionQuery.fetchNextPage()}
+          >
+            {transactionQuery.isFetchingNextPage ? "Memuatâ€¦" : "Muat lainnya"}
+          </button>
+        ) : null}
       </div>
     </section>
+  );
+}
+
+export function ActivityDashboard() {
+  const { summary } = useFinance();
+
+  return (
+    <main className="page page-enter">
+      <PageHeader
+        eyebrow={summary.monthLabel}
+        title="Aktivitas"
+        description="Semua pemasukan dan pengeluaranmu."
+      />
+      <ActivitySearch />
+    </main>
   );
 }

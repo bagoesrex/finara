@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
-import { useMockFinance } from "@/components/mock-finance-provider";
+import { useFinance } from "@/components/finance-provider";
 import { useViewer } from "@/components/viewer-provider";
 import { authClient } from "@/lib/auth-client";
 import { getInitials } from "@/lib/auth";
@@ -20,7 +20,7 @@ import { PageHeader } from "@/components/page-header";
 
 export function ProfileDashboard() {
   const viewer = useViewer();
-  const { accounts } = useMockFinance();
+  const { accounts } = useFinance();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState("");

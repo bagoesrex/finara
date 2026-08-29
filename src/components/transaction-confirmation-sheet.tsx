@@ -2,16 +2,10 @@
 
 import { useRef } from "react";
 import { Check, X } from "lucide-react";
-import {
-  categoriesForType,
-  changeDraftType,
-  formatCurrency,
-  type TransactionType,
-} from "@/lib/finance";
-import {
-  useMockFinance,
-  type TransactionDraft,
-} from "./mock-finance-provider";
+import { useFinance } from "@/components/finance-provider";
+import { formatCurrency } from "@/lib/finance";
+import type { TransactionDraft } from "@/lib/finance-query";
+import type { TransactionType } from "@/lib/transactions";
 import { useModalFocusTrap } from "./use-modal-focus-trap";
 
 type SheetVariant = "create" | "edit";
@@ -21,13 +15,13 @@ const sheetCopy: Record<
   { caption: string; eyebrow: string; saveLabel: string; title: string }
 > = {
   create: {
-    caption: "Data sementara akan hilang saat halaman dimuat ulang.",
+    caption: "Data akan disimpan setelah semua detail sesuai.",
     eyebrow: "Periksa dulu",
     saveLabel: "Simpan transaksi",
     title: "Tinjau transaksi",
   },
   edit: {
-    caption: "Perubahan hanya berlaku selama sesi prototipe ini.",
+    caption: "Ringkasan keuangan dihitung ulang setelah disimpan.",
     eyebrow: "Perbarui data",
     saveLabel: "Simpan perubahan",
     title: "Edit transaksi",
@@ -36,6 +30,8 @@ const sheetCopy: Record<
 
 type TransactionConfirmationSheetProps = {
   draft: TransactionDraft;
+  error?: string;
+  isSaving?: boolean;
   onChange: (draft: TransactionDraft) => void;
   onClose: () => void;
   onSave: () => void;
@@ -44,6 +40,8 @@ type TransactionConfirmationSheetProps = {
 
 export function TransactionConfirmationSheet({
   draft,
+  error,
+  isSaving = false,
   onChange,
   onClose,
   onSave,
@@ -51,21 +49,44 @@ export function TransactionConfirmationSheet({
 }: TransactionConfirmationSheetProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
-  const { accounts } = useMockFinance();
-  const isValid = draft.amount > 0 && draft.description.trim().length > 0;
+  const { accounts, categories } = useFinance();
+  const isValid =
+    Number.isSafeInteger(draft.amount) &&
+    draft.amount > 0 &&
+    draft.description.trim().length > 0 &&
+    Boolean(draft.accountId && draft.categoryId);
   const copy = sheetCopy[variant];
 
   useModalFocusTrap(sheetRef, closeButtonRef, onClose);
 
   function updateType(type: TransactionType) {
-    onChange({ ...changeDraftType(draft, type), account: draft.account });
+    const availableCategories = categories.filter(
+      (category) => category.type === type,
+    );
+    const category =
+      availableCategories.find((item) => item.name === draft.category) ??
+      availableCategories.find((item) => item.name === "Other") ??
+      availableCategories[0];
+    if (!category) return;
+
+    onChange({
+      ...draft,
+      type,
+      categoryId: category.id,
+      category: category.name,
+    });
   }
+
+  const availableCategories = categories.filter(
+    (category) => category.type === draft.type,
+  );
 
   return (
     <div className="sheet-layer" role="presentation">
       <button
         className="sheet-backdrop"
         type="button"
+        disabled={isSaving}
         tabIndex={-1}
         aria-label="Tutup tinjauan transaksi"
         onClick={onClose}
@@ -84,7 +105,13 @@ export function TransactionConfirmationSheet({
             <p className="eyebrow">{copy.eyebrow}</p>
             <h2 id="confirmation-title">{copy.title}</h2>
           </div>
-          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Tutup">
+          <button
+            ref={closeButtonRef}
+            type="button"
+            disabled={isSaving}
+            onClick={onClose}
+            aria-label="Tutup"
+          >
             <X aria-hidden="true" size={19} />
           </button>
         </div>
@@ -96,10 +123,11 @@ export function TransactionConfirmationSheet({
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            if (isValid) onSave();
+            if (isValid && !isSaving) onSave();
           }}
+          aria-busy={isSaving}
         >
-          <fieldset className="type-selector">
+          <fieldset className="type-selector" disabled={isSaving}>
             <legend>Jenis transaksi</legend>
             <div>
               <button
@@ -129,6 +157,7 @@ export function TransactionConfirmationSheet({
                 value={draft.description}
                 onChange={(event) => onChange({ ...draft, description: event.target.value })}
                 autoComplete="off"
+                disabled={isSaving}
                 required
               />
             </label>
@@ -143,6 +172,7 @@ export function TransactionConfirmationSheet({
                 value={draft.amount || ""}
                 onChange={(event) => onChange({ ...draft, amount: event.target.valueAsNumber || 0 })}
                 autoComplete="off"
+                disabled={isSaving}
                 required
               />
             </label>
@@ -154,6 +184,7 @@ export function TransactionConfirmationSheet({
                 value={draft.date}
                 onChange={(event) => onChange({ ...draft, date: event.target.value })}
                 autoComplete="off"
+                disabled={isSaving}
                 required
               />
             </label>
@@ -161,11 +192,23 @@ export function TransactionConfirmationSheet({
               <span>Kategori</span>
               <select
                 name="category"
-                value={draft.category}
-                onChange={(event) => onChange({ ...draft, category: event.target.value })}
+                disabled={isSaving}
+                value={draft.categoryId}
+                onChange={(event) => {
+                  const category = availableCategories.find(
+                    (item) => item.id === event.target.value,
+                  );
+                  if (category) {
+                    onChange({
+                      ...draft,
+                      categoryId: category.id,
+                      category: category.name,
+                    });
+                  }
+                }}
               >
-                {categoriesForType(draft.type).map((category) => (
-                  <option key={category} value={category}>{category}</option>
+                {availableCategories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
                 ))}
               </select>
             </label>
@@ -173,33 +216,53 @@ export function TransactionConfirmationSheet({
               <span>Akun</span>
               <select
                 name="account"
-                value={draft.account}
-                onChange={(event) => onChange({ ...draft, account: event.target.value })}
+                disabled={isSaving}
+                value={draft.accountId}
+                onChange={(event) => {
+                  const account = accounts.find(
+                    (item) => item.id === event.target.value,
+                  );
+                  if (account) {
+                    onChange({
+                      ...draft,
+                      accountId: account.id,
+                      account: account.name,
+                    });
+                  }
+                }}
               >
                 {accounts.map((account) => (
-                  <option key={account.id} value={account.name}>{account.name}</option>
+                  <option key={account.id} value={account.id}>{account.name}</option>
                 ))}
               </select>
             </label>
-            {draft.time ? (
-              <label className="preview-field preview-field--wide">
-                <span>Waktu</span>
-                <input
-                  name="time"
-                  type="time"
-                  value={draft.time}
-                  onChange={(event) => onChange({ ...draft, time: event.target.value })}
-                  autoComplete="off"
-                />
-              </label>
-            ) : null}
+            <label className="preview-field preview-field--wide">
+              <span>Waktu (opsional)</span>
+              <input
+                name="time"
+                type="time"
+                value={draft.time ?? ""}
+                onChange={(event) => onChange({ ...draft, time: event.target.value })}
+                autoComplete="off"
+                disabled={isSaving}
+              />
+            </label>
           </div>
 
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+
           <div className="sheet-actions">
-            <button className="secondary-button" type="button" onClick={onClose}>Batal</button>
-            <button className="primary-button" type="submit" disabled={!isValid}>
+            <button
+              className="secondary-button"
+              type="button"
+              disabled={isSaving}
+              onClick={onClose}
+            >
+              Batal
+            </button>
+            <button className="primary-button" type="submit" disabled={!isValid || isSaving}>
               <Check aria-hidden="true" size={18} />
-              {copy.saveLabel}
+              {isSaving ? "Menyimpanâ€¦" : copy.saveLabel}
             </button>
           </div>
         </form>

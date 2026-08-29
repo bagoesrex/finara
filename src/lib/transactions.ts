@@ -37,6 +37,7 @@ export type FinanceSnapshotDto = {
   monthLabel: string;
   availableBalance: string;
   monthlyExpense: string;
+  monthlyIncome: string;
   accounts: Array<{
     id: string;
     name: string;
@@ -49,6 +50,59 @@ export type FinanceSnapshotDto = {
     type: TransactionType;
   }>;
 };
+
+export const transactionDtoSchema = z
+  .object({
+    id: z.uuid(),
+    accountId: z.uuid(),
+    accountName: z.string(),
+    categoryId: z.uuid(),
+    categoryName: z.string(),
+    type: z.enum(TRANSACTION_TYPES),
+    amount: z.string().regex(/^\d+$/),
+    description: z.string(),
+    transactionDate: z.string().refine(isValidCalendarDate),
+    transactionTime: z.string().regex(localTimePattern).nullable(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
+  })
+  .strict();
+
+export const transactionPageDtoSchema = z
+  .object({
+    items: z.array(transactionDtoSchema),
+    nextCursor: z.uuid().nullable(),
+  })
+  .strict();
+
+export const financeSnapshotDtoSchema = z
+  .object({
+    monthKey: z.string().regex(monthKeyPattern),
+    monthLabel: z.string(),
+    availableBalance: z.string().regex(/^-?\d+$/),
+    monthlyExpense: z.string().regex(/^\d+$/),
+    monthlyIncome: z.string().regex(/^\d+$/),
+    accounts: z.array(
+      z
+        .object({
+          id: z.uuid(),
+          name: z.string(),
+          type: z.enum(["CASH", "BANK", "EWALLET"]),
+          currentBalance: z.string().regex(/^-?\d+$/),
+        })
+        .strict(),
+    ),
+    categories: z.array(
+      z
+        .object({
+          id: z.uuid(),
+          name: z.string(),
+          type: z.enum(TRANSACTION_TYPES),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
 
 type ContractFieldErrors = Record<string, string>;
 
@@ -232,6 +286,27 @@ export function getMonthKeyInTimeZone(
   }
 
   return `${year}-${month}`;
+}
+
+export function getDateKeyInTimeZone(
+  date: Date,
+  timeZone = "Asia/Jakarta",
+) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone,
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  if (!year || !month || !day) {
+    throw new RangeError("Unable to derive the calendar date.");
+  }
+
+  return `${year}-${month}-${day}`;
 }
 
 export function isTransactionId(value: string) {

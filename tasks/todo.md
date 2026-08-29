@@ -48,10 +48,10 @@
   - Acceptance: paginated list, detail, create, edit, and delete use stable DTOs; every operation derives owner identity from the server session.
   - Verify: contract/service tests cover invalid input, unauthenticated access, cross-user access, incompatible category types, and generic errors.
 
-- [ ] Hydrate TanStack Query and persist transaction create/list.
+- [x] Hydrate TanStack Query and persist transaction create/list.
   - Acceptance: initial private-app data is server-prefetched; a confirmed transaction is persisted once and appears on Home and Activity without browser reload.
   - Verify: focused query/mutation tests plus runtime create and cross-page navigation smoke.
 
-- [ ] Persist transaction edit and soft delete.
+- [x] Persist transaction edit and soft delete.
   - Acceptance: detail edits and confirmed deletion update lists, balances, summaries, and budget-derived views through targeted invalidation; deleted rows remain excluded from normal reads.
   - Verify: service/API/query tests, runtime edit/delete smoke, lint, typecheck, and production build.

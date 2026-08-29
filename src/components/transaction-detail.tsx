@@ -13,12 +13,17 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/finance";
-import { DeleteTransactionDialog } from "./delete-transaction-dialog";
+
 import {
-  useMockFinance,
+  useFinance,
+  useTransactionDetail,
+} from "@/components/finance-provider";
+import { formatCurrency } from "@/lib/finance";
+import {
+  FinanceRequestError,
   type TransactionDraft,
-} from "./mock-finance-provider";
+} from "@/lib/finance-query";
+import { DeleteTransactionDialog } from "./delete-transaction-dialog";
 import { TransactionConfirmationSheet } from "./transaction-confirmation-sheet";
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", {
@@ -42,7 +47,7 @@ function MissingTransaction({ deletedName }: { deletedName: string }) {
       <p>
         {wasDeleted
           ? `${deletedName} sudah dihapus dan ringkasan keuangan telah diperbarui.`
-          : "Tautan ini mungkin sudah tidak berlaku atau data dummy telah dimuat ulang."}
+          : "Tautan ini mungkin sudah tidak berlaku atau transaksinya telah dihapus."}
       </p>
       <Link className="primary-button" href="/activity">
         Kembali ke Aktivitas
@@ -52,19 +57,25 @@ function MissingTransaction({ deletedName }: { deletedName: string }) {
 }
 
 export function TransactionDetail({ id }: { id: string }) {
-  const { deleteTransaction, transactions, updateTransaction } = useMockFinance();
-  const transaction = transactions.find((item) => item.id === id);
+  const { deleteTransaction, updateTransaction } = useFinance();
+  const transactionQuery = useTransactionDetail(id);
+  const transaction = transactionQuery.data;
   const [editDraft, setEditDraft] = useState<TransactionDraft | null>(null);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
   const [deletedName, setDeletedName] = useState("");
   const savingRef = useRef(false);
   const deletingRef = useRef(false);
-  const closeEdit = useCallback(() => setEditDraft(null), [setEditDraft]);
+  const closeEdit = useCallback(() => {
+    if (!savingRef.current) setEditDraft(null);
+  }, []);
   const closeDelete = useCallback(() => {
-    deletingRef.current = false;
-    setDeleteOpen(false);
-  }, [setDeleteOpen]);
+    if (!deletingRef.current) setDeleteOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!savedMessage) return;
@@ -72,9 +83,41 @@ export function TransactionDetail({ id }: { id: string }) {
     return () => window.clearTimeout(timeout);
   }, [savedMessage]);
 
-  if (!transaction) return <MissingTransaction deletedName={deletedName} />;
-  const currentTransaction = transaction;
+  if (deletedName) return <MissingTransaction deletedName={deletedName} />;
 
+  if (transactionQuery.isPending) {
+    return (
+      <main className="empty-page page-enter" role="status" aria-live="polite">
+        <h1>Memuat transaksi</h1>
+        <p>Mohon tunggu sebentar.</p>
+      </main>
+    );
+  }
+
+  if (
+    transactionQuery.error instanceof FinanceRequestError &&
+    transactionQuery.error.status === 404
+  ) {
+    return <MissingTransaction deletedName="" />;
+  }
+
+  if (transactionQuery.isError || !transaction) {
+    return (
+      <main className="empty-page page-enter" role="alert">
+        <h1>Transaksi belum dapat dimuat</h1>
+        <p>Periksa koneksi lalu coba lagi.</p>
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => transactionQuery.refetch()}
+        >
+          Coba lagi
+        </button>
+      </main>
+    );
+  }
+
+  const currentTransaction = transaction;
   const formattedDate = dateFormatter.format(
     new Date(`${currentTransaction.date}T00:00:00Z`),
   );
@@ -82,9 +125,12 @@ export function TransactionDetail({ id }: { id: string }) {
   function startEdit() {
     savingRef.current = false;
     setSavedMessage("");
+    setEditError("");
     setEditDraft({
+      accountId: currentTransaction.accountId,
       account: currentTransaction.account,
       amount: currentTransaction.amount,
+      categoryId: currentTransaction.categoryId,
       category: currentTransaction.category,
       date: currentTransaction.date,
       description: currentTransaction.description,
@@ -93,27 +139,45 @@ export function TransactionDetail({ id }: { id: string }) {
     });
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     if (!editDraft || savingRef.current) return;
 
     savingRef.current = true;
-    updateTransaction({
-      ...currentTransaction,
-      ...editDraft,
-      description: editDraft.description.trim(),
-      time: editDraft.time || currentTransaction.time,
-    });
-    setEditDraft(null);
-    setSavedMessage("Perubahan transaksi berhasil disimpan.");
+    setIsSaving(true);
+    setEditError("");
+
+    try {
+      const updatedTransaction = await updateTransaction(id, {
+        ...editDraft,
+        description: editDraft.description.trim(),
+      });
+      savingRef.current = false;
+      setIsSaving(false);
+      setEditDraft(null);
+      setSavedMessage(`${updatedTransaction.description} berhasil diperbarui.`);
+    } catch {
+      savingRef.current = false;
+      setIsSaving(false);
+      setEditError("Perubahan belum tersimpan. Coba lagi.");
+    }
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (deletingRef.current) return;
 
     deletingRef.current = true;
-    setDeletedName(currentTransaction.description);
-    deleteTransaction(currentTransaction.id);
-    setDeleteOpen(false);
+    setIsDeleting(true);
+    setDeleteError("");
+
+    try {
+      await deleteTransaction(currentTransaction.id);
+      setDeletedName(currentTransaction.description);
+      setDeleteOpen(false);
+    } catch {
+      deletingRef.current = false;
+      setIsDeleting(false);
+      setDeleteError("Transaksi belum terhapus. Coba lagi.");
+    }
   }
 
   return (
@@ -137,7 +201,10 @@ export function TransactionDetail({ id }: { id: string }) {
       <dl className="detail-list">
         <div>
           <dt><CalendarDays aria-hidden="true" size={19} />Tanggal</dt>
-          <dd>{formattedDate}, {currentTransaction.time}</dd>
+          <dd>
+            {formattedDate}
+            {currentTransaction.time ? `, ${currentTransaction.time}` : ""}
+          </dd>
         </div>
         <div>
           <dt><Tag aria-hidden="true" size={19} />Kategori</dt>
@@ -149,11 +216,6 @@ export function TransactionDetail({ id }: { id: string }) {
         </div>
       </dl>
 
-      <section className="detail-note">
-        <h2>Catatan</h2>
-        <p>{currentTransaction.note || "—"}</p>
-      </section>
-
       <div className="detail-actions" aria-label="Tindakan transaksi">
         <button className="secondary-button" type="button" onClick={startEdit}>
           <Pencil aria-hidden="true" size={17} />Edit
@@ -163,6 +225,8 @@ export function TransactionDetail({ id }: { id: string }) {
           type="button"
           onClick={() => {
             deletingRef.current = false;
+            setIsDeleting(false);
+            setDeleteError("");
             setSavedMessage("");
             setDeleteOpen(true);
           }}
@@ -171,11 +235,11 @@ export function TransactionDetail({ id }: { id: string }) {
         </button>
       </div>
 
-      <p className="prototype-note">Data ini masih berupa contoh dan belum tersimpan permanen.</p>
-
       {editDraft ? (
         <TransactionConfirmationSheet
           draft={editDraft}
+          error={editError}
+          isSaving={isSaving}
           onChange={setEditDraft}
           onClose={closeEdit}
           onSave={saveEdit}
@@ -186,6 +250,8 @@ export function TransactionDetail({ id }: { id: string }) {
       {isDeleteOpen ? (
         <DeleteTransactionDialog
           transaction={currentTransaction}
+          error={deleteError}
+          isDeleting={isDeleting}
           onClose={closeDelete}
           onConfirm={confirmDelete}
         />

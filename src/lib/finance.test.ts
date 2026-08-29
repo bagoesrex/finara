@@ -7,6 +7,7 @@ import {
   filterTransactions,
   formatCompactCurrency,
   formatCurrency,
+  formatSignedCurrency,
   groupTransactionsByDate,
   parseTransactionInput,
   removeTransactionFromSummary,
@@ -45,6 +46,11 @@ describe("currency formatting", () => {
   it("uses Indonesian compact units", () => {
     expect(formatCompactCurrency(580_000)).toBe("Rp580 rb");
     expect(formatCompactCurrency(1_420_000)).toBe("Rp1,42 jt");
+  });
+
+  it("preserves a negative sign for signed balances", () => {
+    expect(formatSignedCurrency(-25_000)).toBe("−Rp25.000");
+    expect(formatSignedCurrency(25_000)).toBe("Rp25.000");
   });
 });
 

@@ -127,6 +127,7 @@ async function checkTransactionService() {
     const expenseSnapshot = await getFinanceSnapshot(owner.id, "2026-08");
     assert.equal(expenseSnapshot.availableBalance, "75000");
     assert.equal(expenseSnapshot.monthlyExpense, "25000");
+    assert.equal(expenseSnapshot.monthlyIncome, "0");
     assert.equal(expenseSnapshot.accounts[0]?.currentBalance, "75000");
 
     await expectError(
@@ -150,6 +151,7 @@ async function checkTransactionService() {
     const incomeSnapshot = await getFinanceSnapshot(owner.id, "2026-08");
     assert.equal(incomeSnapshot.availableBalance, "150000");
     assert.equal(incomeSnapshot.monthlyExpense, "0");
+    assert.equal(incomeSnapshot.monthlyIncome, "50000");
 
     await softDeleteTransaction(owner.id, created.id);
     await expectError(
@@ -164,6 +166,7 @@ async function checkTransactionService() {
     const deletedSnapshot = await getFinanceSnapshot(owner.id, "2026-08");
     assert.equal(deletedSnapshot.availableBalance, "100000");
     assert.equal(deletedSnapshot.monthlyExpense, "0");
+    assert.equal(deletedSnapshot.monthlyIncome, "0");
     assert.equal(
       (
         await listTransactions(owner.id, {

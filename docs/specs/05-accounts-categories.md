@@ -54,11 +54,18 @@ Account and category management is reached from Profile/Settings. The minimum us
 
 Destructive actions must explain the effect on existing transactions before confirmation. Historical transactions must never become inaccessible merely because their account or category is no longer active.
 
-### Frontend prototype boundary
+### Current frontend boundary
 
-The dummy-data frontend currently supports viewing account type and current balance, plus renaming an account. An in-session rename updates the account selector and existing dummy transaction references so the prototype remains understandable. Account balances also follow in-session transaction create, edit, and delete actions.
+Account type, current balance, transaction counts, and category options are now
+read from the authenticated PostgreSQL-backed finance snapshot. Account balances
+follow persisted transaction create, edit, and soft-delete operations through
+TanStack Query invalidation.
 
-Default categories are view-only until category ownership and lifecycle are decided. The prototype trims account names, limits them to 40 characters, and rejects case-insensitive duplicates as a temporary UI safety guard. These constraints do not settle the backend duplicate-name or case-sensitivity policy listed under open questions.
+Account rename remains an explicitly session-only UI operation until its server
+contract and duplicate-name policy are settled. Default categories are view-only
+until category ownership and lifecycle are decided. The UI trims account names,
+limits them to 40 characters, and rejects case-insensitive duplicates as a
+temporary safety guard; these constraints do not settle the backend policy.
 
 ## UI states
 
