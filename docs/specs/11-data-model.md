@@ -96,7 +96,7 @@ Minimum proposed responsibilities:
 ```text
 id
 userId
-categoryId?      // pending total-vs-category budget decision
+categoryId       // required user-owned EXPENSE category
 periodStart      // first Jakarta calendar day of month
 amount
 createdAt

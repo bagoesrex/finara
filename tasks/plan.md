@@ -67,16 +67,16 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 5: Persisted monthly category budgets
 
-- [ ] Task 13: Record category-only monthly Budget semantics and add the constrained Prisma model.
-- [ ] Task 14: Add precise Budget contracts and a server-side monthly calculation service.
-- [ ] Task 15: Expose authenticated Budget list/create/update Route Handlers with abuse-case checks.
-- [ ] Task 16: Hydrate the Budget route and replace session-only allocation state with TanStack Query mutations.
+- [x] Task 13: Record category-only monthly Budget semantics and add the constrained Prisma model.
+- [x] Task 14: Add precise Budget contracts and a server-side monthly calculation service.
+- [x] Task 15: Expose authenticated Budget list/create/update Route Handlers with abuse-case checks.
+- [x] Task 16: Hydrate the Budget route and replace session-only allocation state with TanStack Query mutations.
 
 ### Checkpoint: Persisted Budget
 
-- [ ] Budget allocation and derived spending survive reloads and remain user-scoped.
-- [ ] Transaction changes invalidate Budget calculations without client-side financial reconciliation.
-- [ ] Focused tests, runtime flows, lint, type checking, and production build pass.
+- [x] Budget allocation and derived spending survive reloads and remain user-scoped.
+- [x] Transaction changes invalidate Budget calculations without client-side financial reconciliation.
+- [x] Focused tests, runtime flows, lint, type checking, and production build pass.
 
 ## Risks and mitigations
 
@@ -107,6 +107,8 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Transaction Route Handlers expose precise string-money DTOs for snapshot, cursor-paginated list, create, detail, edit, and soft delete. Service and HTTP checks cover malformed/oversized input, non-JSON and cross-origin mutations, invalid references, mismatched category types, cross-user access, idempotent retry/conflict, summary changes, and tombstone exclusion.
 - The development Prisma singleton now replaces a generated client that predates the `Transaction` delegate. This keeps `next dev` hot reload usable after an additive schema generation while preserving the normal single-client behavior.
 - The private app now server-prefetches viewer-scoped snapshot and transaction-list queries, dehydrates string-money DTOs, and uses authenticated browser query functions after hydration. Successful create, edit, and soft-delete mutations await snapshot, list, and affected-detail invalidation before the UI reports success.
-- Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, and finance settings now read persisted account/category/transaction projections; the UI explicitly labels account rename and budgets as session-only until their own persisted slices are implemented.
-- `npm test` passes 67 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flow pass, including authenticated SSR hydration on Home and Activity, cross-user denial, idempotent create, edit, soft delete, and summary reconciliation.
+- Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, finance settings, and Budget now read persisted projections. Account rename remains the explicitly labeled session-only finance operation.
+- Migration `20260829021840_add_budgets` adds positive exact-IDR category allocations, database-enforced same-user expense-category references, first-of-month periods, and per-user/category/month uniqueness. Schema and service checks cover precision, every constraint, idempotent create/conflict, cross-user denial, deleted and out-of-period transaction exclusion, derived totals, and each progress-status boundary.
+- Authenticated Budget Route Handlers expose monthly overview, create, and amount update contracts with precise string-money DTOs. The Budget Server Component preloads the viewer/month query, while successful Budget mutations and transaction changes await targeted TanStack Query invalidation before reporting success.
+- `npm test` passes 91 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flows pass, including authenticated SSR hydration on Home, Activity, and Budget; cross-user denial; sequential and concurrent idempotent create; transaction edit/soft delete; summary reconciliation; persisted Budget create/update calculations; duplicate-query rejection; and exact BIGINT rendering beyond JavaScript's safe-integer range.
 - Chrome DevTools MCP was not available in this environment, so the no-reload behavior is covered by focused query invalidation tests and the production HTTP hydration smoke rather than an automated real-browser interaction.

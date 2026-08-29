@@ -17,7 +17,7 @@ Define system boundaries that keep financial data authoritative, user-scoped, an
 - Zod for untrusted-boundary validation.
 - An LLM provider with structured output and tool calling.
 
-PostgreSQL, Prisma, Zod, and Better Auth are installed. The current persisted slice covers database-backed email/password sessions, first-account onboarding, user-owned default categories, and a server-derived opening balance on Home. Transaction, budget, and AI persistence remain future slices; an LLM provider is not selected or installed.
+PostgreSQL, Prisma, Zod, Better Auth, and TanStack Query are installed. The persisted application slice covers database-backed email/password sessions, first-account onboarding, user-owned default categories, transactions, server-derived balances and monthly summaries, and category Budgets with server-derived progress. AI orchestration remains a future slice; an LLM provider is not selected or installed.
 
 TanStack Query is accepted for mutable client server-state by [ADR 0002](../decisions/0002-tanstack-query-for-client-finance-state.md). It is a session-scoped UX cache, not an authorization boundary or source of financial truth.
 
