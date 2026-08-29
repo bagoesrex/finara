@@ -19,6 +19,7 @@
     "app:test:auth-flow": "node --conditions=react-server --import tsx scripts/check-auth-onboarding-flow.ts",
     "app:test:budget-api": "node --conditions=react-server --import tsx scripts/check-budget-api-flow.ts",
     "app:test:transaction-api": "node --conditions=react-server --import tsx scripts/check-transaction-api-flow.ts",
+    "ai:check:nvidia": "node --import tsx scripts/check-nvidia-inference.ts",
     "predev": "npm run db:generate",
     "dev": "next dev",
     "prebuild": "npm run db:generate",
