@@ -63,3 +63,15 @@
 - [x] Add authenticated Budget API and TanStack Query UI.
   - Acceptance: list/create/update are user-scoped; Budget route is server-prefetched; mutations survive reload and invalidate authoritative Budget data.
   - Verify: abuse-case HTTP flow, query tests, runtime page smoke, lint, typecheck, and production build.
+
+- [x] Define the NVIDIA Build transaction-preview boundary.
+  - Acceptance: provider/model configuration, structured extraction, data minimization, timeout, failure, and confirmation rules are recorded and strictly typed.
+  - Verify: ADR/spec review plus contract, prompt-injection, provider-envelope, malformed-output, and client-response tests.
+
+- [x] Integrate authenticated NVIDIA parsing into Home.
+  - Acceptance: Home requests an authorized preview, prevents duplicate parsing, never auto-saves, preserves input on failure, and offers manual entry.
+  - Verify: 107 unit tests, lint, typecheck, production build, and HTTP 401/405 smoke pass.
+
+- [ ] Verify hosted NVIDIA inference with a local credential.
+  - Acceptance: the documented PRD phrase returns the expected strict extraction from the configured hosted model without exposing the key.
+  - Verify: set `NVIDIA_API_KEY` in ignored `.env`, then run `npm run ai:check:nvidia`.

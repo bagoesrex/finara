@@ -78,6 +78,19 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Transaction changes invalidate Budget calculations without client-side financial reconciliation.
 - [x] Focused tests, runtime flows, lint, type checking, and production build pass.
 
+### Phase 6: NVIDIA-assisted transaction preview
+
+- [x] Task 17: Record the NVIDIA Build provider boundary and strict parsing contracts.
+- [x] Task 18: Add the authenticated NVIDIA transaction-preview service and Route Handler.
+- [x] Task 19: Replace Home's primary local parser with async AI parsing and an explicit manual fallback.
+
+### Checkpoint: AI Transaction Preview
+
+- [x] Model output cannot persist a transaction or introduce account/category IDs.
+- [x] Provider failure preserves input and exposes retry/manual paths.
+- [x] Unit tests, lint, type checking, production build, and unauthenticated HTTP smoke pass.
+- [ ] Hosted inference smoke passes after `NVIDIA_API_KEY` is configured locally.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -112,3 +125,6 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Authenticated Budget Route Handlers expose monthly overview, create, and amount update contracts with precise string-money DTOs. The Budget Server Component preloads the viewer/month query, while successful Budget mutations and transaction changes await targeted TanStack Query invalidation before reporting success.
 - `npm test` passes 91 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flows pass, including authenticated SSR hydration on Home, Activity, and Budget; cross-user denial; sequential and concurrent idempotent create; transaction edit/soft delete; summary reconciliation; persisted Budget create/update calculations; duplicate-query rejection; and exact BIGINT rendering beyond JavaScript's safe-integer range.
 - Chrome DevTools MCP was not available in this environment, so the no-reload behavior is covered by focused query invalidation tests and the production HTTP hydration smoke rather than an automated real-browser interaction.
+- ADR 0007 selects NVIDIA Build's OpenAI-compatible hosted endpoint with `nvidia/nemotron-3.5-lightning-30b-a3b` as the configurable default. The parser uses one non-streaming, non-retried, eight-second request with reasoning disabled and a 256-token output cap.
+- AI parsing is exposed only as authenticated `POST /api/ai/transaction-previews`. Strict schemas reject malformed provider output; server code maps hints to viewer-owned account/category records; the existing confirmation sheet and transaction API remain the only persistence path.
+- `npm test` passes 107 tests after the AI slice. Lint, type checking, the Next.js production build, unauthenticated POST `401`, unsupported GET `405`, and npm registry signatures pass. Live NVIDIA inference remains pending because no `NVIDIA_API_KEY` is present in the local environment; run `npm run ai:check:nvidia` after configuring it.
