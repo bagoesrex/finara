@@ -6,6 +6,7 @@ export type ApiErrorCode =
   | "PAYLOAD_TOO_LARGE"
   | "VALIDATION_ERROR"
   | "NOT_FOUND"
+  | "BUDGET_CONFLICT"
   | "IDEMPOTENCY_CONFLICT"
   | "INTERNAL_ERROR";
 

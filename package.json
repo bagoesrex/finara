@@ -17,6 +17,7 @@
     "db:test:transaction-service": "node --conditions=react-server --import tsx scripts/check-transaction-service.ts",
     "db:test:auth": "node --conditions=react-server --import tsx scripts/check-auth-foundation.ts",
     "app:test:auth-flow": "node --conditions=react-server --import tsx scripts/check-auth-onboarding-flow.ts",
+    "app:test:budget-api": "node --conditions=react-server --import tsx scripts/check-budget-api-flow.ts",
     "app:test:transaction-api": "node --conditions=react-server --import tsx scripts/check-transaction-api-flow.ts",
     "predev": "npm run db:generate",
     "dev": "next dev",

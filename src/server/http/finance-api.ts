@@ -7,6 +7,11 @@ import type {
 } from "@/lib/api";
 import type { ContractParseResult } from "@/lib/transactions";
 import {
+  BudgetConflictError,
+  BudgetNotFoundError,
+  InvalidBudgetCategoryError,
+} from "@/server/budgets/service";
+import {
   IdempotencyConflictError,
   InvalidTransactionReferenceError,
   TransactionNotFoundError,
@@ -132,6 +137,10 @@ export function notFoundResponse() {
   return apiError(404, "NOT_FOUND", "Transaksi tidak ditemukan.");
 }
 
+export function budgetNotFoundResponse() {
+  return apiError(404, "NOT_FOUND", "Budget tidak ditemukan.");
+}
+
 export function handleFinanceApiError(error: unknown) {
   if (error instanceof CrossOriginMutationError) {
     return apiError(403, "FORBIDDEN", "Permintaan tidak diizinkan.");
@@ -147,6 +156,27 @@ export function handleFinanceApiError(error: unknown) {
 
   if (error instanceof TransactionNotFoundError) {
     return notFoundResponse();
+  }
+
+  if (error instanceof BudgetNotFoundError) {
+    return budgetNotFoundResponse();
+  }
+
+  if (error instanceof InvalidBudgetCategoryError) {
+    return apiError(
+      422,
+      "VALIDATION_ERROR",
+      "Kategori pengeluaran tidak tersedia.",
+      { categoryId: "Pilihan ini tidak tersedia." },
+    );
+  }
+
+  if (error instanceof BudgetConflictError) {
+    return apiError(
+      409,
+      "BUDGET_CONFLICT",
+      "Kategori ini sudah memiliki alokasi berbeda untuk bulan tersebut.",
+    );
   }
 
   if (error instanceof InvalidTransactionReferenceError) {
