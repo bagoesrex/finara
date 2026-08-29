@@ -8,7 +8,7 @@ import { useModalFocusTrap } from "./use-modal-focus-trap";
 
 export type BudgetAllocationDraft = {
   id?: string;
-  amount: number;
+  amount: string;
   category: string;
   categoryId: string;
   monthKey: string;
@@ -26,6 +26,14 @@ type BudgetAllocationSheetProps = {
   onSave: () => void;
 };
 
+const POSTGRES_BIGINT_MAX = BigInt("9223372036854775807");
+
+function parseDraftAmount(value: string) {
+  if (!/^\d{1,19}$/.test(value)) return null;
+  const amount = BigInt(value);
+  return amount > BigInt(0) && amount <= POSTGRES_BIGINT_MAX ? amount : null;
+}
+
 export function BudgetAllocationSheet({
   availableCategories,
   draft,
@@ -38,10 +46,8 @@ export function BudgetAllocationSheet({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const isEditing = Boolean(draft.id);
-  const isValid =
-    Number.isSafeInteger(draft.amount) &&
-    draft.amount > 0 &&
-    draft.categoryId.length > 0;
+  const exactAmount = parseDraftAmount(draft.amount);
+  const isValid = exactAmount !== null && draft.categoryId.length > 0;
   const descriptionIds = error
     ? "budget-sheet-caption budget-sheet-error"
     : "budget-sheet-caption";
@@ -86,7 +92,9 @@ export function BudgetAllocationSheet({
           </button>
         </div>
 
-        <p className="budget-preview-amount">{formatCurrency(draft.amount)}</p>
+        <p className="budget-preview-amount">
+          {formatCurrency(exactAmount ?? BigInt(0))}
+        </p>
 
         <form
           onSubmit={(event) => {
@@ -125,17 +133,19 @@ export function BudgetAllocationSheet({
               <span>Alokasi bulanan</span>
               <input
                 name="amount"
-                type="number"
+                type="text"
                 inputMode="numeric"
-                min="1"
-                max={Number.MAX_SAFE_INTEGER}
-                step="1"
-                value={draft.amount || ""}
+                pattern="[0-9]*"
+                maxLength={19}
+                value={draft.amount}
                 disabled={isSaving}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? "budget-sheet-error" : undefined}
                 onChange={(event) =>
-                  onChange({ ...draft, amount: event.target.valueAsNumber || 0 })
+                  onChange({
+                    ...draft,
+                    amount: event.target.value.replace(/\D/g, "").slice(0, 19),
+                  })
                 }
                 autoComplete="off"
                 required

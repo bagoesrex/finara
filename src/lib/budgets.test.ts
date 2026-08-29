@@ -46,6 +46,10 @@ describe("Budget input contracts", () => {
       success: false,
       fieldErrors: { month: expect.any(String) },
     });
+    expect(parseListBudgetsInput({ month: "0000-01" })).toMatchObject({
+      success: false,
+      fieldErrors: { month: expect.any(String) },
+    });
     expect(
       parseCreateBudgetInput({
         amount: "500000",

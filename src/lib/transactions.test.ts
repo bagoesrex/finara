@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   getMonthDateRange,
   getDateKeyInTimeZone,
+  getMillisecondsUntilNextJakartaMonth,
   getMonthKeyInTimeZone,
   parseCreateTransactionInput,
+  parseFinanceSnapshotInput,
   parseListTransactionsInput,
   parseUpdateTransactionInput,
 } from "./transactions";
@@ -108,11 +110,35 @@ describe("transaction list contract", () => {
   });
 });
 
+describe("finance snapshot contract", () => {
+  it("accepts an omitted or singular valid month", () => {
+    expect(parseFinanceSnapshotInput({})).toEqual({
+      success: true,
+      data: { month: undefined },
+    });
+    expect(parseFinanceSnapshotInput({ month: "2026-08" }).success).toBe(true);
+  });
+
+  it.each([
+    { month: ["2026-08", "2026-09"] },
+    { unexpected: "true" },
+  ])("rejects an ambiguous snapshot query %#", (input) => {
+    expect(parseFinanceSnapshotInput(input).success).toBe(false);
+  });
+});
+
 describe("month date ranges", () => {
   it("uses an inclusive start and exclusive next-month boundary", () => {
     expect(getMonthDateRange("2026-12")).toEqual({
       start: new Date("2026-12-01T00:00:00.000Z"),
       end: new Date("2027-01-01T00:00:00.000Z"),
+    });
+  });
+
+  it("does not apply JavaScript's 1900 offset to two-digit years", () => {
+    expect(getMonthDateRange("0099-12")).toEqual({
+      start: new Date("0099-12-01T00:00:00.000Z"),
+      end: new Date("0100-01-01T00:00:00.000Z"),
     });
   });
 
@@ -123,6 +149,14 @@ describe("month date ranges", () => {
         "Asia/Jakarta",
       ),
     ).toBe("2026-09");
+  });
+
+  it("finds the next Jakarta month boundary", () => {
+    expect(
+      getMillisecondsUntilNextJakartaMonth(
+        new Date("2026-08-31T16:59:30.000Z"),
+      ),
+    ).toBe(30_000);
   });
 
   it("derives the Jakarta calendar date at the UTC day boundary", () => {

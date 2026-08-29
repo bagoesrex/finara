@@ -4,6 +4,10 @@ import "dotenv/config";
 
 import type { ApiSuccessResponse } from "../src/lib/api";
 import type { BudgetDto, BudgetOverviewDto } from "../src/lib/budgets";
+import {
+  getMonthDateRange,
+  getMonthKeyInTimeZone,
+} from "../src/lib/transactions";
 import { db } from "../src/server/db/client";
 import { initializeOnboarding } from "../src/server/onboarding/service";
 
@@ -61,14 +65,22 @@ async function apiData<T>(response: Response) {
 
 async function checkBudgetApiFlow() {
   const userIds: string[] = [];
+  const monthKey = getMonthKeyInTimeZone(new Date());
+  const nextMonthKey = getMonthDateRange(monthKey).end
+    .toISOString()
+    .slice(0, 7);
 
   try {
     await resetLocalRuntimeRateLimits();
-    assert.equal((await request("/api/budgets?month=2026-08")).status, 401);
+    assert.equal(
+      (await request(`/api/budgets?month=${monthKey}`)).status,
+      401,
+    );
 
     const owner = await registerAndSignIn("Runtime Budget Owner");
+    userIds.push(owner.userId);
     const otherUser = await registerAndSignIn("Other Runtime Budget Owner");
-    userIds.push(owner.userId, otherUser.userId);
+    userIds.push(otherUser.userId);
 
     await initializeOnboarding(owner.userId, {
       accountName: "Runtime Bank",
@@ -97,12 +109,30 @@ async function checkBudgetApiFlow() {
 
     assert.equal(
       (
-        await request("/api/budgets?month=2026-08&unexpected=true", {
+        await request(`/api/budgets?month=${monthKey}&unexpected=true`, {
           headers: { cookie: owner.cookie },
         })
       ).status,
       422,
     );
+    assert.equal(
+      (
+        await request(
+          `/api/budgets?month=${monthKey}&month=${nextMonthKey}`,
+          { headers: { cookie: owner.cookie } },
+        )
+      ).status,
+      422,
+    );
+    for (const path of [
+      `/api/finance/snapshot?month=${monthKey}&unexpected=true`,
+      `/api/finance/snapshot?month=${monthKey}&month=${nextMonthKey}`,
+    ]) {
+      assert.equal(
+        (await request(path, { headers: { cookie: owner.cookie } })).status,
+        422,
+      );
+    }
 
     const crossOriginMutation = await request("/api/budgets", {
       method: "POST",
@@ -128,7 +158,7 @@ async function checkBudgetApiFlow() {
       body: JSON.stringify({
         amount: "0",
         categoryId: expenseCategory.id,
-        month: "2026-08",
+        month: monthKey,
       }),
     });
     assert.equal(invalidAmount.status, 422);
@@ -143,7 +173,7 @@ async function checkBudgetApiFlow() {
         body: JSON.stringify({
           amount: "100000",
           categoryId,
-          month: "2026-08",
+          month: monthKey,
         }),
       });
       assert.equal(invalidCategory.status, 422);
@@ -152,7 +182,7 @@ async function checkBudgetApiFlow() {
     const createPayload = {
       amount: "100000",
       categoryId: expenseCategory.id,
-      month: "2026-08",
+      month: monthKey,
     };
     const createResponse = await request("/api/budgets", {
       method: "POST",
@@ -186,13 +216,13 @@ async function checkBudgetApiFlow() {
         type: "EXPENSE",
         amount: BigInt("25000"),
         description: "Runtime budget expense",
-        transactionDate: new Date("2026-08-20T00:00:00.000Z"),
+        transactionDate: new Date(`${monthKey}-15T00:00:00.000Z`),
         transactionTime: null,
         clientRequestId: randomUUID(),
       },
     });
 
-    const overviewResponse = await request("/api/budgets?month=2026-08", {
+    const overviewResponse = await request(`/api/budgets?month=${monthKey}`, {
       headers: { cookie: owner.cookie },
     });
     assert.equal(overviewResponse.status, 200);
@@ -249,8 +279,28 @@ async function checkBudgetApiFlow() {
     assert.match(budgetHtml, /Rp90\.000/);
     assert.doesNotMatch(budgetHtml, /Penyimpanan anggaran segera menyusul/);
 
+    const exactLargeAmount = "9007199254740993";
+    const exactUpdateResponse = await request(`/api/budgets/${created.id}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        cookie: owner.cookie,
+      },
+      body: JSON.stringify({ amount: exactLargeAmount }),
+    });
+    assert.equal(exactUpdateResponse.status, 200);
+    assert.equal(
+      (await apiData<BudgetDto>(exactUpdateResponse)).amount,
+      exactLargeAmount,
+    );
+    const exactBudgetPage = await request("/budget", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(exactBudgetPage.status, 200);
+    assert.match(await exactBudgetPage.text(), /Rp9\.007\.199\.254\.740\.993/);
+
     const otherOverview = await apiData<BudgetOverviewDto>(
-      await request("/api/budgets?month=2026-08", {
+      await request(`/api/budgets?month=${monthKey}`, {
         headers: { cookie: otherUser.cookie },
       }),
     );

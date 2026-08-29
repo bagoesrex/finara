@@ -1,11 +1,12 @@
 import {
   getMonthKeyInTimeZone,
-  parseMonthKey,
+  parseFinanceSnapshotInput,
 } from "@/lib/transactions";
 import { getSessionViewer } from "@/server/auth/session";
 import {
   apiData,
   handleFinanceApiError,
+  toStrictQueryInput,
   unauthorizedResponse,
   validationErrorResponse,
 } from "@/server/http/finance-api";
@@ -16,13 +17,13 @@ export async function GET(request: Request) {
     const viewer = await getSessionViewer();
     if (!viewer) return unauthorizedResponse();
 
-    const month =
-      new URL(request.url).searchParams.get("month") ??
-      getMonthKeyInTimeZone(new Date());
-    const parsed = parseMonthKey(month);
+    const query = toStrictQueryInput(new URL(request.url).searchParams);
+    const parsed = parseFinanceSnapshotInput(query);
     if (!parsed.success) return validationErrorResponse(parsed);
 
-    return apiData(await getFinanceSnapshot(viewer.id, parsed.data));
+    const month = parsed.data.month ?? getMonthKeyInTimeZone(new Date());
+
+    return apiData(await getFinanceSnapshot(viewer.id, month));
   } catch (error) {
     return handleFinanceApiError(error);
   }

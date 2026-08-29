@@ -308,25 +308,31 @@ export async function invalidateFinanceResources(
   scope: InvalidationScope,
 ) {
   const invalidations: Array<Promise<unknown>> = [
-    queryClient.invalidateQueries({
-      queryKey: financeQueryKeys.snapshot(scope.viewerId, scope.monthKey),
-    }),
-    queryClient.invalidateQueries({
-      queryKey: financeQueryKeys.transactionLists(scope.viewerId),
-    }),
-    queryClient.invalidateQueries({
-      queryKey: financeQueryKeys.budgets(scope.viewerId),
-    }),
+    queryClient.invalidateQueries(
+      { queryKey: financeQueryKeys.snapshot(scope.viewerId, scope.monthKey) },
+      { throwOnError: true },
+    ),
+    queryClient.invalidateQueries(
+      { queryKey: financeQueryKeys.transactionLists(scope.viewerId) },
+      { throwOnError: true },
+    ),
+    queryClient.invalidateQueries(
+      { queryKey: financeQueryKeys.budgets(scope.viewerId) },
+      { throwOnError: true },
+    ),
   ];
 
   if (scope.transactionId) {
     invalidations.push(
-      queryClient.invalidateQueries({
-        queryKey: financeQueryKeys.transactionDetail(
-          scope.viewerId,
-          scope.transactionId,
-        ),
-      }),
+      queryClient.invalidateQueries(
+        {
+          queryKey: financeQueryKeys.transactionDetail(
+            scope.viewerId,
+            scope.transactionId,
+          ),
+        },
+        { throwOnError: true },
+      ),
     );
   }
 

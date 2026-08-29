@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryObserver } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
 import type { FinanceSnapshotDto, TransactionDto } from "./transactions";
@@ -154,6 +154,61 @@ describe("finance query keys and invalidation", () => {
     expect(queryClient.getQueryState(listKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(detailKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(budgetKey)?.isInvalidated).toBe(true);
+  });
+
+  it("waits for an active Budget refetch after a transaction mutation", async () => {
+    const queryClient = new QueryClient();
+    const budgetKey = financeQueryKeys.budgetOverview("user-a", "2026-08");
+    queryClient.setQueryData(budgetKey, {});
+
+    let resolveRefetch!: (value: object) => void;
+    const refetch = new Promise<object>((resolve) => {
+      resolveRefetch = resolve;
+    });
+    const observer = new QueryObserver(queryClient, {
+      queryKey: budgetKey,
+      queryFn: () => refetch,
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+    const unsubscribe = observer.subscribe(() => undefined);
+    let settled = false;
+
+    const invalidation = invalidateFinanceResources(queryClient, {
+      monthKey: "2026-08",
+      viewerId: "user-a",
+    }).then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveRefetch({});
+    await invalidation;
+    expect(settled).toBe(true);
+    unsubscribe();
+  });
+
+  it("rejects transaction invalidation when an active Budget refetch fails", async () => {
+    const queryClient = new QueryClient();
+    const budgetKey = financeQueryKeys.budgetOverview("user-a", "2026-08");
+    queryClient.setQueryData(budgetKey, {});
+    const observer = new QueryObserver(queryClient, {
+      queryKey: budgetKey,
+      queryFn: async () => {
+        throw new Error("Budget refetch failed");
+      },
+      retry: false,
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+    const unsubscribe = observer.subscribe(() => undefined);
+
+    await expect(
+      invalidateFinanceResources(queryClient, {
+        monthKey: "2026-08",
+        viewerId: "user-a",
+      }),
+    ).rejects.toThrow("Budget refetch failed");
+    unsubscribe();
   });
 });
 

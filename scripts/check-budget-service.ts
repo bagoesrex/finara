@@ -81,11 +81,28 @@ async function checkBudgetService() {
     assert.equal(foodBudget.amount, "100000");
     assert.equal(foodBudget.status, "UNUSED");
 
-    await createBudget(owner.id, {
+    const transportInput = {
       amount: BigInt("50000"),
       categoryId: transport.id,
       month: "2026-08",
-    });
+    };
+    const concurrentTransportBudgets = await Promise.all(
+      Array.from({ length: 4 }, () => createBudget(owner.id, transportInput)),
+    );
+    assert.equal(
+      new Set(concurrentTransportBudgets.map((budget) => budget.id)).size,
+      1,
+    );
+    assert.equal(
+      await db.budget.count({
+        where: {
+          userId: owner.id,
+          categoryId: transport.id,
+          periodStart: new Date("2026-08-01T00:00:00.000Z"),
+        },
+      }),
+      1,
+    );
 
     await expectError(
       () =>

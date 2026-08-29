@@ -1,9 +1,14 @@
-import { QueryClient } from "@tanstack/react-query";
+import {
+  MutationObserver,
+  QueryClient,
+  QueryObserver,
+} from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 
 import type { BudgetOverviewDto } from "./budgets";
 import {
   adaptBudgetOverview,
+  budgetMutationOptions,
   invalidateBudgetResource,
   toCreateBudgetPayload,
   toUpdateBudgetPayload,
@@ -39,9 +44,9 @@ const overviewDto: BudgetOverviewDto = {
 describe("budget query adapters", () => {
   it("maps authoritative DTO values into the existing UI model", () => {
     expect(adaptBudgetOverview(overviewDto)).toEqual({
-      allocated: 100_000,
-      spent: 85_000,
-      remaining: 15_000,
+      allocated: BigInt(100_000),
+      spent: BigInt(85_000),
+      remaining: BigInt(15_000),
       progress: 0.85,
       budgets: [
         {
@@ -49,9 +54,9 @@ describe("budget query adapters", () => {
           categoryId,
           category: "Food & Drink",
           monthKey: "2026-08",
-          amount: 100_000,
-          spent: 85_000,
-          remaining: 15_000,
+          amount: BigInt(100_000),
+          spent: BigInt(85_000),
+          remaining: BigInt(15_000),
           progress: 0.85,
           status: "near-limit",
         },
@@ -59,19 +64,19 @@ describe("budget query adapters", () => {
     });
   });
 
-  it("rejects money outside the current UI safe-integer range", () => {
-    expect(() =>
+  it("preserves money outside the JavaScript safe-integer range", () => {
+    expect(
       adaptBudgetOverview({
         ...overviewDto,
         allocatedAmount: "9007199254740993",
-      }),
-    ).toThrow("outside the safe client range");
+      }).allocated,
+    ).toBe(BigInt("9007199254740993"));
   });
 
   it("serializes create and update without authority fields", () => {
     const draft = {
       id: budgetId,
-      amount: 125_000,
+      amount: "125000",
       category: "Food & Drink",
       categoryId,
       monthKey: "2026-08",
@@ -83,6 +88,18 @@ describe("budget query adapters", () => {
       month: "2026-08",
     });
     expect(toUpdateBudgetPayload(draft)).toEqual({ amount: "125000" });
+    expect(
+      toUpdateBudgetPayload({
+        ...draft,
+        amount: "9223372036854775807",
+      }),
+    ).toEqual({ amount: "9223372036854775807" });
+    expect(() =>
+      toUpdateBudgetPayload({
+        ...draft,
+        amount: "9223372036854775808",
+      }),
+    ).toThrow("PostgreSQL BIGINT range");
   });
 });
 
@@ -107,5 +124,108 @@ describe("budget query invalidation", () => {
     });
 
     expect(queryClient.getQueryState(key)?.isInvalidated).toBe(true);
+  });
+
+  it("waits for an active authoritative refetch", async () => {
+    const queryClient = new QueryClient();
+    const key = financeQueryKeys.budgetOverview("user-a", "2026-08");
+    queryClient.setQueryData(key, overviewDto);
+
+    let resolveRefetch!: (overview: BudgetOverviewDto) => void;
+    const refetch = new Promise<BudgetOverviewDto>((resolve) => {
+      resolveRefetch = resolve;
+    });
+    const observer = new QueryObserver(queryClient, {
+      queryKey: key,
+      queryFn: () => refetch,
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+    const unsubscribe = observer.subscribe(() => undefined);
+    let settled = false;
+
+    const invalidation = invalidateBudgetResource(queryClient, {
+      monthKey: "2026-08",
+      viewerId: "user-a",
+    }).then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveRefetch(overviewDto);
+    await invalidation;
+    expect(settled).toBe(true);
+    unsubscribe();
+  });
+
+  it("rejects invalidation when an active authoritative refetch fails", async () => {
+    const queryClient = new QueryClient();
+    const key = financeQueryKeys.budgetOverview("user-a", "2026-08");
+    queryClient.setQueryData(key, overviewDto);
+    const observer = new QueryObserver(queryClient, {
+      queryKey: key,
+      queryFn: async () => {
+        throw new Error("Budget refetch failed");
+      },
+      retry: false,
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+    const unsubscribe = observer.subscribe(() => undefined);
+
+    await expect(
+      invalidateBudgetResource(queryClient, {
+        monthKey: "2026-08",
+        viewerId: "user-a",
+      }),
+    ).rejects.toThrow("Budget refetch failed");
+    unsubscribe();
+  });
+
+  it("keeps a Budget mutation pending until invalidation refetches", async () => {
+    const queryClient = new QueryClient();
+    const key = financeQueryKeys.budgetOverview("user-a", "2026-08");
+    queryClient.setQueryData(key, overviewDto);
+
+    let resolveRefetch!: (overview: BudgetOverviewDto) => void;
+    const refetch = new Promise<BudgetOverviewDto>((resolve) => {
+      resolveRefetch = resolve;
+    });
+    const queryObserver = new QueryObserver(queryClient, {
+      queryKey: key,
+      queryFn: () => refetch,
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+    const unsubscribe = queryObserver.subscribe(() => undefined);
+    const mutationObserver = new MutationObserver(
+      queryClient,
+      budgetMutationOptions(
+        async () => overviewDto.budgets[0]!,
+        () =>
+          invalidateBudgetResource(queryClient, {
+            monthKey: "2026-08",
+            viewerId: "user-a",
+          }),
+      ),
+    );
+    let settled = false;
+    const mutation = mutationObserver
+      .mutate({
+        amount: "125000",
+        category: "Food & Drink",
+        categoryId,
+        monthKey: "2026-08",
+      })
+      .then(() => {
+        settled = true;
+      });
+
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveRefetch(overviewDto);
+    await mutation;
+    expect(settled).toBe(true);
+    unsubscribe();
   });
 });

@@ -41,11 +41,17 @@ const transactions = [
 describe("currency formatting", () => {
   it("formats an IDR amount without decimal noise", () => {
     expect(formatCurrency(25_000)).toBe("Rp25.000");
+    expect(formatCurrency(BigInt("9007199254740993"))).toBe(
+      "Rp9.007.199.254.740.993",
+    );
   });
 
   it("uses Indonesian compact units", () => {
     expect(formatCompactCurrency(580_000)).toBe("Rp580 rb");
     expect(formatCompactCurrency(1_420_000)).toBe("Rp1,42 jt");
+    expect(formatCompactCurrency(BigInt("9007199254740993"))).toBe(
+      "Rp9.007.199.254,74 jt",
+    );
   });
 
   it("preserves a negative sign for signed balances", () => {

@@ -47,8 +47,7 @@ export class BudgetConflictError extends Error {
 }
 
 function toPeriodStart(monthKey: string) {
-  const [year, month] = monthKey.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, 1));
+  return getMonthDateRange(monthKey).start;
 }
 
 function toMonthKey(periodStart: Date) {

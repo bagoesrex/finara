@@ -7,7 +7,7 @@ export const MAX_TRANSACTION_PAGE_SIZE = 50;
 
 const POSTGRES_BIGINT_MAX = BigInt("9223372036854775807");
 const calendarDatePattern = /^\d{4}-\d{2}-\d{2}$/;
-const monthKeyPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+const monthKeyPattern = /^(?!0000)\d{4}-(0[1-9]|1[0-2])$/;
 const localTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
@@ -205,8 +205,20 @@ const listTransactionsInputSchema = z
   })
   .strict();
 
+const financeSnapshotInputSchema = z
+  .object({
+    month: z
+      .string()
+      .regex(monthKeyPattern, "Bulan tidak valid.")
+      .optional(),
+  })
+  .strict();
+
 export type ValidatedListTransactionsInput = z.output<
   typeof listTransactionsInputSchema
+>;
+export type ValidatedFinanceSnapshotInput = z.output<
+  typeof financeSnapshotInputSchema
 >;
 
 function toContractResult<T>(result: z.ZodSafeParseResult<T>): ContractParseResult<T> {
@@ -252,6 +264,12 @@ export function parseListTransactionsInput(
   return toContractResult(listTransactionsInputSchema.safeParse(input));
 }
 
+export function parseFinanceSnapshotInput(
+  input: unknown,
+): ContractParseResult<ValidatedFinanceSnapshotInput> {
+  return toContractResult(financeSnapshotInputSchema.safeParse(input));
+}
+
 export function parseMonthKey(
   input: unknown,
 ): ContractParseResult<string> {
@@ -261,12 +279,11 @@ export function parseMonthKey(
 }
 
 export function getMonthDateRange(monthKey: string) {
-  const [year, month] = monthKey.split("-").map(Number);
+  const start = new Date(`${monthKey}-01T00:00:00.000Z`);
+  const end = new Date(start);
+  end.setUTCMonth(end.getUTCMonth() + 1);
 
-  return {
-    start: new Date(Date.UTC(year, month - 1, 1)),
-    end: new Date(Date.UTC(year, month, 1)),
-  };
+  return { start, end };
 }
 
 export function getMonthKeyInTimeZone(
@@ -286,6 +303,15 @@ export function getMonthKeyInTimeZone(
   }
 
   return `${year}-${month}`;
+}
+
+export function getMillisecondsUntilNextJakartaMonth(date: Date) {
+  const [year, month] = getMonthKeyInTimeZone(date).split("-").map(Number);
+  const jakartaOffsetMilliseconds = 7 * 60 * 60 * 1_000;
+  const nextMonthStart =
+    Date.UTC(year, month, 1) - jakartaOffsetMilliseconds;
+
+  return Math.max(0, nextMonthStart - date.getTime());
 }
 
 export function getDateKeyInTimeZone(

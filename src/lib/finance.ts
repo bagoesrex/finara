@@ -88,15 +88,52 @@ export const incomeCategories = [
   "Other",
 ] as const;
 
-export function formatCurrency(amount: number): string {
-  return `Rp${integerFormatter.format(Math.abs(amount))}`;
+type CurrencyAmount = number | bigint;
+
+function getAbsoluteAmount(amount: CurrencyAmount) {
+  if (typeof amount === "bigint") {
+    return amount < BigInt(0) ? -amount : amount;
+  }
+  return Math.abs(amount);
 }
 
-export function formatSignedCurrency(amount: number): string {
+export function formatCurrency(amount: CurrencyAmount): string {
+  return `Rp${integerFormatter.format(getAbsoluteAmount(amount))}`;
+}
+
+export function formatSignedCurrency(amount: CurrencyAmount): string {
   return `${amount < 0 ? "−" : ""}${formatCurrency(amount)}`;
 }
 
-export function formatCompactCurrency(amount: number): string {
+function formatCompactBigInt(
+  amount: bigint,
+  divisor: bigint,
+  suffix: string,
+) {
+  const roundedHundredths =
+    (amount * BigInt(100) + divisor / BigInt(2)) / divisor;
+  const whole = roundedHundredths / BigInt(100);
+  const fraction = roundedHundredths % BigInt(100);
+  const fractionLabel =
+    fraction === BigInt(0)
+      ? ""
+      : `,${fraction.toString().padStart(2, "0").replace(/0$/, "")}`;
+
+  return `Rp${integerFormatter.format(whole)}${fractionLabel} ${suffix}`;
+}
+
+export function formatCompactCurrency(amount: CurrencyAmount): string {
+  if (typeof amount === "bigint") {
+    const absolute = getAbsoluteAmount(amount) as bigint;
+    if (absolute >= BigInt(1_000_000)) {
+      return formatCompactBigInt(absolute, BigInt(1_000_000), "jt");
+    }
+    if (absolute >= BigInt(1_000)) {
+      return formatCompactBigInt(absolute, BigInt(1_000), "rb");
+    }
+    return formatCurrency(absolute);
+  }
+
   const absoluteAmount = Math.abs(amount);
 
   if (absoluteAmount >= 1_000_000) {

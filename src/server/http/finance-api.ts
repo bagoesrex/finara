@@ -91,6 +91,17 @@ export async function readJsonBody(request: Request): Promise<unknown> {
   }
 }
 
+export function toStrictQueryInput(searchParams: URLSearchParams) {
+  const input: Record<string, string | string[]> = {};
+
+  for (const key of new Set(searchParams.keys())) {
+    const values = searchParams.getAll(key);
+    input[key] = values.length === 1 ? values[0] : values;
+  }
+
+  return input;
+}
+
 export function apiData<T>(data: T, status = 200) {
   const body: ApiSuccessResponse<T> = { data };
   return Response.json(body, { status, headers: noStoreHeaders });

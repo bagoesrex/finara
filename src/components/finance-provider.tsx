@@ -10,6 +10,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -19,6 +20,7 @@ import { useViewer } from "@/components/viewer-provider";
 import { validateAccountName, type FinanceAccount } from "@/lib/accounts";
 import {
   adaptBudgetOverview,
+  budgetMutationOptions,
   createBudgetRequest,
   fetchBudgetOverview,
   invalidateBudgetResource,
@@ -42,6 +44,10 @@ import {
   type TransactionListFilters,
 } from "@/lib/finance-query";
 import type { FinanceSummary } from "@/lib/finance";
+import {
+  getMillisecondsUntilNextJakartaMonth,
+  getMonthKeyInTimeZone,
+} from "@/lib/transactions";
 
 type FinanceContextValue = {
   accountNameOverrides: Readonly<Record<string, string>>;
@@ -61,6 +67,7 @@ type FinanceContextValue = {
 const FinanceContext = createContext<FinanceContextValue | null>(null);
 const EMPTY_ACCOUNTS: FinanceAccount[] = [];
 const EMPTY_TRANSACTIONS: FinanceTransaction[] = [];
+const MAX_BROWSER_TIMER_DELAY = 2_147_000_000;
 
 function applyAccountNameOverrides(
   accounts: FinanceAccount[],
@@ -84,16 +91,51 @@ function applyTransactionAccountNames(
 
 export function FinanceProvider({
   children,
-  monthKey,
+  monthKey: initialMonthKey,
 }: {
   children: ReactNode;
   monthKey: string;
 }) {
   const viewer = useViewer();
   const queryClient = useQueryClient();
+  const [monthKey, setMonthKey] = useState(initialMonthKey);
   const [accountNameOverrides, setAccountNameOverrides] = useState<
     Record<string, string>
   >({});
+  useEffect(() => {
+    let monthBoundaryTimer: number;
+
+    const syncMonthKey = () => {
+      const currentMonthKey = getMonthKeyInTimeZone(new Date());
+      setMonthKey((current) =>
+        current === currentMonthKey ? current : currentMonthKey,
+      );
+    };
+    const scheduleMonthBoundary = () => {
+      const now = new Date();
+      const delay = Math.min(
+        getMillisecondsUntilNextJakartaMonth(now) + 100,
+        MAX_BROWSER_TIMER_DELAY,
+      );
+      monthBoundaryTimer = window.setTimeout(() => {
+        syncMonthKey();
+        scheduleMonthBoundary();
+      }, delay);
+    };
+    const syncVisibleMonth = () => {
+      if (document.visibilityState === "visible") syncMonthKey();
+    };
+
+    scheduleMonthBoundary();
+    window.addEventListener("focus", syncMonthKey);
+    document.addEventListener("visibilitychange", syncVisibleMonth);
+
+    return () => {
+      window.clearTimeout(monthBoundaryTimer);
+      window.removeEventListener("focus", syncMonthKey);
+      document.removeEventListener("visibilitychange", syncVisibleMonth);
+    };
+  }, []);
   const snapshotQuery = useQuery({
     queryKey: financeQueryKeys.snapshot(viewer.id, monthKey),
     queryFn: () => fetchFinanceSnapshot(monthKey),
@@ -308,14 +350,12 @@ export function useBudgetOverview(monthKey: string) {
       }),
     [monthKey, queryClient, viewer.id],
   );
-  const { isPending: isCreating, mutateAsync: createBudget } = useMutation({
-    mutationFn: createBudgetRequest,
-    onSuccess: invalidate,
-  });
-  const { isPending: isUpdating, mutateAsync: updateBudget } = useMutation({
-    mutationFn: updateBudgetRequest,
-    onSuccess: invalidate,
-  });
+  const { isPending: isCreating, mutateAsync: createBudget } = useMutation(
+    budgetMutationOptions(createBudgetRequest, invalidate),
+  );
+  const { isPending: isUpdating, mutateAsync: updateBudget } = useMutation(
+    budgetMutationOptions(updateBudgetRequest, invalidate),
+  );
   const saveBudget = useCallback(
     async (draft: BudgetMutationDraft) => {
       if (draft.id) {

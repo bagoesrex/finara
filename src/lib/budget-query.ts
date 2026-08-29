@@ -3,28 +3,46 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   budgetDtoSchema,
   budgetOverviewDtoSchema,
+  type BudgetDto,
   type BudgetOverviewDto,
   type BudgetStatus as BudgetDtoStatus,
 } from "./budgets";
-import type {
-  BudgetOverview,
-  BudgetProgress,
-  BudgetStatus as ClientBudgetStatus,
-} from "./finance";
 import {
   financeFetch,
   financeQueryKeys,
   readApiData,
 } from "./finance-query";
 
-export type ClientBudgetProgress = BudgetProgress & { categoryId: string };
-export type ClientBudgetOverview = Omit<BudgetOverview, "budgets"> & {
+export type ClientBudgetStatus =
+  | "unused"
+  | "on-track"
+  | "near-limit"
+  | "limit-reached"
+  | "over";
+
+export type ClientBudgetProgress = {
+  id: string;
+  categoryId: string;
+  category: string;
+  monthKey: string;
+  amount: bigint;
+  spent: bigint;
+  remaining: bigint;
+  progress: number;
+  status: ClientBudgetStatus;
+};
+
+export type ClientBudgetOverview = {
+  allocated: bigint;
+  spent: bigint;
+  remaining: bigint;
+  progress: number;
   budgets: ClientBudgetProgress[];
 };
 
 export type BudgetMutationDraft = {
   id?: string;
-  amount: number;
+  amount: string;
   category: string;
   categoryId: string;
   monthKey: string;
@@ -43,16 +61,8 @@ const statusMap = {
   OVER: "over",
 } satisfies Record<BudgetDtoStatus, ClientBudgetStatus>;
 
-function toSafeClientMoney(value: string, allowNegative = false) {
-  const amount = Number(value);
-  if (
-    !Number.isSafeInteger(amount) ||
-    (!allowNegative && amount < 0)
-  ) {
-    throw new RangeError("Money value is outside the safe client range.");
-  }
-  return amount;
-}
+const POSTGRES_BIGINT_MAX = BigInt("9223372036854775807");
+const positiveMoneyPattern = /^\d+$/;
 
 function toProgress(progressBasisPoints: number) {
   return progressBasisPoints / 10_000;
@@ -62,42 +72,48 @@ export function adaptBudgetOverview(
   overview: BudgetOverviewDto,
 ): ClientBudgetOverview {
   return {
-    allocated: toSafeClientMoney(overview.allocatedAmount),
-    spent: toSafeClientMoney(overview.spentAmount),
-    remaining: toSafeClientMoney(overview.remainingAmount, true),
+    allocated: BigInt(overview.allocatedAmount),
+    spent: BigInt(overview.spentAmount),
+    remaining: BigInt(overview.remainingAmount),
     progress: toProgress(overview.progressBasisPoints),
     budgets: overview.budgets.map((budget) => ({
       id: budget.id,
       categoryId: budget.categoryId,
       category: budget.categoryName,
       monthKey: budget.monthKey,
-      amount: toSafeClientMoney(budget.amount),
-      spent: toSafeClientMoney(budget.spentAmount),
-      remaining: toSafeClientMoney(budget.remainingAmount, true),
+      amount: BigInt(budget.amount),
+      spent: BigInt(budget.spentAmount),
+      remaining: BigInt(budget.remainingAmount),
       progress: toProgress(budget.progressBasisPoints),
       status: statusMap[budget.status],
     })),
   };
 }
 
-function assertSafePositiveAmount(amount: number) {
-  if (!Number.isSafeInteger(amount) || amount <= 0) {
-    throw new RangeError("Budget amount is outside the safe client range.");
+function normalizedPositiveAmount(amount: string) {
+  const normalized = amount.trim();
+  if (!positiveMoneyPattern.test(normalized)) {
+    throw new RangeError("Budget amount must be a positive whole Rupiah value.");
   }
+
+  const exactAmount = BigInt(normalized);
+  if (exactAmount <= BigInt(0) || exactAmount > POSTGRES_BIGINT_MAX) {
+    throw new RangeError("Budget amount is outside the PostgreSQL BIGINT range.");
+  }
+
+  return normalized;
 }
 
 export function toCreateBudgetPayload(draft: BudgetMutationDraft) {
-  assertSafePositiveAmount(draft.amount);
   return {
-    amount: String(draft.amount),
+    amount: normalizedPositiveAmount(draft.amount),
     categoryId: draft.categoryId,
     month: draft.monthKey,
   };
 }
 
 export function toUpdateBudgetPayload(draft: BudgetMutationDraft) {
-  assertSafePositiveAmount(draft.amount);
-  return { amount: String(draft.amount) };
+  return { amount: normalizedPositiveAmount(draft.amount) };
 }
 
 export async function fetchBudgetOverview(monthKey: string) {
@@ -124,11 +140,21 @@ export async function updateBudgetRequest(draft: BudgetMutationDraft) {
   return budgetDtoSchema.parse(await readApiData(response));
 }
 
+export function budgetMutationOptions(
+  mutationFn: (draft: BudgetMutationDraft) => Promise<BudgetDto>,
+  invalidate: () => Promise<void>,
+) {
+  return { mutationFn, onSuccess: invalidate };
+}
+
 export async function invalidateBudgetResource(
   queryClient: QueryClient,
   scope: BudgetInvalidationScope,
 ) {
-  await queryClient.invalidateQueries({
-    queryKey: financeQueryKeys.budgetOverview(scope.viewerId, scope.monthKey),
-  });
+  await queryClient.invalidateQueries(
+    {
+      queryKey: financeQueryKeys.budgetOverview(scope.viewerId, scope.monthKey),
+    },
+    { throwOnError: true },
+  );
 }

@@ -13,9 +13,13 @@ import {
 import { useBudgetOverview, useFinance } from "./finance-provider";
 import { PageHeader } from "./page-header";
 
+function getAbsoluteBudgetAmount(amount: bigint) {
+  return amount < BigInt(0) ? -amount : amount;
+}
+
 function getRemainingCopy(budget: ClientBudgetProgress): string {
   if (budget.status === "over") {
-    return `Lewat ${formatCurrency(Math.abs(budget.remaining))}`;
+    return `Lewat ${formatCurrency(getAbsoluteBudgetAmount(budget.remaining))}`;
   }
   if (budget.status === "limit-reached") return "Batas tercapai";
   if (budget.status === "unused") return "Belum terpakai";
@@ -27,11 +31,11 @@ function getBudgetInsight(budgets: readonly ClientBudgetProgress[]): string {
     (first, second) => second.progress - first.progress,
   )[0];
 
-  if (!mostUsed || mostUsed.spent === 0) {
+  if (!mostUsed || mostUsed.spent === BigInt(0)) {
     return "Belum ada pengeluaran pada kategori yang diberi anggaran bulan ini.";
   }
   if (mostUsed.status === "over") {
-    return `${mostUsed.category} melewati batas ${formatCurrency(Math.abs(mostUsed.remaining))} bulan ini.`;
+    return `${mostUsed.category} melewati batas ${formatCurrency(getAbsoluteBudgetAmount(mostUsed.remaining))} bulan ini.`;
   }
   if (mostUsed.status === "limit-reached") {
     return `${mostUsed.category} telah mencapai alokasi bulan ini.`;
@@ -83,7 +87,7 @@ export function BudgetDashboard() {
     setSaveError("");
     setSavedMessage("");
     setDraft({
-      amount: 500_000,
+      amount: "500000",
       category: category.name,
       categoryId: category.id,
       monthKey: summary.monthKey,
@@ -95,7 +99,7 @@ export function BudgetDashboard() {
     setSavedMessage("");
     setDraft({
       id: budget.id,
-      amount: budget.amount,
+      amount: budget.amount.toString(),
       category: budget.category,
       categoryId: budget.categoryId,
       monthKey: budget.monthKey,
@@ -103,7 +107,7 @@ export function BudgetDashboard() {
   }
 
   async function saveAllocation() {
-    if (!draft || budgetQuery.isSaving || draft.amount <= 0) return;
+    if (!draft || budgetQuery.isSaving) return;
     setSaveError("");
 
     try {
@@ -156,9 +160,9 @@ export function BudgetDashboard() {
     );
   }
 
-  const summaryIsOver = overview.remaining < 0;
+  const summaryIsOver = overview.remaining < BigInt(0);
   const summaryLabel = summaryIsOver ? "Melebihi anggaran" : "Sisa anggaran";
-  const summaryValue = Math.abs(overview.remaining);
+  const summaryValue = summaryIsOver ? -overview.remaining : overview.remaining;
 
   return (
     <main className="page page-enter">
@@ -177,8 +181,8 @@ export function BudgetDashboard() {
           role="progressbar"
           aria-label="Anggaran kategori bulan ini terpakai"
           aria-valuemin={0}
-          aria-valuemax={Math.max(overview.allocated, 1)}
-          aria-valuenow={Math.min(overview.spent, overview.allocated)}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(overview.progress * 10_000) / 100}
           aria-valuetext={`${formatCurrency(overview.spent)} dari ${formatCurrency(overview.allocated)}`}
         >
           <span style={{ transform: `scaleX(${overview.progress})` }} />
@@ -234,8 +238,8 @@ export function BudgetDashboard() {
                     role="progressbar"
                     aria-label={`${budget.category} terpakai`}
                     aria-valuemin={0}
-                    aria-valuemax={budget.amount}
-                    aria-valuenow={Math.min(budget.spent, budget.amount)}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(budget.progress * 10_000) / 100}
                     aria-valuetext={`${formatCurrency(budget.spent)} dari ${formatCurrency(budget.amount)}. ${getRemainingCopy(budget)}.`}
                   >
                     <span style={{ transform: `scaleX(${budget.progress})` }} />

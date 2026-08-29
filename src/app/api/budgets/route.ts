@@ -9,6 +9,7 @@ import {
   assertTrustedMutationRequest,
   handleFinanceApiError,
   readJsonBody,
+  toStrictQueryInput,
   unauthorizedResponse,
   validationErrorResponse,
 } from "@/server/http/finance-api";
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
     const viewer = await getSessionViewer();
     if (!viewer) return unauthorizedResponse();
 
-    const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+    const query = toStrictQueryInput(new URL(request.url).searchParams);
     const parsed = parseListBudgetsInput(query);
     if (!parsed.success) return validationErrorResponse(parsed);
 

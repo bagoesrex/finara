@@ -7,8 +7,8 @@ import {
   financeQueryKeys,
   type HydratedTransactionData,
 } from "@/lib/finance-query";
-import { getMonthKeyInTimeZone } from "@/lib/transactions";
 import { getPrivateAppState } from "@/server/auth/private-app";
+import { getCurrentMonthKey } from "@/server/time/current-month";
 import {
   getFinanceSnapshot,
   listTransactions,
@@ -25,7 +25,7 @@ export default async function MainLayout({ children }: { children: ReactNode }) 
     redirect("/onboarding");
   }
 
-  const monthKey = getMonthKeyInTimeZone(new Date());
+  const monthKey = getCurrentMonthKey();
   const [snapshot, transactionPage] = await Promise.all([
     getFinanceSnapshot(state.viewer.id, monthKey),
     listTransactions(state.viewer.id, {

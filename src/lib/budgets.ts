@@ -11,7 +11,7 @@ export const BUDGET_STATUSES = [
 ] as const;
 
 const POSTGRES_BIGINT_MAX = BigInt("9223372036854775807");
-const monthKeyPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
+const monthKeyPattern = /^(?!0000)\d{4}-(0[1-9]|1[0-2])$/;
 const unsignedMoneyPattern = /^\d+$/;
 const signedMoneyPattern = /^-?\d+$/;
 
