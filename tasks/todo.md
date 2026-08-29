@@ -55,3 +55,11 @@
 - [x] Persist transaction edit and soft delete.
   - Acceptance: detail edits and confirmed deletion update lists, balances, summaries, and budget-derived views through targeted invalidation; deleted rows remain excluded from normal reads.
   - Verify: service/API/query tests, runtime edit/delete smoke, lint, typecheck, and production build.
+
+- [ ] Persist monthly category Budget schema and calculations.
+  - Acceptance: exact positive IDR, expense-category ownership, first-of-month period, and per-user/category/month uniqueness are database enforced; totals and status are derived server-side.
+  - Verify: contract tests, migration status, and database/service integration checks.
+
+- [ ] Add authenticated Budget API and TanStack Query UI.
+  - Acceptance: list/create/update are user-scoped; Budget route is server-prefetched; mutations survive reload and invalidate authoritative Budget data.
+  - Verify: abuse-case HTTP flow, query tests, runtime page smoke, lint, typecheck, and production build.

@@ -1,7 +1,10 @@
 # Spec: Budget
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 23-24, 26
+
+The persistence and calculation decisions in this spec follow
+[ADR 0006](../decisions/0006-category-month-budgets.md).
 
 ## Objective
 
@@ -17,6 +20,10 @@ Help users understand how much of a monthly spending limit has been used and wha
 - **BUD-006:** Progress remains understandable when spending reaches or exceeds the allocation.
 - **BUD-007:** Users can create or change an allocation without editing a spreadsheet-like grid.
 - **BUD-008:** AI budget answers use the same server-side budget calculations as the Budget page.
+- **BUD-009:** Every MVP Budget references one user-owned expense category.
+- **BUD-010:** The displayed monthly total is the sum of category allocations, not an independent mutable value.
+- **BUD-011:** An allocation is unique per user, category, and Jakarta calendar month.
+- **BUD-012:** Unused allocation does not roll over automatically.
 
 ## Calculation behavior
 
@@ -29,6 +36,19 @@ progress = spent / allocation
 ```
 
 Presentation may clamp the visual progress bar while still displaying the true overspent amount. Zero or missing allocations must not cause division errors.
+
+`near-limit` begins at 80 percent. All allocation, spending, remaining, status,
+and progress calculations are produced by the authenticated server application
+service. Public money fields are decimal strings.
+
+## API contract
+
+- `GET /api/budgets?month=YYYY-MM` returns the authorized monthly overview.
+- `POST /api/budgets` creates a category allocation and is idempotent when the
+  same user/category/month/amount is retried.
+- `PATCH /api/budgets/:id` changes only the allocation amount.
+- Missing and cross-user Budget IDs are both returned as not found.
+- Delete remains outside the accepted MVP behavior.
 
 ## UI states
 
@@ -60,9 +80,6 @@ It must not shame the user or recommend unrelated financial products.
 
 ## Open questions
 
-- Whether total monthly budget is an independent value or the sum of category allocations.
-- Whether every budget must reference a category.
-- Budget uniqueness and rollover rules across periods.
-- How timezone determines month boundaries.
-- Whether unused budget carries into the next month; no rollover is currently specified.
-- Which warning threshold constitutes `nearly exhausted`.
+- Delete, archive, or replacement behavior when a user no longer wants an allocation.
+- Whether a future total-only planning mode should coexist with category allocations.
+- Multi-timezone behavior beyond the single Jakarta-calendar MVP.

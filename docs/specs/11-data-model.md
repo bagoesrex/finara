@@ -5,7 +5,7 @@
 
 ## Objective
 
-Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md). Positive transaction amounts, optional local time, idempotent creation, and soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md); the document remains Draft while budget and category lifecycle questions are open.
+Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md). Positive transaction amounts, optional local time, idempotent creation, and soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md). Category-only monthly Budget semantics are accepted by [ADR 0006](../decisions/0006-category-month-budgets.md); category lifecycle questions remain open.
 
 ## Core relationships
 
@@ -97,13 +97,15 @@ Minimum proposed responsibilities:
 id
 userId
 categoryId?      // pending total-vs-category budget decision
-period
+periodStart      // first Jakarta calendar day of month
 amount
 createdAt
 updatedAt
 ```
 
-Actual spending and remaining amount are derived values and should not be duplicated as mutable budget fields.
+`categoryId` is required and must reference an `EXPENSE` category owned by the
+same user. Actual spending, remaining amount, total allocation, status, and
+progress are derived values and must not be duplicated as mutable Budget fields.
 
 ## Integrity requirements
 
@@ -155,6 +157,6 @@ The following are explicitly deferred and do not belong in the MVP schema withou
 
 - Custom categories in MVP.
 - Restore UI, audit history, and permanent-retention policy for soft-deleted records.
-- Total budget versus category-only budgets and period uniqueness.
+- Delete/archive behavior for Budgets.
 - Merchant, note, and AI provenance fields.
 - Multi-timezone behavior beyond the single `Asia/Jakarta` MVP.

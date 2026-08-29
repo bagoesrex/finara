@@ -65,6 +65,19 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Creating a transaction updates affected pages without a browser reload.
 - [x] PostgreSQL remains authoritative and every financial operation is user-scoped on the server.
 
+### Phase 5: Persisted monthly category budgets
+
+- [ ] Task 13: Record category-only monthly Budget semantics and add the constrained Prisma model.
+- [ ] Task 14: Add precise Budget contracts and a server-side monthly calculation service.
+- [ ] Task 15: Expose authenticated Budget list/create/update Route Handlers with abuse-case checks.
+- [ ] Task 16: Hydrate the Budget route and replace session-only allocation state with TanStack Query mutations.
+
+### Checkpoint: Persisted Budget
+
+- [ ] Budget allocation and derived spending survive reloads and remain user-scoped.
+- [ ] Transaction changes invalidate Budget calculations without client-side financial reconciliation.
+- [ ] Focused tests, runtime flows, lint, type checking, and production build pass.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -78,6 +91,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 ## Open questions
 
 - Restore and permanent-retention behavior for soft-deleted transactions; neither is required by the current MVP.
+- Delete/archive behavior for Budget allocations; create and amount update are the accepted MVP operations.
 
 ## Verification notes
 
