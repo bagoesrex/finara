@@ -16,7 +16,7 @@ const globalForDatabase = globalThis as unknown as {
 
 function supportsCurrentSchema(client: PrismaClient | undefined) {
   // A generated client can outlive a schema change in globalThis during next dev.
-  return client !== undefined && "transaction" in client;
+  return client !== undefined && "transaction" in client && "budget" in client;
 }
 
 export const db =

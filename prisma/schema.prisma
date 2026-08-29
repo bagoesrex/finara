@@ -21,12 +21,13 @@ enum TransactionType {
 }
 
 model User {
-  id             String         @id @default(dbgenerated("pg_catalog.gen_random_uuid()")) @db.Uuid
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
   email          String         @unique
   emailVerified  Boolean        @default(false)
   image          String?
   accounts       Account[]
+  budgets        Budget[]
   categories     Category[]
   transactions   Transaction[]
   authSessions   AuthSession[]
@@ -36,7 +37,7 @@ model User {
 }
 
 model AuthSession {
-  id        String   @id @default(dbgenerated("pg_catalog.gen_random_uuid()")) @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token     String   @unique
@@ -50,7 +51,7 @@ model AuthSession {
 }
 
 model AuthIdentity {
-  id                    String    @id @default(dbgenerated("pg_catalog.gen_random_uuid()")) @db.Uuid
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId                String    @db.Uuid
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   issuer                String
@@ -71,7 +72,7 @@ model AuthIdentity {
 }
 
 model AuthVerification {
-  id         String   @id @default(dbgenerated("pg_catalog.gen_random_uuid()")) @db.Uuid
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   identifier String
   value      String
   expiresAt  DateTime @db.Timestamptz(3)
@@ -82,7 +83,7 @@ model AuthVerification {
 }
 
 model AuthRateLimit {
-  id          String @id @default(dbgenerated("pg_catalog.gen_random_uuid()")) @db.Uuid
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   key         String @unique
   count       Int
   lastRequest BigInt @db.BigInt
@@ -111,11 +112,28 @@ model Category {
   name         String
   type         TransactionType
   transactions Transaction[]
+  budgets      Budget[]
   createdAt    DateTime        @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([userId, type])
   @@unique([id, userId, type])
+}
+
+model Budget {
+  id           String          @id @default(uuid()) @db.Uuid
+  userId       String          @db.Uuid
+  user         User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  categoryId   String          @db.Uuid
+  categoryType TransactionType @default(EXPENSE)
+  category     Category        @relation(fields: [categoryId, userId, categoryType], references: [id, userId, type], onDelete: Restrict)
+  periodStart  DateTime        @db.Date
+  amount       BigInt          @db.BigInt
+  createdAt    DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @db.Timestamptz(3)
+
+  @@unique([userId, categoryId, periodStart])
+  @@index([userId, periodStart])
 }
 
 model Transaction {
