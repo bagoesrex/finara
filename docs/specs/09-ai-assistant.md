@@ -1,6 +1,6 @@
 # Spec: AI Assistant
 
-**Status:** Draft  
+**Status:** Accepted for MVP transaction parsing
 **PRD source:** Sections 15-18, 24-29, 54-56
 
 ## Objective
@@ -63,6 +63,17 @@ Initial tools may include:
 
 Tool implementations must authenticate, authorize, validate, and return only the minimum result required. Tool names do not authorize direct database access by the model.
 
+## Accepted transaction-parsing boundary
+
+Following [ADR 0007](../decisions/0007-nvidia-build-for-ai-inference.md),
+transaction parsing uses NVIDIA Build's hosted Chat Completions endpoint with
+`nvidia/nemotron-3.5-lightning-30b-a3b` as the configurable default model.
+Parsing is exposed as authenticated `POST /api/ai/transaction-previews` and can
+only return `ready` or `needs_input`; it cannot persist a transaction. The
+server maps model hints to the authenticated user's account and category IDs,
+and the existing transaction API remains the only persistence boundary after
+explicit confirmation.
+
 ## Response style
 
 - **AI-012:** Responses are concise, factual, calm, contextual, and non-judgmental.
@@ -104,9 +115,9 @@ Financial records are fetched at request time and are not embedded in static pro
 
 ## Open questions
 
-- LLM provider, model, latency budget, and cost ceiling.
-- Structured-output schema and bounded retry policy.
+- Production quota, availability target, privacy review, and cost ceiling if
+  NVIDIA changes the free prototype endpoint.
 - Confidence calibration and evaluation dataset.
 - Conversation persistence and retention; `AIConversation` is Phase 2.
-- Exact supported date language and timezone rules.
+- Date-language coverage beyond the accepted Jakarta-relative MVP examples.
 - Whether natural-language transaction search remains Phase 2 or is included through basic query tools.
