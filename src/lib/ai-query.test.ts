@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { fetchAiTransactionPreview } from "./ai-query";
+import {
+  fetchAiComposerResponse,
+  fetchAiTransactionPreview,
+} from "./ai-query";
 
 const readyResponse = {
   status: "ready",
@@ -50,5 +53,52 @@ describe("AI transaction preview request", () => {
     );
 
     await expect(fetchAiTransactionPreview("makan 25rb")).rejects.toThrow();
+  });
+});
+
+describe("AI composer request", () => {
+  it("posts questions to the authenticated composer resource", async () => {
+    const answer = {
+      kind: "finance_answer",
+      label: "Saldo tersedia",
+      value: "Rp500.000",
+      detail: "Dari 1 akun.",
+    };
+    const fetchMock = vi.fn<typeof fetch>(async () =>
+      Response.json({ data: answer }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchAiComposerResponse("saldo saya?")).resolves.toEqual(
+      answer,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/ai/composer-responses",
+      expect.objectContaining({
+        body: JSON.stringify({ text: "saldo saya?" }),
+        cache: "no-store",
+        credentials: "same-origin",
+        method: "POST",
+      }),
+    );
+  });
+
+  it("rejects extra financial data outside the public composer contract", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          data: {
+            kind: "finance_answer",
+            label: "Saldo tersedia",
+            value: "Rp500.000",
+            detail: null,
+            transactions: [],
+          },
+        }),
+      ),
+    );
+
+    await expect(fetchAiComposerResponse("saldo saya?")).rejects.toThrow();
   });
 });
