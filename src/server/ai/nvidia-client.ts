@@ -7,6 +7,7 @@ export const NVIDIA_CHAT_COMPLETIONS_URL =
 
 const NVIDIA_REQUEST_TIMEOUT_MS = 8_000;
 const MAX_NVIDIA_RESPONSE_BYTES = 65_536;
+const MAX_NVIDIA_OUTPUT_TOKENS = 512;
 
 const nvidiaCompletionSchema = z
   .object({
@@ -24,11 +25,16 @@ const nvidiaCompletionSchema = z
   })
   .passthrough();
 
-type NvidiaTransactionRequest = {
+type NvidiaJsonRequest = {
   apiKey: string;
+  maxTokens?: number;
   model: string;
   systemPrompt: string;
   userPrompt: string;
+};
+
+type NvidiaStructuredJsonRequest<T> = NvidiaJsonRequest & {
+  outputSchema: z.ZodType<T>;
 };
 
 export class NvidiaUnavailableError extends Error {
@@ -45,7 +51,7 @@ export class NvidiaInvalidResponseError extends Error {
   }
 }
 
-function parseCompletion(raw: string) {
+function parseCompletion<T>(raw: string, outputSchema: z.ZodType<T>) {
   let body: unknown;
   try {
     body = JSON.parse(raw) as unknown;
@@ -63,15 +69,24 @@ function parseCompletion(raw: string) {
     throw new NvidiaInvalidResponseError();
   }
 
-  const parsed = aiTransactionExtractionSchema.safeParse(extraction);
+  const parsed = outputSchema.safeParse(extraction);
   if (!parsed.success) throw new NvidiaInvalidResponseError();
   return parsed.data;
 }
 
-export async function requestNvidiaTransactionExtraction(
-  request: NvidiaTransactionRequest,
+export async function requestNvidiaStructuredJson<T>(
+  request: NvidiaStructuredJsonRequest<T>,
   fetchImpl: typeof fetch = fetch,
 ) {
+  const maxTokens = request.maxTokens ?? 256;
+  if (
+    !Number.isSafeInteger(maxTokens) ||
+    maxTokens < 1 ||
+    maxTokens > MAX_NVIDIA_OUTPUT_TOKENS
+  ) {
+    throw new NvidiaInvalidResponseError();
+  }
+
   try {
     const response = await fetchImpl(NVIDIA_CHAT_COMPLETIONS_URL, {
       method: "POST",
@@ -87,7 +102,7 @@ export async function requestNvidiaTransactionExtraction(
           { role: "user", content: request.userPrompt },
         ],
         temperature: 0,
-        max_tokens: 256,
+        max_tokens: maxTokens,
         stream: false,
         response_format: { type: "json_object" },
         chat_template_kwargs: { enable_thinking: false },
@@ -104,7 +119,7 @@ export async function requestNvidiaTransactionExtraction(
       throw new NvidiaInvalidResponseError();
     }
 
-    return parseCompletion(raw);
+    return parseCompletion(raw, request.outputSchema);
   } catch (error) {
     if (
       error instanceof NvidiaUnavailableError ||
@@ -114,4 +129,14 @@ export async function requestNvidiaTransactionExtraction(
     }
     throw new NvidiaUnavailableError();
   }
+}
+
+export function requestNvidiaTransactionExtraction(
+  request: NvidiaJsonRequest,
+  fetchImpl: typeof fetch = fetch,
+) {
+  return requestNvidiaStructuredJson(
+    { ...request, outputSchema: aiTransactionExtractionSchema },
+    fetchImpl,
+  );
 }

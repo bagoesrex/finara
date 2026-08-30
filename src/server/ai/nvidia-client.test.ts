@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 
 import {
   NVIDIA_CHAT_COMPLETIONS_URL,
   NvidiaInvalidResponseError,
   NvidiaUnavailableError,
+  requestNvidiaStructuredJson,
   requestNvidiaTransactionExtraction,
 } from "./nvidia-client";
 
@@ -28,6 +30,61 @@ function completion(content: string) {
 }
 
 describe("NVIDIA transaction extraction client", () => {
+  it("validates a generic structured response with the caller schema", async () => {
+    const intentSchema = z
+      .object({ intent: z.literal("GET_BALANCE") })
+      .strict();
+
+    await expect(
+      requestNvidiaStructuredJson(
+        {
+          apiKey: "key",
+          maxTokens: 128,
+          model: "nvidia/model",
+          outputSchema: intentSchema,
+          systemPrompt: "Select one intent.",
+          userPrompt: "saldo saya?",
+        },
+        async () => completion(JSON.stringify({ intent: "GET_BALANCE" })),
+      ),
+    ).resolves.toEqual({ intent: "GET_BALANCE" });
+
+    await expect(
+      requestNvidiaStructuredJson(
+        {
+          apiKey: "key",
+          model: "nvidia/model",
+          outputSchema: intentSchema,
+          systemPrompt: "Select one intent.",
+          userPrompt: "saldo saya?",
+        },
+        async () =>
+          completion(
+            JSON.stringify({ intent: "GET_BALANCE", userId: "forged" }),
+          ),
+      ),
+    ).rejects.toBeInstanceOf(NvidiaInvalidResponseError);
+  });
+
+  it("rejects an unsafe structured-output token limit before provider access", async () => {
+    const fetchImpl = vi.fn<typeof fetch>();
+
+    await expect(
+      requestNvidiaStructuredJson(
+        {
+          apiKey: "key",
+          maxTokens: 513,
+          model: "nvidia/model",
+          outputSchema: z.object({ intent: z.string() }),
+          systemPrompt: "Select one intent.",
+          userPrompt: "saldo saya?",
+        },
+        fetchImpl,
+      ),
+    ).rejects.toBeInstanceOf(NvidiaInvalidResponseError);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("sends one bounded, non-streaming JSON request and validates the result", async () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       completion(JSON.stringify(extraction)),
