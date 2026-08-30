@@ -101,25 +101,26 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 7: Read-only financial questions
 
-- [ ] Task 20: Define the additive composer request/response and strict NVIDIA
+- [x] Task 20: Define the additive composer request/response and strict NVIDIA
   intent-routing contracts.
-- [ ] Task 21: Add user-scoped read tools and deterministic current-month
+- [x] Task 21: Add user-scoped read tools and deterministic current-month
   financial answers.
-- [ ] Task 22: Expose the authenticated, rate-limited composer Route Handler and
+- [x] Task 22: Expose the authenticated, rate-limited composer Route Handler and
   client request boundary.
-- [ ] Task 23: Let Home render either a transaction preview or a concise
+- [x] Task 23: Let Home render either a transaction preview or a concise
   financial answer from the same composer.
 
 ### Checkpoint: Read-only Financial Questions
 
-- [ ] Saldo, current-month income/expense, top/category spending, and budget
+- [x] Saldo, current-month income/expense, top/category spending, and budget
   remaining answers come only from authorized PostgreSQL data.
-- [ ] Model output can select only an allowlisted read intent and cannot provide
+- [x] Model output can select only an allowlisted read intent and cannot provide
   SQL, user IDs, record IDs, calculated totals, or persistence instructions.
-- [ ] Transaction entry remains a one-model-call preview flow with explicit
+- [x] Transaction entry remains a one-model-call preview flow with explicit
   confirmation before save.
-- [ ] Unit, database, HTTP, browser, live provider, lint, typecheck, and
-  production-build verification pass.
+- [x] Unit, database, production HTTP, live provider, lint, typecheck, and
+  production-build verification pass. Chrome DevTools MCP was unavailable, so
+  authenticated SSR and source-level accessibility checks cover the UI here.
 
 ## Risks and mitigations
 
@@ -162,3 +163,18 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - ADR 0007 selects NVIDIA Build's OpenAI-compatible hosted endpoint with `nvidia/nemotron-3.5-lightning-30b-a3b` as the configurable default. The parser uses one non-streaming, non-retried, eight-second request with reasoning disabled and a 256-token output cap.
 - AI parsing is exposed only as authenticated `POST /api/ai/transaction-previews`. Strict schemas reject malformed provider output; server code maps hints to viewer-owned account/category records; the existing confirmation sheet and transaction API remain the only persistence path.
 - `npm test` passes 107 tests after the AI slice. Lint, type checking, the Next.js production build, unauthenticated POST `401`, unsupported GET `405`, and npm registry signatures pass. Live NVIDIA inference remains pending because no `NVIDIA_API_KEY` is present in the local environment; run `npm run ai:check:nvidia` after configuring it.
+- ADR 0008 keeps NVIDIA at the intent-routing boundary for current-month
+  questions. Financial answers are calculated once by viewer-scoped server
+  tools and are never returned to the model for rephrasing.
+- The AI finance tool integration check covers cross-user isolation, deleted
+  and prior-month exclusion, empty budgets, category matching, and exact IDR
+  above JavaScript's safe-integer range.
+- The production composer HTTP flow verifies authenticated Home SSR, `401`,
+  cross-origin `403`, forged-identity `422`, deterministic balance success with
+  no transaction mutation, and shared-quota `429` with `Retry-After`.
+- Live NVIDIA smoke verifies both `GET_BALANCE` and `CREATE_TRANSACTION` against
+  the configured hosted model. A regression test prevents the model from
+  returning an embedded `oneOf` schema instead of an intent instance.
+- Final Phase 7 gates pass: ESLint is clean, all 126 tests across 18 files pass,
+  strict type checking passes, and the Next.js 16.3.2 production build includes
+  the dynamic composer Route Handler.

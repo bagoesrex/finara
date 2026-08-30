@@ -102,7 +102,8 @@ transaction persistence contracts.
 - The limiter adds one database write to each request that reaches the provider
   boundary. Invalid, unauthenticated, and cross-origin requests do not consume
   this quota.
-- Basic financial questions and tool calling remain a separate later slice.
+- Basic financial questions are added through the separate application-managed
+  boundary accepted in [ADR 0008](./0008-application-managed-ai-finance-tools.md).
 - A production launch must re-evaluate provider quota, availability, privacy
   terms, and whether the default application quota remains appropriate.
 

@@ -1,6 +1,6 @@
 # Spec: AI Assistant
 
-**Status:** Accepted for MVP transaction parsing
+**Status:** Accepted for MVP transaction parsing and current-month questions
 **PRD source:** Sections 15-18, 24-29, 54-56
 
 ## Objective
@@ -10,13 +10,13 @@ Use AI as a concise interaction layer for transaction parsing and questions abou
 ## Supported MVP intents
 
 1. Parse a proposed income or expense transaction.
-2. Ask for spending or income totals over a period.
-3. Ask for spending grouped by category.
-4. Ask for remaining category budget.
-5. Compare basic spending periods.
-6. Ask for transactions matching a merchant/description concept when supported by the available tools.
+2. Ask for the current available balance.
+3. Ask for current-month spending or income totals and category totals/ranking.
+4. Ask for current-month remaining category or overall budget.
 
 Unsupported requests receive a brief limitation response and do not trigger unrelated tools.
+Cross-period comparison, merchant/description search, and conversation history
+remain later slices.
 
 ## Transaction parsing
 
@@ -77,6 +77,22 @@ a PostgreSQL-backed fixed window (10 requests per 60 seconds by default).
 Exhausted quota returns `429 AI_RATE_LIMITED` with `Retry-After`; it never
 creates a transaction.
 
+## Accepted current-month question boundary
+
+Following [ADR 0008](../decisions/0008-application-managed-ai-finance-tools.md),
+authenticated `POST /api/ai/composer-responses` uses one strict NVIDIA JSON
+response to select an allowlisted intent. It receives user text, Jakarta date
+context, and available category names/types, but no account IDs, category IDs,
+balances, transactions, budgets, or calculated answers. Server tools inject the
+session user ID, query PostgreSQL, calculate exact IDR values, and return concise
+application-authored text without a second model call.
+
+The accepted first slice covers available balance; current-month income,
+expense, category totals, and top category; and current-month category or
+overall budget remaining. It shares the persisted quota from ADR 0007. Home
+renders a transaction preview, one announced financial answer, or a short
+unsupported message from the same composer without storing chat history.
+
 ## Response style
 
 - **AI-012:** Responses are concise, factual, calm, contextual, and non-judgmental.
@@ -104,15 +120,17 @@ Financial records are fetched at request time and are not embedded in static pro
 - Timeout/provider failure preserves user input and offers retry or manual entry.
 - Invalid structured output is rejected and may be retried within a bounded policy.
 - Tool failure returns a short user-facing error without exposing internal details.
-- Rate-limited parsing preserves user input and offers the existing retry or
-  manual-entry path.
+- Rate-limited composer requests preserve user input; transaction-shaped input
+  retains the existing retry or manual-entry path.
 - Ambiguous intent asks one focused clarification or routes the user to manual entry.
 - No model response can bypass server validation or confirmation.
 
 ## Acceptance criteria
 
 - Representative phrases from the PRD parse into correct editable previews: `makan 25rb`, `gaji masuk 5jt`, `kemarin beli bensin 50 ribu`, `bayar wifi 350k`, and `grab 22rb tadi pagi`.
-- Queries such as weekly spending, top category, remaining food budget, Grab total, and weekly income use authorized stored data.
+- Available balance, current-month totals/top category, and remaining budget use
+  authorized stored data. Other periods and merchant totals return the bounded
+  unsupported response in this slice.
 - Changing model wording cannot change deterministic totals returned by tools.
 - No transaction is saved from a parsing response without explicit MVP confirmation.
 - Prompts and logs do not receive a user's complete financial dataset by default.
