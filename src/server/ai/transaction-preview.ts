@@ -6,6 +6,7 @@ import { getDateKeyInTimeZone } from "@/lib/transactions";
 import { db } from "@/server/db/client";
 import { getNvidiaConfig } from "./config";
 import { requestNvidiaTransactionExtraction } from "./nvidia-client";
+import { consumeAiPreviewQuota } from "./rate-limit";
 
 export async function createAiTransactionPreview(
   userId: string,
@@ -30,6 +31,7 @@ export async function createAiTransactionPreview(
     referenceDate,
     text,
   });
+  await consumeAiPreviewQuota(userId);
   const extraction = await requestNvidiaTransactionExtraction({
     apiKey,
     model,

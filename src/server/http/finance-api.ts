@@ -11,6 +11,8 @@ import {
   NvidiaInvalidResponseError,
   NvidiaUnavailableError,
 } from "@/server/ai/nvidia-client";
+import { AiPreviewRateLimitExceededError } from "@/server/ai/rate-limit";
+import { AiRateLimitConfigurationError } from "@/server/ai/rate-limit-policy";
 import {
   BudgetConflictError,
   BudgetNotFoundError,
@@ -121,6 +123,7 @@ export function apiError(
   code: ApiErrorCode,
   message: string,
   fieldErrors?: Record<string, string>,
+  headers?: HeadersInit,
 ) {
   const body: ApiErrorResponse = {
     error: {
@@ -131,7 +134,9 @@ export function apiError(
         : {}),
     },
   };
-  return Response.json(body, { status, headers: noStoreHeaders });
+  const responseHeaders = new Headers(headers);
+  responseHeaders.set("Cache-Control", noStoreHeaders["Cache-Control"]);
+  return Response.json(body, { status, headers: responseHeaders });
 }
 
 export function unauthorizedResponse() {
@@ -212,7 +217,18 @@ export function handleFinanceApiError(error: unknown) {
     );
   }
 
+  if (error instanceof AiPreviewRateLimitExceededError) {
+    return apiError(
+      429,
+      "AI_RATE_LIMITED",
+      "Terlalu banyak permintaan AI. Coba lagi sebentar.",
+      undefined,
+      { "Retry-After": String(error.retryAfterSeconds) },
+    );
+  }
+
   if (
+    error instanceof AiRateLimitConfigurationError ||
     error instanceof NvidiaConfigurationError ||
     error instanceof NvidiaInvalidResponseError ||
     error instanceof NvidiaUnavailableError
