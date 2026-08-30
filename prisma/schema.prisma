@@ -30,6 +30,7 @@ model User {
   budgets        Budget[]
   categories     Category[]
   transactions   Transaction[]
+  aiRateLimit    AiRateLimit?
   authSessions   AuthSession[]
   authIdentities AuthIdentity[]
   createdAt      DateTime       @default(now()) @db.Timestamptz(3)
@@ -87,6 +88,14 @@ model AuthRateLimit {
   key         String @unique
   count       Int
   lastRequest BigInt @db.BigInt
+}
+
+model AiRateLimit {
+  userId          String   @id @db.Uuid
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  windowStartedAt DateTime @db.Timestamptz(3)
+  requestCount    Int
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model Account {
