@@ -7,7 +7,7 @@ import { useFinance } from "@/components/finance-provider";
 import { useViewer } from "@/components/viewer-provider";
 import { getInitials } from "@/lib/auth";
 import { formatCompactCurrency, formatSignedCurrency } from "@/lib/finance";
-import { HomeTransactionComposer } from "./home-transaction-composer";
+import { HomeComposer } from "./home-composer";
 import { TransactionRow } from "./transaction-row";
 
 export function HomeDashboard() {
@@ -51,7 +51,7 @@ export function HomeDashboard() {
         </div>
       </section>
 
-      <HomeTransactionComposer />
+      <HomeComposer />
 
       <section className="section-block recent-section" aria-labelledby="recent-title">
         <div className="section-heading">

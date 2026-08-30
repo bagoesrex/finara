@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   ArrowRight,
   Check,
@@ -8,19 +14,18 @@ import {
   MessageSquareText,
 } from "lucide-react";
 
-import { useFinance } from "@/components/finance-provider";
-import {
-  adaptAiTransactionPreview,
-  MAX_AI_TRANSACTION_INPUT_LENGTH,
-} from "@/lib/ai-transaction";
-import { fetchAiTransactionPreview } from "@/lib/ai-query";
+import type { AiFinanceAnswer } from "@/lib/ai-composer";
+import { MAX_AI_COMPOSER_INPUT_LENGTH } from "@/lib/ai-composer";
+import { fetchAiComposerResponse } from "@/lib/ai-query";
+import { adaptAiTransactionPreview } from "@/lib/ai-transaction";
+import type { FinanceAccount } from "@/lib/accounts";
 import { parseTransactionInput } from "@/lib/finance";
 import type {
   FinanceCategory,
   TransactionDraft,
 } from "@/lib/finance-query";
-import type { FinanceAccount } from "@/lib/accounts";
 import { getDateKeyInTimeZone } from "@/lib/transactions";
+import { useFinance } from "@/components/finance-provider";
 import { TransactionConfirmationSheet } from "./transaction-confirmation-sheet";
 
 function createManualDraft(
@@ -63,16 +68,24 @@ function createManualDraft(
   };
 }
 
-export function HomeTransactionComposer() {
+function canOfferManualEntry(input: string) {
+  return (
+    parseTransactionInput(input, getDateKeyInTimeZone(new Date())).status ===
+    "ready"
+  );
+}
+
+export function HomeComposer() {
   const { accounts, addTransaction, categories } = useFinance();
   const [input, setInput] = useState("");
+  const [answer, setAnswer] = useState<AiFinanceAnswer | null>(null);
   const [preview, setPreview] = useState<TransactionDraft | null>(null);
   const [error, setError] = useState("");
-  const [isParsing, setIsParsing] = useState(false);
   const [showManualFallback, setShowManualFallback] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState("");
+  const [isParsing, startParsing] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
   const parsingRef = useRef(false);
   const savingRef = useRef(false);
@@ -86,35 +99,45 @@ export function HomeTransactionComposer() {
     return () => window.clearTimeout(timeout);
   }, [savedMessage]);
 
-  async function handleParse(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (parsingRef.current) return;
 
     parsingRef.current = true;
-    setIsParsing(true);
+    setAnswer(null);
     setError("");
     setShowManualFallback(false);
 
-    try {
-      const result = await fetchAiTransactionPreview(input);
-      if (result.status === "needs_input") {
-        setError(result.message);
-        setShowManualFallback(true);
-        return;
-      }
+    startParsing(async () => {
+      try {
+        const result = await fetchAiComposerResponse(input);
 
-      setSaveError("");
-      setPreview({
-        ...adaptAiTransactionPreview(result),
-        clientRequestId: crypto.randomUUID(),
-      });
-    } catch {
-      setError("AI belum dapat memproses transaksi. Coba lagi atau isi manual.");
-      setShowManualFallback(true);
-    } finally {
-      parsingRef.current = false;
-      setIsParsing(false);
-    }
+        if (result.kind === "finance_answer") {
+          setAnswer(result);
+          return;
+        }
+        if (result.kind === "unsupported") {
+          setError(result.message);
+          return;
+        }
+        if (result.preview.status === "needs_input") {
+          setError(result.preview.message);
+          setShowManualFallback(true);
+          return;
+        }
+
+        setSaveError("");
+        setPreview({
+          ...adaptAiTransactionPreview(result.preview),
+          clientRequestId: crypto.randomUUID(),
+        });
+      } catch {
+        setError("AI belum dapat memproses permintaan. Coba lagi.");
+        setShowManualFallback(canOfferManualEntry(input));
+      } finally {
+        parsingRef.current = false;
+      }
+    });
   }
 
   function openManualEntry() {
@@ -154,54 +177,82 @@ export function HomeTransactionComposer() {
     }
   }
 
+  function chooseExample(example: string) {
+    setInput(example);
+    setAnswer(null);
+    setError("");
+    setShowManualFallback(false);
+    inputRef.current?.focus();
+  }
+
   return (
     <>
       <section className="composer-section" aria-labelledby="composer-title">
         <div className="composer-heading">
-          <span><MessageSquareText aria-hidden="true" size={18} /></span>
+          <span>
+            <MessageSquareText aria-hidden="true" size={18} />
+          </span>
           <div>
-            <h2 id="composer-title">Catat dengan kalimat biasa</h2>
-            <p>Coba “makan ayam 25rb”</p>
+            <h2 id="composer-title">Catat atau tanya</h2>
+            <p>Misalnya makan 25rb atau saldo saya?</p>
           </div>
         </div>
         <form
           className="composer-form"
-          onSubmit={handleParse}
+          onSubmit={handleSubmit}
           aria-busy={isParsing}
         >
-          <label className="sr-only" htmlFor="quick-transaction">Tulis transaksi</label>
+          <label className="sr-only" htmlFor="finance-composer-input">
+            Tulis transaksi atau pertanyaan
+          </label>
           <input
             ref={inputRef}
-            id="quick-transaction"
-            name="transaction"
+            id="finance-composer-input"
+            name="composerInput"
             value={input}
             onChange={(event) => {
               setInput(event.target.value);
-              if (error) setError("");
-              if (showManualFallback) setShowManualFallback(false);
+              setAnswer(null);
+              setError("");
+              setShowManualFallback(false);
             }}
-            placeholder="Contoh: kopi 18rb…"
+            placeholder="Kopi 18rb atau sisa budget makan?"
             autoComplete="off"
             disabled={isParsing}
-            maxLength={MAX_AI_TRANSACTION_INPUT_LENGTH}
+            maxLength={MAX_AI_COMPOSER_INPUT_LENGTH}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "composer-error" : undefined}
           />
           <button
             type="submit"
             disabled={!input.trim() || isParsing}
-            aria-label={isParsing ? "Memproses transaksi" : "Tinjau transaksi"}
+            aria-label={isParsing ? "Finara sedang memproses" : "Proses dengan Finara"}
           >
             {isParsing ? (
-              <LoaderCircle className="composer-spinner" aria-hidden="true" size={19} />
+              <LoaderCircle
+                className="composer-spinner"
+                aria-hidden="true"
+                size={19}
+              />
             ) : (
               <ArrowRight aria-hidden="true" size={19} />
             )}
           </button>
         </form>
+
+        {answer ? (
+          <div className="composer-answer" role="status" aria-live="polite">
+            <span>{answer.label}</span>
+            <strong>{answer.value}</strong>
+            {answer.detail ? <p>{answer.detail}</p> : null}
+          </div>
+        ) : null}
+
         {error ? (
           <div className="composer-feedback">
-            <p id="composer-error" className="form-error" role="alert">{error}</p>
+            <p id="composer-error" className="form-error" role="alert">
+              {error}
+            </p>
             {showManualFallback ? (
               <button
                 className="section-action"
@@ -213,22 +264,20 @@ export function HomeTransactionComposer() {
             ) : null}
           </div>
         ) : null}
-        <div className="quick-examples" aria-label="Contoh transaksi">
-          {["Makan 25rb", "Grab 22rb", "Gaji masuk 5jt"].map((example) => (
-            <button
-              type="button"
-              disabled={isParsing}
-              key={example}
-              onClick={() => {
-                setInput(example);
-                setError("");
-                setShowManualFallback(false);
-                inputRef.current?.focus();
-              }}
-            >
-              {example}
-            </button>
-          ))}
+
+        <div className="quick-examples" aria-label="Contoh input">
+          {["Makan 25rb", "Saldo saya?", "Sisa budget makan?"].map(
+            (example) => (
+              <button
+                type="button"
+                disabled={isParsing}
+                key={example}
+                onClick={() => chooseExample(example)}
+              >
+                {example}
+              </button>
+            ),
+          )}
         </div>
       </section>
 
@@ -245,7 +294,8 @@ export function HomeTransactionComposer() {
 
       {savedMessage ? (
         <div className="toast" role="status" aria-live="polite">
-          <Check aria-hidden="true" size={17} />{savedMessage}
+          <Check aria-hidden="true" size={17} />
+          {savedMessage}
         </div>
       ) : null}
     </>
