@@ -122,6 +122,23 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   production-build verification pass. Chrome DevTools MCP was unavailable, so
   authenticated SSR and source-level accessibility checks cover the UI here.
 
+### Phase 8: First-class manual transaction entry
+
+- [x] Task 24: Extract deterministic manual-draft construction with focused
+  regression tests.
+- [ ] Task 25: Keep manual entry available as a secondary Home action while
+  preserving typed-text recovery after an AI parsing failure.
+
+### Checkpoint: Manual Transaction Entry
+
+- [ ] A user can open an empty expense draft without calling NVIDIA or first
+  entering natural-language text.
+- [ ] A recoverable AI failure can carry the current text into the same editable
+  confirmation sheet.
+- [ ] Confirmed manual transactions use the existing idempotent transaction API
+  and authoritative query invalidation path.
+- [ ] Focused tests, lint, type checking, and production build pass.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |

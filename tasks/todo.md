@@ -103,3 +103,11 @@
   - Verify: authenticated production SSR, source-level keyboard/accessibility
     review, unit tests, lint, typecheck, and production build. Chrome DevTools
     MCP was unavailable for an automated interactive browser run.
+
+- [ ] Make manual transaction entry a permanent Home action.
+  - Acceptance: the secondary action opens an empty expense draft with today's
+    Jakarta date, the first account, and a compatible category without an AI
+    request; AI recovery may prefill the current text; saving still requires the
+    existing confirmation sheet.
+  - Verify: deterministic draft tests, authenticated Home runtime smoke, query
+    invalidation regression coverage, lint, typecheck, and production build.
