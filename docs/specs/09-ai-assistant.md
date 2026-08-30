@@ -72,7 +72,10 @@ Parsing is exposed as authenticated `POST /api/ai/transaction-previews` and can
 only return `ready` or `needs_input`; it cannot persist a transaction. The
 server maps model hints to the authenticated user's account and category IDs,
 and the existing transaction API remains the only persistence boundary after
-explicit confirmation.
+explicit confirmation. Provider-bound preview requests are limited per user by
+a PostgreSQL-backed fixed window (10 requests per 60 seconds by default).
+Exhausted quota returns `429 AI_RATE_LIMITED` with `Retry-After`; it never
+creates a transaction.
 
 ## Response style
 
@@ -101,6 +104,8 @@ Financial records are fetched at request time and are not embedded in static pro
 - Timeout/provider failure preserves user input and offers retry or manual entry.
 - Invalid structured output is rejected and may be retried within a bounded policy.
 - Tool failure returns a short user-facing error without exposing internal details.
+- Rate-limited parsing preserves user input and offers the existing retry or
+  manual-entry path.
 - Ambiguous intent asks one focused clarification or routes the user to manual entry.
 - No model response can bypass server validation or confirmation.
 

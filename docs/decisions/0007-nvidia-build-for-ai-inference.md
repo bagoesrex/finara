@@ -76,6 +76,11 @@ transaction persistence contracts.
   value can select an arbitrary outbound URL.
 - Cap time and generated tokens and perform at most one provider call per
   request.
+- Enforce a PostgreSQL-backed quota per authenticated user immediately before
+  provider access. The default is 10 preview requests in a 60-second fixed
+  window; bounded server-only environment overrides may tune both values.
+- Return `429 AI_RATE_LIMITED` with `Retry-After` when the quota is exhausted.
+  Invalid rate-limit configuration fails closed as `503 AI_UNAVAILABLE`.
 - Never include the API key in a prompt, response, or log.
 - Strictly validate provider JSON, exact money, dates, times, and public DTOs.
 - Never trust client-provided user IDs or provider-produced account/category
@@ -91,9 +96,15 @@ transaction persistence contracts.
   UI must retain retry and manual paths.
 - Parsing latency is bounded below the product's ten-second recording target,
   but a timeout can still move the user to manual entry.
+- Each user has one `AiRateLimit` row. Atomic conditional updates keep the
+  quota consistent across concurrent requests and multiple application
+  instances; deleting the user cascades to the row.
+- The limiter adds one database write to each request that reaches the provider
+  boundary. Invalid, unauthenticated, and cross-origin requests do not consume
+  this quota.
 - Basic financial questions and tool calling remain a separate later slice.
 - A production launch must re-evaluate provider quota, availability, privacy
-  terms, and operational rate limiting.
+  terms, and whether the default application quota remains appropriate.
 
 ## Alternatives considered
 
