@@ -15,6 +15,7 @@
     "db:test:budgets": "node --conditions=react-server --import tsx scripts/check-budget-schema.ts",
     "db:test:budget-service": "node --conditions=react-server --import tsx scripts/check-budget-service.ts",
     "db:test:ai-rate-limit": "node --conditions=react-server --import tsx scripts/check-ai-rate-limit.ts",
+    "db:test:ai-finance-tools": "node --conditions=react-server --import tsx scripts/check-ai-finance-tools.ts",
     "db:test:transaction-service": "node --conditions=react-server --import tsx scripts/check-transaction-service.ts",
     "db:test:auth": "node --conditions=react-server --import tsx scripts/check-auth-foundation.ts",
     "app:test:auth-flow": "node --conditions=react-server --import tsx scripts/check-auth-onboarding-flow.ts",
