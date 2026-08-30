@@ -72,6 +72,33 @@
   - Acceptance: Home requests an authorized preview, prevents duplicate parsing, never auto-saves, preserves input on failure, and offers manual entry.
   - Verify: 107 unit tests, lint, typecheck, production build, and HTTP 401/405 smoke pass.
 
-- [ ] Verify hosted NVIDIA inference with a local credential.
+- [x] Verify hosted NVIDIA inference with a local credential.
   - Acceptance: the documented PRD phrase returns the expected strict extraction from the configured hosted model without exposing the key.
   - Verify: set `NVIDIA_API_KEY` in ignored `.env`, then run `npm run ai:check:nvidia`.
+
+- [ ] Define additive composer and NVIDIA intent-routing contracts.
+  - Acceptance: one strict discriminated union covers transaction preview,
+    balance, monthly summary, budget, and unsupported intents without accepting
+    model-provided user or record IDs.
+  - Verify: focused contract, prompt-injection, and provider-envelope tests fail
+    before implementation and pass afterward.
+
+- [ ] Add deterministic current-month finance read tools.
+  - Acceptance: saldo, income/expense summary, category spending, and budget
+    remaining are derived from viewer-scoped PostgreSQL services and returned as
+    concise application-authored text.
+  - Verify: database integration checks include cross-user isolation, deleted
+    transaction exclusion, exact IDR, empty data, and category matching.
+
+- [ ] Add the authenticated composer response API.
+  - Acceptance: POST validates input, session, origin, provider output, and the
+    shared persisted AI quota; the existing transaction-preview endpoint remains
+    unchanged.
+  - Verify: client contract tests plus HTTP 401, 403, 422, 429, and success flows.
+
+- [ ] Connect Home to transaction previews and financial answers.
+  - Acceptance: one composer shows a confirmation sheet for transactions, an
+    announced concise result for questions, and safe retry/manual states without
+    adding chat history.
+  - Verify: keyboard/mobile browser smoke, unit tests, lint, typecheck, and
+    production build.

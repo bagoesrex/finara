@@ -15,6 +15,14 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Do not expose financial endpoints until the selected authentication/session implementation is verified.
 - Use authenticated Route Handlers for transaction resource contracts while Server Components call application services directly for initial query hydration.
 - Use positive whole-rupiah transaction amounts, database-backed idempotency, and soft deletion following ADR 0005.
+- Keep `POST /api/ai/transaction-previews` stable and add an additive composer
+  response resource for transaction previews and current-month read-only
+  financial questions.
+- Use one strict NVIDIA JSON response to select an allowlisted intent. Server
+  services execute every read tool and format all financial values; no account,
+  transaction, balance, or budget values are returned to the model.
+- Reuse the persisted per-user AI preview quota for composer requests so a
+  single user cannot bypass provider limits by switching endpoints.
 
 ## Task list
 
@@ -89,7 +97,29 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Model output cannot persist a transaction or introduce account/category IDs.
 - [x] Provider failure preserves input and exposes retry/manual paths.
 - [x] Unit tests, lint, type checking, production build, and unauthenticated HTTP smoke pass.
-- [ ] Hosted inference smoke passes after `NVIDIA_API_KEY` is configured locally.
+- [x] Hosted inference smoke passes with the locally configured credential.
+
+### Phase 7: Read-only financial questions
+
+- [ ] Task 20: Define the additive composer request/response and strict NVIDIA
+  intent-routing contracts.
+- [ ] Task 21: Add user-scoped read tools and deterministic current-month
+  financial answers.
+- [ ] Task 22: Expose the authenticated, rate-limited composer Route Handler and
+  client request boundary.
+- [ ] Task 23: Let Home render either a transaction preview or a concise
+  financial answer from the same composer.
+
+### Checkpoint: Read-only Financial Questions
+
+- [ ] Saldo, current-month income/expense, top/category spending, and budget
+  remaining answers come only from authorized PostgreSQL data.
+- [ ] Model output can select only an allowlisted read intent and cannot provide
+  SQL, user IDs, record IDs, calculated totals, or persistence instructions.
+- [ ] Transaction entry remains a one-model-call preview flow with explicit
+  confirmation before save.
+- [ ] Unit, database, HTTP, browser, live provider, lint, typecheck, and
+  production-build verification pass.
 
 ## Risks and mitigations
 
@@ -100,11 +130,15 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 | Database code leaks into Client Components | High | Mark the client factory `server-only` and expose narrow DTOs through a later DAL. |
 | Prisma client connections multiply during hot reload | Medium | Cache one development client instance on `globalThis`. |
 | Prototype UI is partially backed by real data | Medium | Migrate one complete authenticated vertical slice at a time. |
+| Hosted NVIDIA tool-calling configuration differs from self-hosted NIM | Medium | Use the already verified JSON response mode to select one allowlisted server tool in a single bounded call. |
+| A model-selected read leaks another user's finance data | High | Derive identity from the server session and inject it into every tool; never accept `userId` or database IDs from model output. |
 
 ## Open questions
 
 - Restore and permanent-retention behavior for soft-deleted transactions; neither is required by the current MVP.
 - Delete/archive behavior for Budget allocations; create and amount update are the accepted MVP operations.
+- Date ranges beyond the current Jakarta month and natural-language merchant
+  search remain later financial-question slices.
 
 ## Verification notes
 
