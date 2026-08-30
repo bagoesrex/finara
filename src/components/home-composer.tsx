@@ -12,68 +12,18 @@ import {
   Check,
   LoaderCircle,
   MessageSquareText,
+  PencilLine,
 } from "lucide-react";
 
 import type { AiFinanceAnswer } from "@/lib/ai-composer";
 import { MAX_AI_COMPOSER_INPUT_LENGTH } from "@/lib/ai-composer";
 import { fetchAiComposerResponse } from "@/lib/ai-query";
 import { adaptAiTransactionPreview } from "@/lib/ai-transaction";
-import type { FinanceAccount } from "@/lib/accounts";
-import { parseTransactionInput } from "@/lib/finance";
-import type {
-  FinanceCategory,
-  TransactionDraft,
-} from "@/lib/finance-query";
+import type { TransactionDraft } from "@/lib/finance-query";
+import { createManualTransactionDraft } from "@/lib/manual-transaction";
 import { getDateKeyInTimeZone } from "@/lib/transactions";
 import { useFinance } from "@/components/finance-provider";
 import { TransactionConfirmationSheet } from "./transaction-confirmation-sheet";
-
-function createManualDraft(
-  input: string,
-  accounts: FinanceAccount[],
-  categories: FinanceCategory[],
-): TransactionDraft | null {
-  const referenceDate = getDateKeyInTimeZone(new Date());
-  const parsed = parseTransactionInput(input, referenceDate);
-  const transaction =
-    parsed.status === "ready"
-      ? parsed.transaction
-      : {
-          amount: 0,
-          category: "Other",
-          date: referenceDate,
-          description: input.trim() || "Transaksi",
-          type: "EXPENSE" as const,
-        };
-  const account = accounts[0];
-  const category =
-    categories.find(
-      (item) =>
-        item.type === transaction.type && item.name === transaction.category,
-    ) ??
-    categories.find(
-      (item) => item.type === transaction.type && item.name === "Other",
-    ) ??
-    categories.find((item) => item.type === transaction.type);
-
-  if (!account || !category) return null;
-
-  return {
-    ...transaction,
-    accountId: account.id,
-    account: account.name,
-    categoryId: category.id,
-    category: category.name,
-    clientRequestId: crypto.randomUUID(),
-  };
-}
-
-function canOfferManualEntry(input: string) {
-  return (
-    parseTransactionInput(input, getDateKeyInTimeZone(new Date())).status ===
-    "ready"
-  );
-}
 
 export function HomeComposer() {
   const { accounts, addTransaction, categories } = useFinance();
@@ -133,24 +83,30 @@ export function HomeComposer() {
         });
       } catch {
         setError("AI belum dapat memproses permintaan. Coba lagi.");
-        setShowManualFallback(canOfferManualEntry(input));
+        setShowManualFallback(Boolean(input.trim()));
       } finally {
         parsingRef.current = false;
       }
     });
   }
 
-  function openManualEntry() {
-    const draft = createManualDraft(input, accounts, categories);
+  function openManualEntry(text = "") {
+    const draft = createManualTransactionDraft({
+      accounts,
+      categories,
+      referenceDate: getDateKeyInTimeZone(new Date()),
+      text,
+    });
     if (!draft) {
       setError("Akun atau kategori belum tersedia.");
       return;
     }
 
+    setAnswer(null);
     setError("");
     setShowManualFallback(false);
     setSaveError("");
-    setPreview(draft);
+    setPreview({ ...draft, clientRequestId: crypto.randomUUID() });
   }
 
   async function saveTransaction() {
@@ -249,35 +205,40 @@ export function HomeComposer() {
         ) : null}
 
         {error ? (
-          <div className="composer-feedback">
-            <p id="composer-error" className="form-error" role="alert">
-              {error}
-            </p>
-            {showManualFallback ? (
-              <button
-                className="section-action"
-                type="button"
-                onClick={openManualEntry}
-              >
-                Isi manual
-              </button>
-            ) : null}
-          </div>
+          <p id="composer-error" className="form-error" role="alert">
+            {error}
+          </p>
         ) : null}
 
-        <div className="quick-examples" aria-label="Contoh input">
-          {["Makan 25rb", "Saldo saya?", "Sisa budget makan?"].map(
-            (example) => (
-              <button
-                type="button"
-                disabled={isParsing}
-                key={example}
-                onClick={() => chooseExample(example)}
-              >
-                {example}
-              </button>
-            ),
-          )}
+        <div className="composer-shortcuts">
+          <button
+            className="composer-manual-action"
+            type="button"
+            disabled={isParsing}
+            aria-label={
+              showManualFallback
+                ? "Lanjutkan teks saat ini sebagai transaksi manual"
+                : "Buka formulir transaksi manual"
+            }
+            onClick={() => openManualEntry(showManualFallback ? input : "")}
+          >
+            <PencilLine aria-hidden="true" size={15} />
+            {showManualFallback ? "Lanjut manual" : "Isi manual"}
+          </button>
+          <div className="quick-examples" aria-label="Contoh input">
+            {["Makan 25rb", "Saldo saya?", "Sisa budget makan?"].map(
+              (example) => (
+                <button
+                  type="button"
+                  disabled={isParsing}
+                  key={example}
+                  onClick={() => chooseExample(example)}
+                >
+                  {example}
+                </button>
+              ),
+            )}
+          </div>
         </div>
       </section>
 

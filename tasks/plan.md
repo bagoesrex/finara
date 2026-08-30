@@ -126,18 +126,18 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 - [x] Task 24: Extract deterministic manual-draft construction with focused
   regression tests.
-- [ ] Task 25: Keep manual entry available as a secondary Home action while
+- [x] Task 25: Keep manual entry available as a secondary Home action while
   preserving typed-text recovery after an AI parsing failure.
 
 ### Checkpoint: Manual Transaction Entry
 
-- [ ] A user can open an empty expense draft without calling NVIDIA or first
+- [x] A user can open an empty expense draft without calling NVIDIA or first
   entering natural-language text.
-- [ ] A recoverable AI failure can carry the current text into the same editable
+- [x] A recoverable AI failure can carry the current text into the same editable
   confirmation sheet.
-- [ ] Confirmed manual transactions use the existing idempotent transaction API
+- [x] Confirmed manual transactions use the existing idempotent transaction API
   and authoritative query invalidation path.
-- [ ] Focused tests, lint, type checking, and production build pass.
+- [x] Focused tests, lint, type checking, and production build pass.
 
 ## Risks and mitigations
 
@@ -195,3 +195,13 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Final Phase 7 gates pass: ESLint is clean, all 126 tests across 18 files pass,
   strict type checking passes, and the Next.js 16.3.2 production build includes
   the dynamic composer Route Handler.
+- Phase 8 extracts deterministic manual-draft defaults from Home and exposes a
+  permanent secondary action. Normal use opens a blank expense draft without an
+  AI request; recoverable AI errors pass the current text through the local
+  parser into the same confirmation sheet. The existing transaction mutation
+  remains the only save path.
+- Final Phase 8 gates pass: ESLint is clean, all 131 tests across 19 files pass,
+  strict type checking and the Next.js 16.3.2 production build pass, and the
+  authenticated production Home smoke verifies the manual action's accessible
+  label. Chrome DevTools MCP remains unavailable for an automated interactive
+  browser run.

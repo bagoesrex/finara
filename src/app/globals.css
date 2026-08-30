@@ -429,14 +429,17 @@ a { color: inherit; text-decoration: none; }
 .composer-form button:active:not(:disabled), .primary-button:active, .secondary-button:active, .danger-button:active { transform: scale(.97); }
 .composer-form button:disabled { cursor: not-allowed; opacity: .38; }
 .composer-spinner { animation: status-spin 700ms linear infinite; }
-.composer-feedback { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.composer-feedback .section-action { margin-top: 1px; flex: 0 0 auto; }
 .form-error { margin: 9px 2px 0; color: var(--expense); font-size: .76rem; }
 .composer-answer { display: grid; gap: 3px; margin-top: 13px; padding: 13px 2px 1px; border-top: 1px solid #d7e3dc; }
 .composer-answer span { color: var(--muted); font-size: .7rem; font-weight: 620; }
 .composer-answer strong { overflow-wrap: anywhere; font-size: 1.18rem; font-weight: 680; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
 .composer-answer p { margin: 1px 0 0; color: var(--muted); font-size: .7rem; line-height: 1.45; }
-.quick-examples { display: flex; gap: 7px; margin-top: 11px; overflow-x: auto; scrollbar-width: none; }
+.composer-shortcuts { display: flex; align-items: center; gap: 7px; margin-top: 11px; }
+.composer-manual-action { display: inline-flex; min-height: 44px; flex: 0 0 auto; align-items: center; gap: 5px; padding: 0 7px; border: 0; border-radius: 10px; background: transparent; color: var(--accent); cursor: pointer; font-size: .69rem; font-weight: 680; transition: background-color 150ms ease, color 150ms ease, transform 150ms ease; }
+.composer-manual-action:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent-strong); }
+.composer-manual-action:active:not(:disabled) { transform: scale(.97); }
+.composer-manual-action:disabled { cursor: not-allowed; opacity: .42; }
+.quick-examples { display: flex; min-width: 0; gap: 7px; overflow-x: auto; scrollbar-width: none; }
 .quick-examples::-webkit-scrollbar { display: none; }
 .quick-examples button { min-height: 33px; padding: 6px 10px; flex: 0 0 auto; border: 1px solid var(--border); border-radius: 99px; background: var(--surface); color: var(--muted); cursor: pointer; font-size: .68rem; transition: color 150ms ease, border-color 150ms ease, transform 150ms ease; }
 .quick-examples button:hover { border-color: #aec4b7; color: var(--accent); }

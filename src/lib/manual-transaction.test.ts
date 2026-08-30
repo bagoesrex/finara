@@ -66,6 +66,22 @@ describe("createManualTransactionDraft", () => {
     });
   });
 
+  it("keeps income recovery drafts on an income category", () => {
+    expect(
+      createManualTransactionDraft({
+        accounts,
+        categories,
+        referenceDate: "2026-08-30",
+        text: "gaji masuk 5jt",
+      }),
+    ).toMatchObject({
+      amount: 5_000_000,
+      category: "Salary",
+      categoryId: "category-salary",
+      type: "INCOME",
+    });
+  });
+
   it("preserves unparseable recovery text in an editable expense draft", () => {
     expect(
       createManualTransactionDraft({

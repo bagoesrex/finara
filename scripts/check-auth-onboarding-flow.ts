@@ -133,6 +133,7 @@ async function checkAuthOnboardingFlow() {
     const homeHtml = await initializedHome.text();
     assert.match(homeHtml, /Runtime Check/);
     assert.match(homeHtml, /Rp321\.000/);
+    assert.match(homeHtml, /Buka formulir transaksi manual/);
 
     const bypassedOnboarding = await request("/onboarding", {
       headers: { cookie },
