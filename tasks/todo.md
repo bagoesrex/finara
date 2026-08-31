@@ -135,7 +135,7 @@
     invalidated and awaited; Budget data is not refetched unnecessarily.
   - Verify: focused TanStack Query tests cover active refetch success/failure.
 
-- [ ] Connect Finance Settings to persisted rename.
+- [x] Connect Finance Settings to persisted rename.
   - Acceptance: pending controls cannot duplicate submission; success closes the
     sheet and announces persistence; failure preserves input and supports retry.
   - Verify: authenticated runtime flow, source-level accessibility review, unit

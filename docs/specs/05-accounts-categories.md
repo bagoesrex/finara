@@ -61,11 +61,10 @@ read from the authenticated PostgreSQL-backed finance snapshot. Account balances
 follow persisted transaction create, edit, and soft-delete operations through
 TanStack Query invalidation.
 
-Account rename remains an explicitly session-only UI operation until its server
-contract and duplicate-name policy are settled. Default categories are view-only
-until category ownership and lifecycle are decided. The UI trims account names,
-limits them to 40 characters, and rejects case-insensitive duplicates as a
-temporary safety guard; these constraints do not settle the backend policy.
+Account rename is persisted through the authenticated server contract below.
+Successful mutations invalidate the authoritative account and transaction
+projections before the UI reports success. Default categories remain view-only
+until category ownership and lifecycle are decided.
 
 ## Persisted account rename contract
 

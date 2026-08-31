@@ -111,29 +111,6 @@ export function isAccountId(value: string) {
   return z.uuid().safeParse(value).success;
 }
 
-export function renameAccountReferences<
-  TTransaction extends Pick<SearchableTransaction, "account">,
->(
-  accounts: readonly FinanceAccount[],
-  transactions: readonly TTransaction[],
-  accountId: string,
-  name: string,
-): { accounts: FinanceAccount[]; transactions: TTransaction[] } {
-  const account = accounts.find(({ id }) => id === accountId);
-  if (!account) return { accounts: [...accounts], transactions: [...transactions] };
-
-  return {
-    accounts: accounts.map((item) =>
-      item.id === accountId ? { ...item, name } : item,
-    ),
-    transactions: transactions.map((transaction) =>
-      transaction.account === account.name
-        ? { ...transaction, account: name }
-        : transaction,
-    ),
-  };
-}
-
 type AccountBalanceTransaction = Pick<
   SearchableTransaction,
   "account" | "amount" | "type"

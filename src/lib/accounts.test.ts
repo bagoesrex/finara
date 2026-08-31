@@ -6,7 +6,6 @@ import {
   isAccountId,
   parseUpdateAccountInput,
   removeTransactionFromAccounts,
-  renameAccountReferences,
   replaceTransactionInAccounts,
   validateAccountName,
   type FinanceAccount,
@@ -133,27 +132,6 @@ describe("account rename contract", () => {
         userId: crypto.randomUUID(),
       }),
     ).toThrow();
-  });
-});
-
-describe("account reference updates", () => {
-  it("renames the account and every matching transaction reference", () => {
-    const renamed = renameAccountReferences(
-      accounts,
-      transactions,
-      "account-gopay",
-      "Dompet Digital",
-    );
-
-    expect(renamed.accounts[1].name).toBe("Dompet Digital");
-    expect(renamed.transactions[0].account).toBe("Dompet Digital");
-    expect(renamed.transactions[1].account).toBe("BCA");
-  });
-
-  it("keeps references unchanged when the account does not exist", () => {
-    expect(
-      renameAccountReferences(accounts, transactions, "missing", "Baru"),
-    ).toEqual({ accounts, transactions });
   });
 });
 

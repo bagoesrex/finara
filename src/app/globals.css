@@ -473,8 +473,9 @@ a.transaction-row:active { transform: scale(.99); }
 .search-field input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: .82rem; }
 .search-field input::-webkit-search-cancel-button { display: none; }
 .search-field button, .sheet-heading button { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; }
-.search-field button:hover, .sheet-heading button:hover { background: var(--border); color: var(--ink); }
+.search-field button:hover, .sheet-heading button:hover:not(:disabled) { background: var(--border); color: var(--ink); }
 .sheet-heading button { width: 44px; height: 44px; }
+.sheet-heading button:disabled { cursor: not-allowed; opacity: .48; }
 .activity-results { min-height: 300px; margin-top: 27px; }
 .transaction-group { margin-top: 26px; }
 .transaction-group:first-child { margin-top: 0; }
@@ -752,7 +753,8 @@ a.transaction-row:active { transform: scale(.99); }
 .primary-button { border: 1px solid var(--accent); background: var(--accent); color: white; }
 .primary-button:disabled { cursor: not-allowed; opacity: .48; }
 .secondary-button { border: 1px solid var(--border); background: var(--surface); }
-.secondary-button:hover { background: var(--surface-subtle); }
+.secondary-button:hover:not(:disabled) { background: var(--surface-subtle); }
+.secondary-button:disabled { cursor: not-allowed; opacity: .48; }
 .danger-button { border: 1px solid var(--expense); background: var(--expense); color: white; }
 .danger-button:hover { border-color: #8d3b2b; background: #8d3b2b; }
 .danger-button--quiet { border-color: #e5c8c0; background: var(--surface); color: var(--expense); }

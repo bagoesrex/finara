@@ -1,19 +1,35 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { Check, X } from "lucide-react";
 import {
+  MAX_ACCOUNT_NAME_LENGTH,
   validateAccountName,
   type FinanceAccount,
 } from "@/lib/accounts";
+import { FinanceRequestError } from "@/lib/finance-query";
 import { useModalFocusTrap } from "./use-modal-focus-trap";
 
 type AccountRenameSheetProps = {
   account: FinanceAccount;
   accounts: readonly FinanceAccount[];
   onClose: () => void;
-  onSave: (id: string, name: string) => void;
+  onSave: (id: string, name: string) => Promise<void>;
 };
+
+function getSaveError(error: unknown) {
+  if (error instanceof FinanceRequestError) {
+    return error.fieldErrors?.name ?? error.message;
+  }
+
+  return "Nama akun belum dapat dipastikan tersimpan. Coba lagi.";
+}
 
 export function AccountRenameSheet({
   account,
@@ -23,24 +39,42 @@ export function AccountRenameSheet({
 }: AccountRenameSheetProps) {
   const [name, setName] = useState(account.name);
   const [error, setError] = useState("");
+  const [isSaving, startSaving] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+  const savingRef = useRef(false);
   const sheetRef = useRef<HTMLElement>(null);
   const normalizedName = name.trim();
   const isUnchanged = normalizedName === account.name;
+  const closeSheet = useCallback(() => {
+    if (!savingRef.current) onClose();
+  }, [onClose]);
 
-  useModalFocusTrap(sheetRef, inputRef, onClose);
+  useModalFocusTrap(sheetRef, inputRef, closeSheet);
+  useEffect(() => {
+    if (error && !isSaving) inputRef.current?.focus();
+  }, [error, isSaving]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (savingRef.current) return;
     const validation = validateAccountName(name, accounts, account.id);
 
     if (validation.status === "invalid") {
       setError(validation.message);
-      inputRef.current?.focus();
       return;
     }
 
-    onSave(account.id, validation.name);
+    savingRef.current = true;
+    setError("");
+    startSaving(async () => {
+      try {
+        await onSave(account.id, validation.name);
+      } catch (saveError) {
+        setError(getSaveError(saveError));
+      } finally {
+        savingRef.current = false;
+      }
+    });
   }
 
   return (
@@ -48,9 +82,10 @@ export function AccountRenameSheet({
       <button
         className="sheet-backdrop"
         type="button"
+        disabled={isSaving}
         tabIndex={-1}
         aria-label="Tutup ubah nama akun"
-        onClick={onClose}
+        onClick={closeSheet}
       />
       <section
         ref={sheetRef}
@@ -66,20 +101,30 @@ export function AccountRenameSheet({
             <p className="eyebrow">Akun</p>
             <h2 id="account-rename-title">Ubah nama akun</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Tutup">
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={closeSheet}
+            aria-label="Tutup"
+          >
             <X aria-hidden="true" size={19} />
           </button>
         </div>
 
-        <form className="account-rename-form" onSubmit={handleSubmit}>
+        <form
+          className="account-rename-form"
+          onSubmit={handleSubmit}
+          aria-busy={isSaving}
+        >
           <label className="preview-field">
             <span>Nama akun</span>
             <input
               ref={inputRef}
               name="account-name"
               value={name}
-              maxLength={40}
+              maxLength={MAX_ACCOUNT_NAME_LENGTH}
               autoComplete="off"
+              disabled={isSaving}
               required
               aria-invalid={Boolean(error)}
               aria-describedby={error ? "account-name-error" : undefined}
@@ -96,21 +141,26 @@ export function AccountRenameSheet({
           ) : null}
 
           <div className="sheet-actions">
-            <button className="secondary-button" type="button" onClick={onClose}>
+            <button
+              className="secondary-button"
+              type="button"
+              disabled={isSaving}
+              onClick={closeSheet}
+            >
               Batal
             </button>
             <button
               className="primary-button"
               type="submit"
-              disabled={!normalizedName || isUnchanged}
+              disabled={!normalizedName || isUnchanged || isSaving}
             >
               <Check aria-hidden="true" size={18} />
-              Simpan
+              {isSaving ? "Menyimpan…" : "Simpan"}
             </button>
           </div>
         </form>
         <p className="sheet-caption" id="account-rename-caption">
-          Riwayat dan pilihan akun akan memakai nama baru selama sesi ini.
+          Riwayat dan pilihan akun akan memakai nama baru setelah tersimpan.
         </p>
       </section>
     </div>

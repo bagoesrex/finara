@@ -46,10 +46,10 @@ export function FinanceSettingsDashboard() {
     return () => window.clearTimeout(timeout);
   }, [savedMessage]);
 
-  function saveAccountName(id: string, name: string) {
-    renameAccount(id, name);
+  async function saveAccountName(id: string, name: string) {
+    await renameAccount(id, name);
     setEditingAccountId(null);
-    setSavedMessage("Nama akun diperbarui untuk sesi ini.");
+    setSavedMessage("Nama akun berhasil diperbarui.");
   }
 
   return (
@@ -139,9 +139,9 @@ export function FinanceSettingsDashboard() {
       <section className="support-note finance-note" aria-label="Batas pengaturan">
         <CircleHelp aria-hidden="true" size={20} />
         <div>
-          <h2>Pengaturan masih terbatas</h2>
+          <h2>Kategori masih terbatas</h2>
           <p>
-            Perubahan nama akun hanya berlaku sampai halaman dimuat ulang.
+            Nama akun tersimpan dan digunakan di seluruh riwayat transaksi.
             Kategori belum bisa diubah sampai aturan pengelolaannya ditetapkan.
           </p>
         </div>

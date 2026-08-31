@@ -148,15 +148,15 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   case and production HTTP coverage.
 - [x] Task 29: Add the browser request boundary and targeted authoritative query
   invalidation.
-- [ ] Task 30: Replace session-only account overrides with the persisted mutation
+- [x] Task 30: Replace session-only account overrides with the persisted mutation
   and complete saving, success, and failure UI states.
 
 ### Checkpoint: Persisted Account Rename
 
-- [ ] Rename survives reload and updates account and transaction projections.
-- [ ] Invalid, duplicate, missing, and cross-user mutations cannot alter data.
-- [ ] Failed saves preserve the current input and allow retry.
-- [ ] Unit, database, production HTTP, lint, typecheck, and production-build
+- [x] Rename survives reload and updates account and transaction projections.
+- [x] Invalid, duplicate, missing, and cross-user mutations cannot alter data.
+- [x] Failed saves preserve the current input and allow retry.
+- [x] Unit, database, production HTTP, lint, typecheck, and production-build
   verification pass.
 
 ## Risks and mitigations
@@ -192,7 +192,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Transaction Route Handlers expose precise string-money DTOs for snapshot, cursor-paginated list, create, detail, edit, and soft delete. Service and HTTP checks cover malformed/oversized input, non-JSON and cross-origin mutations, invalid references, mismatched category types, cross-user access, idempotent retry/conflict, summary changes, and tombstone exclusion.
 - The development Prisma singleton now replaces a generated client that predates the `Transaction` delegate. This keeps `next dev` hot reload usable after an additive schema generation while preserving the normal single-client behavior.
 - The private app now server-prefetches viewer-scoped snapshot and transaction-list queries, dehydrates string-money DTOs, and uses authenticated browser query functions after hydration. Successful create, edit, and soft-delete mutations await snapshot, list, and affected-detail invalidation before the UI reports success.
-- Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, finance settings, and Budget now read persisted projections. Account rename remains the explicitly labeled session-only finance operation.
+- Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, finance settings, and Budget now read persisted projections. Account rename now persists through its user-scoped API and invalidates account-bearing projections.
 - Migration `20260829021840_add_budgets` adds positive exact-IDR category allocations, database-enforced same-user expense-category references, first-of-month periods, and per-user/category/month uniqueness. Schema and service checks cover precision, every constraint, idempotent create/conflict, cross-user denial, deleted and out-of-period transaction exclusion, derived totals, and each progress-status boundary.
 - Authenticated Budget Route Handlers expose monthly overview, create, and amount update contracts with precise string-money DTOs. The Budget Server Component preloads the viewer/month query, while successful Budget mutations and transaction changes await targeted TanStack Query invalidation before reporting success.
 - `npm test` passes 91 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flows pass, including authenticated SSR hydration on Home, Activity, and Budget; cross-user denial; sequential and concurrent idempotent create; transaction edit/soft delete; summary reconciliation; persisted Budget create/update calculations; duplicate-query rejection; and exact BIGINT rendering beyond JavaScript's safe-integer range.
@@ -225,3 +225,10 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   authenticated production Home smoke verifies the manual action's accessible
   label. Chrome DevTools MCP remains unavailable for an automated interactive
   browser run.
+- Phase 9 account rename gates pass: all 137 tests across 20 files, ESLint,
+  type checking, the PostgreSQL service check, production build, and production
+  HTTP flow pass. The HTTP flow verifies authentication, origin/media/body
+  validation, duplicate and cross-user denial, persistence, transaction
+  projection refresh, and authenticated SSR after reload. Chrome DevTools MCP
+  remains unavailable, so interactive behavior is covered by focused query
+  invalidation tests and source-level accessibility review.

@@ -17,7 +17,12 @@ import {
 } from "react";
 
 import { useViewer } from "@/components/viewer-provider";
-import { validateAccountName, type FinanceAccount } from "@/lib/accounts";
+import {
+  accountRenameMutationOptions,
+  invalidateAccountRenameResources,
+  renameAccountRequest,
+} from "@/lib/account-query";
+import type { FinanceAccount } from "@/lib/accounts";
 import {
   adaptBudgetOverview,
   budgetMutationOptions,
@@ -50,12 +55,11 @@ import {
 } from "@/lib/transactions";
 
 type FinanceContextValue = {
-  accountNameOverrides: Readonly<Record<string, string>>;
   accounts: FinanceAccount[];
   addTransaction: (draft: TransactionDraft) => Promise<FinanceTransaction>;
   categories: FinanceCategory[];
   deleteTransaction: (id: string) => Promise<void>;
-  renameAccount: (id: string, name: string) => void;
+  renameAccount: (id: string, name: string) => Promise<void>;
   summary: FinanceSummary;
   transactions: FinanceTransaction[];
   updateTransaction: (
@@ -69,26 +73,6 @@ const EMPTY_ACCOUNTS: FinanceAccount[] = [];
 const EMPTY_TRANSACTIONS: FinanceTransaction[] = [];
 const MAX_BROWSER_TIMER_DELAY = 2_147_000_000;
 
-function applyAccountNameOverrides(
-  accounts: FinanceAccount[],
-  overrides: Readonly<Record<string, string>>,
-) {
-  return accounts.map((account) => ({
-    ...account,
-    name: overrides[account.id] ?? account.name,
-  }));
-}
-
-function applyTransactionAccountNames(
-  transactions: FinanceTransaction[],
-  overrides: Readonly<Record<string, string>>,
-) {
-  return transactions.map((transaction) => ({
-    ...transaction,
-    account: overrides[transaction.accountId] ?? transaction.account,
-  }));
-}
-
 export function FinanceProvider({
   children,
   monthKey: initialMonthKey,
@@ -99,9 +83,6 @@ export function FinanceProvider({
   const viewer = useViewer();
   const queryClient = useQueryClient();
   const [monthKey, setMonthKey] = useState(initialMonthKey);
-  const [accountNameOverrides, setAccountNameOverrides] = useState<
-    Record<string, string>
-  >({});
   useEffect(() => {
     let monthBoundaryTimer: number;
 
@@ -158,6 +139,14 @@ export function FinanceProvider({
       }),
     [monthKey, queryClient, viewer.id],
   );
+  const invalidateAccountRename = useCallback(
+    () =>
+      invalidateAccountRenameResources(queryClient, {
+        monthKey,
+        viewerId: viewer.id,
+      }),
+    [monthKey, queryClient, viewer.id],
+  );
   const { mutateAsync: createTransaction } = useMutation({
     mutationFn: createTransactionRequest,
     onSuccess: async (transaction) => {
@@ -188,18 +177,12 @@ export function FinanceProvider({
       });
     },
   });
+  const { mutateAsync: persistAccountRename } = useMutation(
+    accountRenameMutationOptions(renameAccountRequest, invalidateAccountRename),
+  );
 
-  const rawAccounts = snapshotQuery.data?.accounts ?? EMPTY_ACCOUNTS;
-  const rawTransactions = transactionQuery.data ?? EMPTY_TRANSACTIONS;
-  const accounts = useMemo(
-    () => applyAccountNameOverrides(rawAccounts, accountNameOverrides),
-    [accountNameOverrides, rawAccounts],
-  );
-  const transactions = useMemo(
-    () =>
-      applyTransactionAccountNames(rawTransactions, accountNameOverrides),
-    [accountNameOverrides, rawTransactions],
-  );
+  const accounts = snapshotQuery.data?.accounts ?? EMPTY_ACCOUNTS;
+  const transactions = transactionQuery.data ?? EMPTY_TRANSACTIONS;
 
   const addTransaction = useCallback(
     async (draft: TransactionDraft) =>
@@ -216,21 +199,15 @@ export function FinanceProvider({
     [deleteExistingTransaction],
   );
   const renameAccount = useCallback(
-    (id: string, name: string) => {
-      const validation = validateAccountName(name, accounts, id);
-      if (validation.status === "invalid") return;
-      setAccountNameOverrides((current) => ({
-        ...current,
-        [id]: validation.name,
-      }));
+    async (id: string, name: string) => {
+      await persistAccountRename({ id, name });
     },
-    [accounts],
+    [persistAccountRename],
   );
   const value = useMemo<FinanceContextValue | null>(() => {
     if (!snapshotQuery.data || !transactionQuery.data) return null;
 
     return {
-      accountNameOverrides,
       accounts,
       addTransaction,
       categories: snapshotQuery.data.categories,
@@ -241,7 +218,6 @@ export function FinanceProvider({
       updateTransaction,
     };
   }, [
-    accountNameOverrides,
     accounts,
     addTransaction,
     deleteTransaction,
@@ -294,7 +270,6 @@ export function useFinance() {
 
 export function useTransactionList(filters: TransactionListFilters) {
   const viewer = useViewer();
-  const { accountNameOverrides } = useFinance();
   const query = useInfiniteQuery({
     queryKey: financeQueryKeys.transactionList(viewer.id, filters),
     queryFn: ({ pageParam }) => fetchTransactionPage(filters, pageParam),
@@ -302,36 +277,18 @@ export function useTransactionList(filters: TransactionListFilters) {
     getNextPageParam: (page) => page.nextCursor,
     select: (data) => data.pages.flatMap((page) => page.items.map(adaptTransaction)),
   });
-  const transactions = useMemo(
-    () =>
-      applyTransactionAccountNames(
-        query.data ?? EMPTY_TRANSACTIONS,
-        accountNameOverrides,
-      ),
-    [accountNameOverrides, query.data],
-  );
 
-  return { ...query, transactions };
+  return { ...query, transactions: query.data ?? EMPTY_TRANSACTIONS };
 }
 
 export function useTransactionDetail(transactionId: string) {
   const viewer = useViewer();
-  const { accountNameOverrides } = useFinance();
   const query = useQuery({
     queryKey: financeQueryKeys.transactionDetail(viewer.id, transactionId),
     queryFn: () => fetchTransactionDetail(transactionId),
     select: adaptTransaction,
   });
-  const transaction = useMemo(() => {
-    if (!query.data) return undefined;
-    return {
-      ...query.data,
-      account:
-        accountNameOverrides[query.data.accountId] ?? query.data.account,
-    };
-  }, [accountNameOverrides, query.data]);
-
-  return { ...query, data: transaction };
+  return query;
 }
 
 export function useBudgetOverview(monthKey: string) {
