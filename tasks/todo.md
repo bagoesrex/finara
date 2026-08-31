@@ -117,7 +117,7 @@
     narrow renamed-account DTO; malformed IDs and extra fields are rejected.
   - Verify: focused contract tests fail before implementation and pass afterward.
 
-- [ ] Persist account rename with server ownership enforcement.
+- [x] Persist account rename with server ownership enforcement.
   - Acceptance: rename is scoped to the session user, rejects case-insensitive
     duplicates, permits capitalization changes, and never rewrites transaction
     foreign keys or balances.

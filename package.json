@@ -10,6 +10,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:check": "node --conditions=react-server --import tsx scripts/check-database.ts",
     "db:test:onboarding": "node --conditions=react-server --import tsx scripts/check-onboarding-schema.ts",
+    "db:test:account-service": "node --conditions=react-server --import tsx scripts/check-account-service.ts",
     "db:test:persisted-onboarding": "node --conditions=react-server --import tsx scripts/check-persisted-onboarding.ts",
     "db:test:transactions": "node --conditions=react-server --import tsx scripts/check-transaction-schema.ts",
     "db:test:budgets": "node --conditions=react-server --import tsx scripts/check-budget-schema.ts",
