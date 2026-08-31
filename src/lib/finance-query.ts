@@ -95,11 +95,11 @@ export const financeQueryKeys = {
       ...financeQueryKeys.transactionLists(viewerId),
       normalizedFilters(filters),
     ] as const,
+  transactionDetails: (viewerId: string) =>
+    [...financeQueryKeys.root(viewerId), "transactions", "detail"] as const,
   transactionDetail: (viewerId: string, transactionId: string) =>
     [
-      ...financeQueryKeys.root(viewerId),
-      "transactions",
-      "detail",
+      ...financeQueryKeys.transactionDetails(viewerId),
       transactionId,
     ] as const,
   budgets: (viewerId: string) =>

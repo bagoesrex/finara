@@ -146,7 +146,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   integration checks.
 - [x] Task 28: Expose the authenticated Account PATCH Route Handler with abuse
   case and production HTTP coverage.
-- [ ] Task 29: Add the browser request boundary and targeted authoritative query
+- [x] Task 29: Add the browser request boundary and targeted authoritative query
   invalidation.
 - [ ] Task 30: Replace session-only account overrides with the persisted mutation
   and complete saving, success, and failure UI states.

@@ -130,7 +130,7 @@
   - Verify: production HTTP smoke covers 401, 403, 404, 409, 415, 422, success,
     reload, and cross-user denial.
 
-- [ ] Invalidate account-dependent client resources after rename.
+- [x] Invalidate account-dependent client resources after rename.
   - Acceptance: snapshot, transaction lists, and cached transaction details are
     invalidated and awaited; Budget data is not refetched unnecessarily.
   - Verify: focused TanStack Query tests cover active refetch success/failure.
