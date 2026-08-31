@@ -112,7 +112,7 @@
   - Verify: deterministic draft tests, authenticated Home runtime smoke, query
     invalidation regression coverage, lint, typecheck, and production build.
 
-- [ ] Define the persisted account rename contract.
+- [x] Define the persisted account rename contract.
   - Acceptance: PATCH accepts only a trimmed 1-40 character name and returns a
     narrow renamed-account DTO; malformed IDs and extra fields are rejected.
   - Verify: focused contract tests fail before implementation and pass afterward.

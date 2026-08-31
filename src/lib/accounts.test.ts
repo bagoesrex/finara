@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  accountRenameDtoSchema,
   applyTransactionToAccounts,
+  isAccountId,
+  parseUpdateAccountInput,
   removeTransactionFromAccounts,
   renameAccountReferences,
   replaceTransactionInAccounts,
@@ -76,6 +79,60 @@ describe("account name validation", () => {
       status: "valid",
       name: "bca",
     });
+  });
+});
+
+describe("account rename contract", () => {
+  it("trims the only accepted update field", () => {
+    expect(parseUpdateAccountInput({ name: "  Dana harian  " })).toEqual({
+      success: true,
+      data: { name: "Dana harian" },
+    });
+  });
+
+  it("rejects blank, oversized, non-string, and extra fields", () => {
+    expect(parseUpdateAccountInput({ name: "   " })).toMatchObject({
+      success: false,
+      fieldErrors: { name: "Masukkan nama akun." },
+    });
+    expect(parseUpdateAccountInput({ name: "a".repeat(41) })).toMatchObject({
+      success: false,
+      fieldErrors: { name: "Nama akun maksimal 40 karakter." },
+    });
+    expect(parseUpdateAccountInput({ name: 123 })).toMatchObject({
+      success: false,
+      fieldErrors: { name: "Masukkan nama akun." },
+    });
+    expect(
+      parseUpdateAccountInput({ name: "BCA", userId: crypto.randomUUID() }),
+    ).toMatchObject({ success: false });
+  });
+
+  it("accepts only UUID account path identifiers", () => {
+    expect(isAccountId("550e8400-e29b-41d4-a716-446655440000")).toBe(true);
+    expect(isAccountId("not-an-account-id")).toBe(false);
+  });
+
+  it("validates the narrow renamed-account response", () => {
+    expect(
+      accountRenameDtoSchema.parse({
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        name: "Dana harian",
+        updatedAt: "2026-08-31T08:00:00.000Z",
+      }),
+    ).toEqual({
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      name: "Dana harian",
+      updatedAt: "2026-08-31T08:00:00.000Z",
+    });
+    expect(() =>
+      accountRenameDtoSchema.parse({
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        name: "Dana harian",
+        updatedAt: "not-a-timestamp",
+        userId: crypto.randomUUID(),
+      }),
+    ).toThrow();
   });
 });
 

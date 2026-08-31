@@ -141,7 +141,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 9: Persisted account rename
 
-- [ ] Task 26: Define the strict account rename request/response contract.
+- [x] Task 26: Define the strict account rename request/response contract.
 - [ ] Task 27: Add the user-scoped serializable rename service and database
   integration checks.
 - [ ] Task 28: Expose the authenticated Account PATCH Route Handler with abuse
