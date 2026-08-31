@@ -144,7 +144,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Task 26: Define the strict account rename request/response contract.
 - [x] Task 27: Add the user-scoped serializable rename service and database
   integration checks.
-- [ ] Task 28: Expose the authenticated Account PATCH Route Handler with abuse
+- [x] Task 28: Expose the authenticated Account PATCH Route Handler with abuse
   case and production HTTP coverage.
 - [ ] Task 29: Add the browser request boundary and targeted authoritative query
   invalidation.

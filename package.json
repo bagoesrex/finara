@@ -20,6 +20,7 @@
     "db:test:transaction-service": "node --conditions=react-server --import tsx scripts/check-transaction-service.ts",
     "db:test:auth": "node --conditions=react-server --import tsx scripts/check-auth-foundation.ts",
     "app:test:auth-flow": "node --conditions=react-server --import tsx scripts/check-auth-onboarding-flow.ts",
+    "app:test:account-api": "node --conditions=react-server --import tsx scripts/check-account-api-flow.ts",
     "app:test:ai-rate-limit-response": "node --conditions=react-server --import tsx scripts/check-ai-rate-limit-response.ts",
     "app:test:ai-composer-flow": "node --conditions=react-server --import tsx scripts/check-ai-composer-api-flow.ts",
     "app:test:budget-api": "node --conditions=react-server --import tsx scripts/check-budget-api-flow.ts",

@@ -14,6 +14,10 @@ import {
 import { AiPreviewRateLimitExceededError } from "@/server/ai/rate-limit";
 import { AiRateLimitConfigurationError } from "@/server/ai/rate-limit-policy";
 import {
+  AccountNameConflictError,
+  AccountNotFoundError,
+} from "@/server/accounts/service";
+import {
   BudgetConflictError,
   BudgetNotFoundError,
   InvalidBudgetCategoryError,
@@ -162,6 +166,10 @@ export function budgetNotFoundResponse() {
   return apiError(404, "NOT_FOUND", "Budget tidak ditemukan.");
 }
 
+export function accountNotFoundResponse() {
+  return apiError(404, "NOT_FOUND", "Akun tidak ditemukan.");
+}
+
 export function handleFinanceApiError(error: unknown) {
   if (error instanceof CrossOriginMutationError) {
     return apiError(403, "FORBIDDEN", "Permintaan tidak diizinkan.");
@@ -181,6 +189,19 @@ export function handleFinanceApiError(error: unknown) {
 
   if (error instanceof BudgetNotFoundError) {
     return budgetNotFoundResponse();
+  }
+
+  if (error instanceof AccountNotFoundError) {
+    return accountNotFoundResponse();
+  }
+
+  if (error instanceof AccountNameConflictError) {
+    return apiError(
+      409,
+      "ACCOUNT_NAME_CONFLICT",
+      "Nama ini sudah dipakai akun lain.",
+      { name: "Nama ini sudah dipakai akun lain." },
+    );
   }
 
   if (error instanceof InvalidBudgetCategoryError) {

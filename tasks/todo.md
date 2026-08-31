@@ -124,7 +124,7 @@
   - Verify: database integration checks cover two users, duplicate names,
     concurrent attempts, persistence, and unchanged financial records.
 
-- [ ] Expose the authenticated Account PATCH API.
+- [x] Expose the authenticated Account PATCH API.
   - Acceptance: the Route Handler validates origin, media type, size, JSON,
     path ID, and body; inaccessible IDs share a generic 404 response.
   - Verify: production HTTP smoke covers 401, 403, 404, 409, 415, 422, success,
