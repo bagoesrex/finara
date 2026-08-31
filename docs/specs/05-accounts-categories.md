@@ -67,6 +67,31 @@ until category ownership and lifecycle are decided. The UI trims account names,
 limits them to 40 characters, and rejects case-insensitive duplicates as a
 temporary safety guard; these constraints do not settle the backend policy.
 
+## Persisted account rename contract
+
+The first persisted account-management slice supports rename only. Create,
+archive, delete, opening-balance edits, and account-type changes are not part of
+this slice.
+
+- **ACCT-013:** `PATCH /api/accounts/:id` accepts exactly `{ "name": string }`
+  and returns the renamed account identity, normalized name, and update time.
+- **ACCT-014:** Account names are trimmed, contain 1-40 characters, and are
+  unique per user without case sensitivity. Changing only capitalization of the
+  current account remains valid.
+- **ACCT-015:** The server resolves ownership from the authenticated session;
+  missing, malformed, and another user's account IDs all produce the same
+  not-found behavior.
+- **ACCT-016:** A successful rename is visible in account selectors and
+  transaction projections after authoritative query invalidation. Transaction
+  rows continue referencing the same `accountId`.
+- **ACCT-017:** A failed rename leaves the sheet open with its input preserved,
+  exposes a concise retryable error, and does not show a success message.
+
+The duplicate check is enforced in the account application service under a
+serializable transaction. No schema migration is required for this rename-only
+slice; account creation must reuse or strengthen the same invariant before it
+can be added.
+
 ## UI states
 
 - Default categories loading and available.
@@ -89,4 +114,4 @@ temporary safety guard; these constraints do not settle the backend policy.
 - Whether custom categories are MVP or Phase 2.
 - Editing and reconciliation lifecycle for the opening-balance snapshot.
 - Archive versus hard-delete behavior for accounts and categories.
-- Duplicate account/category names and case sensitivity.
+- Duplicate category names and case sensitivity.

@@ -139,6 +139,26 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   and authoritative query invalidation path.
 - [x] Focused tests, lint, type checking, and production build pass.
 
+### Phase 9: Persisted account rename
+
+- [ ] Task 26: Define the strict account rename request/response contract.
+- [ ] Task 27: Add the user-scoped serializable rename service and database
+  integration checks.
+- [ ] Task 28: Expose the authenticated Account PATCH Route Handler with abuse
+  case and production HTTP coverage.
+- [ ] Task 29: Add the browser request boundary and targeted authoritative query
+  invalidation.
+- [ ] Task 30: Replace session-only account overrides with the persisted mutation
+  and complete saving, success, and failure UI states.
+
+### Checkpoint: Persisted Account Rename
+
+- [ ] Rename survives reload and updates account and transaction projections.
+- [ ] Invalid, duplicate, missing, and cross-user mutations cannot alter data.
+- [ ] Failed saves preserve the current input and allow retry.
+- [ ] Unit, database, production HTTP, lint, typecheck, and production-build
+  verification pass.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |

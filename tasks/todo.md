@@ -111,3 +111,32 @@
     existing confirmation sheet.
   - Verify: deterministic draft tests, authenticated Home runtime smoke, query
     invalidation regression coverage, lint, typecheck, and production build.
+
+- [ ] Define the persisted account rename contract.
+  - Acceptance: PATCH accepts only a trimmed 1-40 character name and returns a
+    narrow renamed-account DTO; malformed IDs and extra fields are rejected.
+  - Verify: focused contract tests fail before implementation and pass afterward.
+
+- [ ] Persist account rename with server ownership enforcement.
+  - Acceptance: rename is scoped to the session user, rejects case-insensitive
+    duplicates, permits capitalization changes, and never rewrites transaction
+    foreign keys or balances.
+  - Verify: database integration checks cover two users, duplicate names,
+    concurrent attempts, persistence, and unchanged financial records.
+
+- [ ] Expose the authenticated Account PATCH API.
+  - Acceptance: the Route Handler validates origin, media type, size, JSON,
+    path ID, and body; inaccessible IDs share a generic 404 response.
+  - Verify: production HTTP smoke covers 401, 403, 404, 409, 415, 422, success,
+    reload, and cross-user denial.
+
+- [ ] Invalidate account-dependent client resources after rename.
+  - Acceptance: snapshot, transaction lists, and cached transaction details are
+    invalidated and awaited; Budget data is not refetched unnecessarily.
+  - Verify: focused TanStack Query tests cover active refetch success/failure.
+
+- [ ] Connect Finance Settings to persisted rename.
+  - Acceptance: pending controls cannot duplicate submission; success closes the
+    sheet and announces persistence; failure preserves input and supports retry.
+  - Verify: authenticated runtime flow, source-level accessibility review, unit
+    tests, lint, typecheck, and production build.
