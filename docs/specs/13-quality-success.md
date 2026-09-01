@@ -68,9 +68,12 @@ refresh, and Activity visibility in one rendered-browser journey. The generated
 identity is removed after the run, successful output includes a visual artifact,
 and failed runs retain screenshots and traces.
 
-This baseline is one critical happy path, not a cross-browser or complete E2E
-matrix. Transaction/Budget recoverable failures, additional devices, and network
-profiles remain separate quality work.
+The transaction baseline now covers one critical happy path and one recoverable
+ambiguous-save failure: the server commits, the browser receives a simulated
+`503`, the draft remains editable, and retry reuses the original idempotency key
+without creating a duplicate. It is not a cross-browser or complete E2E matrix.
+Budget recoverable failures, additional devices, and network profiles remain
+separate quality work.
 
 ## UX state quality
 

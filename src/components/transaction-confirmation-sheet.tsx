@@ -262,7 +262,7 @@ export function TransactionConfirmationSheet({
             </button>
             <button className="primary-button" type="submit" disabled={!isValid || isSaving}>
               <Check aria-hidden="true" size={18} />
-              {isSaving ? "Menyimpanâ€¦" : copy.saveLabel}
+              {isSaving ? "Menyimpanâ€¦" : error ? "Coba lagi" : copy.saveLabel}
             </button>
           </div>
         </form>

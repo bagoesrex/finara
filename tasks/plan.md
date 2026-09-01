@@ -205,6 +205,20 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] The rendered Activity artifact shows the saved `Rp25.000` expense without
   clipping or desktop-only navigation.
 
+### Phase 13: Recoverable transaction-save failure
+
+- [x] Task 36: Simulate an ambiguous save where PostgreSQL commits successfully
+  but the browser receives a transient failure response.
+- [x] Task 37: Preserve the draft, announce the failure, expose an explicit retry,
+  and prove the retry remains idempotent in mobile Edge.
+
+### Checkpoint: Recoverable Transaction Save
+
+- [x] Every entered field remains visible and editable after the failed response.
+- [x] Retry uses the original `clientRequestId` and Home renders one transaction.
+- [x] The expected simulated `503` is the only browser-console error; no uncaught
+  page error or unrelated warning is accepted.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -307,3 +321,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   The browser gate records a confirmed `Rp25.000` Food & Drink expense, verifies
   Home and Activity with a clean console and inspected mobile artifact, rejects
   non-local database hosts, and leaves no generated E2E user behind.
+- Final Phase 13 gates pass: both mobile Edge journeys, all 142 unit tests,
+  ESLint, route-aware type checking, and the Next.js 16.3.2 production build are
+  clean. The ambiguous-save journey preserves the complete draft, exposes
+  `Coba lagi`, reuses its idempotency key, and renders one persisted transaction.

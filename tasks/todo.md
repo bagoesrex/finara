@@ -169,3 +169,9 @@
     find it on Home and Activity without reusing personal browser state.
   - Verify: Playwright stable Edge/Pixel 7 run passes with a clean browser
     console, guarded local-database cleanup, and an inspected mobile screenshot.
+
+- [x] Cover recoverable manual transaction-save failure in the real browser.
+  - Acceptance: an ambiguous response after successful persistence leaves every
+    draft field intact, announces the failure, and exposes an explicit retry.
+  - Verify: retry reuses the original client request ID, renders exactly one
+    transaction, and the mobile failure artifact remains readable and unclipped.
