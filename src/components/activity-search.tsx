@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react";
 import { groupTransactionsByDate } from "@/lib/finance";
 import { getDateKeyInTimeZone } from "@/lib/transactions";
 import { PageHeader } from "./page-header";
-import { useFinance, useTransactionList } from "./finance-provider";
+import { useTransactionList } from "./finance-provider";
 import { TransactionRow } from "./transaction-row";
 
 function formatGroupDate(date: string, today: string): string {
@@ -107,12 +107,10 @@ export function ActivitySearch() {
 }
 
 export function ActivityDashboard() {
-  const { summary } = useFinance();
-
   return (
     <main className="page page-enter">
       <PageHeader
-        eyebrow={summary.monthLabel}
+        eyebrow="Semua periode"
         title="Aktivitas"
         description="Semua pemasukan dan pengeluaranmu."
       />

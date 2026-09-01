@@ -241,6 +241,27 @@ async function checkTransactionApiFlow() {
     assert.equal(page.items.length, 1);
     assert.equal(page.items[0]?.id, created.id);
 
+    for (const search of ["25000", "Rp25.000", "25rb"]) {
+      const amountSearchResponse = await request(
+        `/api/transactions?month=2026-08&search=${encodeURIComponent(search)}`,
+        { headers: { cookie: owner.cookie } },
+      );
+      assert.equal(amountSearchResponse.status, 200);
+      const amountPage = await apiData<TransactionPageDto>(amountSearchResponse);
+      assert.equal(amountPage.items.length, 1);
+      assert.equal(amountPage.items[0]?.id, created.id);
+    }
+
+    const unmatchedAmountResponse = await request(
+      "/api/transactions?month=2026-08&search=26000",
+      { headers: { cookie: owner.cookie } },
+    );
+    assert.equal(unmatchedAmountResponse.status, 200);
+    const unmatchedAmountPage = await apiData<TransactionPageDto>(
+      unmatchedAmountResponse,
+    );
+    assert.equal(unmatchedAmountPage.items.length, 0);
+
     const hiddenDetail = await request(`/api/transactions/${created.id}`, {
       headers: { cookie: otherUser.cookie },
     });

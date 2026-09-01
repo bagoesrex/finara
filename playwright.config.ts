@@ -4,7 +4,20 @@ import { randomUUID } from "node:crypto";
 
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = "http://localhost:3000";
+const e2ePort = process.env.FINARA_E2E_PORT?.trim() || "3000";
+if (!/^\d+$/.test(e2ePort)) {
+  throw new Error("FINARA_E2E_PORT must be a numeric TCP port.");
+}
+const portNumber = Number(e2ePort);
+if (
+  !Number.isSafeInteger(portNumber) ||
+  portNumber < 1_024 ||
+  portNumber > 65_535
+) {
+  throw new Error("FINARA_E2E_PORT must be between 1024 and 65535.");
+}
+
+const baseURL = `http://localhost:${e2ePort}`;
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
@@ -26,6 +39,8 @@ if (
 }
 
 process.env.FINARA_E2E_SERVER_TOKEN = randomUUID();
+process.env.PORT = e2ePort;
+process.env.BETTER_AUTH_URL = baseURL;
 
 export default defineConfig({
   testDir: "./e2e",

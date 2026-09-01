@@ -238,19 +238,19 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 15: Activity contract closure
 
-- [ ] Task 41: Define exact-IDR search normalization with focused contract
+- [x] Task 41: Define exact-IDR search normalization with focused contract
   tests for plain digits, Indonesian separators, and `rb` shorthand.
-- [ ] Task 42: Match normalized amounts in the authorized transaction query and
+- [x] Task 42: Match normalized amounts in the authorized transaction query and
   verify amount search through the production HTTP boundary.
-- [ ] Task 43: Make the Activity range label truthful for its all-history query
+- [x] Task 43: Make the Activity range label truthful for its all-history query
   and cover search, clear, pagination, and detail navigation in mobile Edge.
 
 ### Checkpoint: Activity Search
 
-- [ ] Description, account, category, and normalized amount searches remain
+- [x] Description, account, category, and normalized amount searches remain
   case-insensitive, user-scoped, and bounded by cursor pagination.
-- [ ] Activity never presents a current-month label over an all-history query.
-- [ ] Search, no-results, clear, and transaction-detail navigation are verified
+- [x] Activity never presents a current-month label over an all-history query.
+- [x] Search, no-results, clear, and transaction-detail navigation are verified
   in the rendered application.
 
 ### Phase 16: Remaining critical browser flows
@@ -413,3 +413,9 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   its draft, exposes `Coba lagi`, retries the exact payload, and renders one
   persisted category/month allocation. Guarded local cleanup leaves zero E2E
   users and zero loopback authentication rate-limit rows.
+- Final Phase 15 gates pass: exact IDR search accepts plain digits, consistent
+  Indonesian/English thousands separators, and `rb`/`ribu`/`k`/`jt`/`juta`
+  shorthand without floating-point arithmetic. Authorized database and HTTP
+  checks cover matching and non-matching amounts. Mobile Edge verifies the
+  truthful all-history label, amount search, no-results/clear, detail navigation,
+  and cursor pagination without resetting the Activity scroll container.

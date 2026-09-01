@@ -8,6 +8,7 @@ import {
   parseCreateTransactionInput,
   parseFinanceSnapshotInput,
   parseListTransactionsInput,
+  parseTransactionAmountSearch,
   parseUpdateTransactionInput,
 } from "./transactions";
 
@@ -107,6 +108,35 @@ describe("transaction list contract", () => {
     { search: "a".repeat(81) },
   ])("rejects an invalid list query %#", (input) => {
     expect(parseListTransactionsInput(input).success).toBe(false);
+  });
+
+  it.each([
+    ["25000", "25000"],
+    ["Rp25.000", "25000"],
+    ["rp 25,000", "25000"],
+    ["Rp1.000.000", "1000000"],
+    ["1,000,000", "1000000"],
+    ["25rb", "25000"],
+    ["25 ribu", "25000"],
+    ["25k", "25000"],
+    ["1,5jt", "1500000"],
+    ["1.5 juta", "1500000"],
+  ])("normalizes the exact IDR search %s", (search, expected) => {
+    expect(parseTransactionAmountSearch(search)).toBe(BigInt(expected));
+  });
+
+  it.each([
+    "",
+    "kopi 25rb",
+    "25,5",
+    "0",
+    "-25000",
+    "1,2345rb",
+    "1.000,000",
+    "1.000.000rb",
+    "9223372036854775808",
+  ])("does not treat %s as an exact IDR amount search", (search) => {
+    expect(parseTransactionAmountSearch(search)).toBeUndefined();
   });
 });
 

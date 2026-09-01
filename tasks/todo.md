@@ -188,7 +188,7 @@
   - Verify: retry sends the original payload, renders exactly one category/month
     allocation, and leaves no E2E identity or loopback auth-throttle state.
 
-- [ ] Complete normalized amount search and truthful Activity period context.
+- [x] Complete normalized amount search and truthful Activity period context.
   - Acceptance: amount queries use exact IDR normalization; all-history results
     are not labeled as the current month.
   - Verify: RED/GREEN unit, database/API, and mobile browser checks.

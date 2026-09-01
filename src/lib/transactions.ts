@@ -221,6 +221,55 @@ export type ValidatedFinanceSnapshotInput = z.output<
   typeof financeSnapshotInputSchema
 >;
 
+export function parseTransactionAmountSearch(search: string) {
+  const normalized = search.trim().toLocaleLowerCase("id-ID");
+  if (!normalized || normalized.length > MAX_TRANSACTION_SEARCH_LENGTH) {
+    return undefined;
+  }
+
+  const match = normalized.match(
+    /^(?:rp\s*)?(\d+(?:[.,]\d+)*)\s*(rb|ribu|k|jt|juta)?$/i,
+  );
+  if (!match) return undefined;
+
+  const numericText = match[1];
+  const unit = match[2];
+  let amount: bigint;
+
+  if (!unit) {
+    if (/^\d+$/.test(numericText)) {
+      amount = BigInt(numericText);
+    } else if (
+      /^\d{1,3}(?:\.\d{3})+$/.test(numericText) ||
+      /^\d{1,3}(?:,\d{3})+$/.test(numericText)
+    ) {
+      amount = BigInt(numericText.replace(/[.,]/g, ""));
+    } else {
+      return undefined;
+    }
+  } else {
+    const parts = numericText.split(/[.,]/);
+    if (parts.length > 2) return undefined;
+
+    const whole = BigInt(parts[0]);
+    const fraction = parts[1] ?? "";
+    const scale = BigInt(10) ** BigInt(fraction.length);
+    const numerator = whole * scale + BigInt(fraction || "0");
+    const multiplier =
+      unit === "jt" || unit === "juta"
+        ? BigInt(1_000_000)
+        : BigInt(1_000);
+    const scaledAmount = numerator * multiplier;
+
+    if (scaledAmount % scale !== BigInt(0)) return undefined;
+    amount = scaledAmount / scale;
+  }
+
+  return amount > BigInt(0) && amount <= POSTGRES_BIGINT_MAX
+    ? amount
+    : undefined;
+}
+
 function toContractResult<T>(result: z.ZodSafeParseResult<T>): ContractParseResult<T> {
   if (result.success) {
     return { success: true, data: result.data };

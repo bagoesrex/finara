@@ -9,7 +9,10 @@ import type {
   ValidatedListTransactionsInput,
   ValidatedUpdateTransactionInput,
 } from "@/lib/transactions";
-import { getMonthDateRange } from "@/lib/transactions";
+import {
+  getMonthDateRange,
+  parseTransactionAmountSearch,
+} from "@/lib/transactions";
 import { db } from "@/server/db/client";
 
 const transactionSelect = {
@@ -211,6 +214,9 @@ export async function listTransactions(
   }
 
   const monthRange = input.month ? getMonthDateRange(input.month) : null;
+  const amountSearch = input.search
+    ? parseTransactionAmountSearch(input.search)
+    : undefined;
   const transactions = await db.transaction.findMany({
     where: {
       userId,
@@ -234,6 +240,7 @@ export async function listTransactions(
                 name: { contains: input.search, mode: "insensitive" },
               },
             },
+            ...(amountSearch === undefined ? [] : [{ amount: amountSearch }]),
           ]
         : undefined,
     },

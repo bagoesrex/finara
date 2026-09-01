@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { expect, test } from "@playwright/test";
 
 import {
@@ -25,7 +27,7 @@ function readClientRequestId(postData: string | null) {
 
 test(
   "a new mobile user can record and find a manual expense",
-  async ({ page }, testInfo) => {
+  async ({ context, page }, testInfo) => {
     const email = createTestEmail();
     const browserProblems = collectBrowserProblems(page);
 
@@ -48,6 +50,15 @@ test(
       await dialog
         .getByRole("combobox", { name: "Kategori", exact: true })
         .selectOption({ label: "Food & Drink" });
+      const accountId = await dialog
+        .getByRole("combobox", { name: "Akun", exact: true })
+        .inputValue();
+      const categoryId = await dialog
+        .getByRole("combobox", { name: "Kategori", exact: true })
+        .inputValue();
+      const transactionDate = await dialog
+        .getByLabel("Tanggal", { exact: true })
+        .inputValue();
       await dialog.getByRole("button", { name: "Simpan transaksi" }).click();
 
       await expect(page.getByRole("status")).toContainText(
@@ -63,7 +74,68 @@ test(
       await expect(
         page.getByRole("heading", { name: "Aktivitas", exact: true }),
       ).toBeVisible();
+      await expect(
+        page.getByText("Semua periode", { exact: true }),
+      ).toBeVisible();
       await expect(page.getByRole("link", { name: /Makan ayam/ })).toBeVisible();
+
+      const search = page.getByRole("searchbox", { name: "Cari transaksi" });
+      await search.fill("25rb");
+      await expect(page.getByRole("link", { name: /Makan ayam/ })).toBeVisible();
+      await search.fill("26000");
+      await expect(
+        page.getByRole("heading", { name: "Tidak ada hasil" }),
+      ).toBeVisible();
+      await page.getByRole("button", { name: "Hapus pencarian" }).click();
+      const savedTransaction = page.getByRole("link", { name: /Makan ayam/ });
+      await expect(savedTransaction).toBeVisible();
+      await savedTransaction.click();
+      await expect(page).toHaveURL(/\/activity\/[a-f0-9-]+$/);
+      await expect(
+        page.getByRole("heading", { name: "Makan ayam", exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole("main")
+        .getByRole("link", { name: "Aktivitas", exact: true })
+        .click();
+      await expect(page).toHaveURL(/\/activity$/);
+
+      const seededResponses = await Promise.all(
+        Array.from({ length: 20 }, (_, index) =>
+          context.request.post("/api/transactions", {
+            data: {
+              accountId,
+              amount: String(1_000 + index),
+              categoryId,
+              clientRequestId: randomUUID(),
+              description: `Aktivitas ${String(index + 1).padStart(2, "0")}`,
+              transactionDate,
+              transactionTime: null,
+              type: "EXPENSE",
+            },
+          }),
+        ),
+      );
+      expect(seededResponses.map((response) => response.status())).toEqual(
+        Array(20).fill(201),
+      );
+
+      await page.reload();
+      const loadMore = page.getByRole("button", { name: "Muat lainnya" });
+      await expect(loadMore).toBeVisible();
+      await loadMore.scrollIntoViewIfNeeded();
+      const scrollContainer = page.locator(".app-content");
+      expect(
+        await scrollContainer.evaluate((element) => element.scrollTop),
+      ).toBeGreaterThan(0);
+      await loadMore.click();
+      await expect(savedTransaction).toBeVisible();
+      await expect(
+        page.getByRole("searchbox", { name: "Cari transaksi" }),
+      ).toHaveValue("");
+      expect(
+        await scrollContainer.evaluate((element) => element.scrollTop),
+      ).toBeGreaterThan(0);
 
       const screenshot = testInfo.outputPath("mobile-activity.png");
       await page.screenshot({ fullPage: true, path: screenshot });

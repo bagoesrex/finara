@@ -57,10 +57,26 @@ The detail surface shows only useful information:
 - Search and detail never expose another user's transaction.
 - Empty, no-result, loading, and failure states are visually distinct and actionable.
 
-## Open questions
+## Settled MVP behavior
 
-- Pagination strategy: cursor, page, or incremental date windows.
-- Default Activity period and navigation between months.
-- Search debounce and minimum query length.
-- Whether merchant becomes a dedicated transaction field.
-- Filter scope beyond search, such as type, account, category, and date.
+- Activity uses an all-history scope labeled `Semua periode`; month navigation is
+  outside the MVP because the PRD defines this surface as the complete history.
+- History loads incrementally with a stable cursor and a 20-record default page.
+- Search has no minimum length. Rendering uses React's deferred value while the
+  server still validates and caps the query at 80 characters.
+- Exact amount queries accept plain IDR digits, consistent `.` or `,` thousands
+  groups, and Indonesian shorthand such as `25rb` and `1,5jt`.
+- Merchant remains part of the transaction description for MVP; it is not a
+  separate persisted field.
+- The MVP Activity UI exposes free-text search only. Additional account,
+  category, type, and date controls require a later product decision.
+
+## Verification evidence
+
+- Contract tests cover valid, ambiguous, overflowing, and mixed-separator amount
+  inputs without using floating-point money arithmetic.
+- PostgreSQL service and production HTTP checks verify exact amount matching,
+  user scoping, text fields, and cursor bounds.
+- Mobile Edge covers the all-history label, amount search, no-results and clear
+  states, transaction-detail navigation, incremental loading, retained search
+  context, and non-reset scroll position.

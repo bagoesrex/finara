@@ -124,6 +124,31 @@ async function checkTransactionService() {
     assert.equal(page.items[0]?.id, created.id);
     assert.equal(page.nextCursor, null);
 
+    for (const search of ["25000", "Rp25.000", "25rb"]) {
+      const amountPage = await listTransactions(owner.id, {
+        cursor: undefined,
+        limit: 20,
+        month: "2026-08",
+        search,
+        type: undefined,
+      });
+      assert.equal(amountPage.items.length, 1);
+      assert.equal(amountPage.items[0]?.id, created.id);
+    }
+
+    assert.equal(
+      (
+        await listTransactions(owner.id, {
+          cursor: undefined,
+          limit: 20,
+          month: "2026-08",
+          search: "26000",
+          type: undefined,
+        })
+      ).items.length,
+      0,
+    );
+
     const expenseSnapshot = await getFinanceSnapshot(owner.id, "2026-08");
     assert.equal(expenseSnapshot.availableBalance, "75000");
     assert.equal(expenseSnapshot.monthlyExpense, "25000");
