@@ -19,6 +19,9 @@ describe("transaction parser prompts", () => {
 
     expect(prompts.system).toContain("CREATE_TRANSACTION");
     expect(prompts.system).toContain("never save");
+    expect(prompts.system).toContain("350k = 350000");
+    expect(prompts.system).toContain("pagi = 08:00");
+    expect(prompts.system).toContain("Wi-Fi/internet");
     expect(prompts.user).toContain('"referenceDate":"2026-08-30"');
     expect(prompts.user).toContain(
       '"availableCategories":[{"name":"Food & Drink","type":"EXPENSE"}',

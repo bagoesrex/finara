@@ -26,6 +26,7 @@
     "app:test:budget-api": "node --conditions=react-server --import tsx scripts/check-budget-api-flow.ts",
     "app:test:transaction-api": "node --conditions=react-server --import tsx scripts/check-transaction-api-flow.ts",
     "ai:check:nvidia": "node --import tsx scripts/check-nvidia-inference.ts",
+    "ai:eval:transactions": "node --import tsx scripts/evaluate-nvidia-transaction-parsing.ts",
     "predev": "npm run db:generate",
     "dev": "next dev",
     "prebuild": "npm run db:generate",

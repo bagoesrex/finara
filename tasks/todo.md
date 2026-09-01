@@ -148,3 +148,17 @@
     without inventing export or deletion behavior.
   - Verify: signed-out redirect and authenticated SSR assertions, source-level
     semantic/accessibility review, lint, typecheck, and production build.
+
+- [x] Add a versioned PRD transaction-parsing evaluation dataset.
+  - Acceptance: dataset `1.0.0` includes all five PRD phrases with fixed Jakarta
+    context and field-level expectations that tolerate wording without hiding
+    persisted-field errors.
+  - Verify: failing-first unit tests cover dataset identity, flexible morning
+    time, every field mismatch, and incorrect intent routing.
+
+- [x] Add and pass the live NVIDIA transaction evaluation gate.
+  - Acceptance: one explicit command evaluates the versioned cases sequentially,
+    prints sanitized per-field findings, and exits unsuccessfully on any failed
+    golden case without logging the credential or raw provider response.
+  - Verify: first baseline records 3/5; shared prompt corrections make the same
+    five cases pass without weakening evaluator expectations.

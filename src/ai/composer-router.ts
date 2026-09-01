@@ -1,4 +1,8 @@
-import { TRANSACTION_EXTRACTION_JSON_SCHEMA } from "./transaction-parser";
+import { CATEGORY_MAPPING_PROMPT } from "./categories";
+import {
+  TRANSACTION_EXTRACTION_JSON_SCHEMA,
+  TRANSACTION_NORMALIZATION_PROMPT,
+} from "./transaction-parser";
 import { STRUCTURED_RESPONSE_PROMPT } from "./response-style";
 
 export const COMPOSER_INTENT_JSON_SCHEMA = {
@@ -67,9 +71,9 @@ Choose GET_SPENDING_SUMMARY for current-month income, expense, category totals, 
 Choose GET_BUDGET for current-month allocated, spent, or remaining budget.
 Choose UNSUPPORTED for other periods, transaction search, advice, or unrelated requests.
 You never calculate financial values, answer the question, save data, or invent identifiers.`,
-    `For CREATE_TRANSACTION, normalize Indonesian money shorthand and relative dates from referenceDate in Asia/Jakarta.
-Use only a supplied compatible category name for categoryHint, falling back to Other.
-For read intents, categoryHint is either an exact supplied category name or null.`,
+    TRANSACTION_NORMALIZATION_PROMPT,
+    CATEGORY_MAPPING_PROMPT,
+    `For read intents, categoryHint is either an exact supplied category name or null.`,
     STRUCTURED_RESPONSE_PROMPT,
     `Return one intent INSTANCE using exactly one of these object shapes.
 Never return a JSON Schema or keys such as oneOf, properties, required, or additionalProperties.

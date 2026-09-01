@@ -21,13 +21,17 @@ remain later slices.
 ## Transaction parsing
 
 - **AI-001:** The parser extracts transaction type, amount, description, category, date, and time when present.
-- **AI-002:** Indonesian shorthand such as `rb`, `ribu`, `k`, `jt`, and relative dates is normalized deterministically after structured extraction.
+- **AI-002:** The parser normalizes Indonesian shorthand such as `rb`, `ribu`,
+  `k`, and `jt`, plus relative Jakarta dates, into the strict structured output.
 - **AI-003:** The model returns structured data rather than free-form text for transaction creation.
 - **AI-004:** Missing or ambiguous required values are surfaced for correction instead of guessed silently.
 - **AI-005:** Parsed data is mapped to authorized account/category identifiers on the server.
 - **AI-006:** The MVP always presents a transaction preview before persistence.
+- **AI-016:** Qualitative Indonesian time words use editable representative
+  local times in previews: `pagi` 08:00, `siang` 12:00, `sore` 16:00, and
+  `malam` 20:00. Users still confirm or edit the value before save.
 
-Draft parsing contract:
+Structured parsing contract:
 
 ```text
 intent
@@ -36,12 +40,12 @@ amount
 description
 categoryHint
 transactionDate
-transactionTime?
-confidence?
+transactionTime
 missingFields[]
 ```
 
-The final validation schema and money/date representations must be approved with the data model.
+The runtime schema strictly validates positive whole-IDR digits, calendar dates,
+local `HH:mm` time, bounded descriptions, and the exact missing-field vocabulary.
 
 ## Financial questions
 
@@ -76,6 +80,21 @@ explicit confirmation. Provider-bound preview requests are limited per user by
 a PostgreSQL-backed fixed window (10 requests per 60 seconds by default).
 Exhausted quota returns `429 AI_RATE_LIMITED` with `Retry-After`; it never
 creates a transaction.
+
+## Accepted transaction-parsing evaluation
+
+Dataset `1.0.0` fixes the Jakarta reference date at `2026-08-30` and contains
+all five transaction phrases in the PRD. Evaluation checks intent, type, exact
+whole-IDR amount, description meaning, category, relative date, qualitative
+time, and missing fields separately. Description checks use required terms
+rather than one exact model-authored phrase; `tadi pagi` accepts an `HH:mm`
+inside the documented morning period.
+
+The deterministic matcher runs in the normal Vitest suite. Run
+`npm run ai:eval:transactions` with the ignored local NVIDIA credential to
+evaluate the same cases against the configured hosted model. Every documented
+golden case must pass; this gate does not silently establish a broader
+production accuracy target.
 
 ## Accepted current-month question boundary
 
@@ -140,7 +159,8 @@ Financial records are fetched at request time and are not embedded in static pro
 
 - Production quota, availability target, privacy review, and cost ceiling if
   NVIDIA changes the free prototype endpoint.
-- Confidence calibration and evaluation dataset.
+- Confidence calibration and a quantitative parsing-success target beyond the
+  accepted PRD golden cases.
 - Conversation persistence and retention; `AIConversation` is Phase 2.
 - Date-language coverage beyond the accepted Jakarta-relative MVP examples.
 - Whether natural-language transaction search remains Phase 2 or is included through basic query tools.

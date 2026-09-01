@@ -173,6 +173,22 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Signed-out protection and authenticated SSR are covered by the production
   Profile runtime flow.
 
+### Phase 11: Versioned AI parsing evaluation
+
+- [x] Task 32: Define the versioned PRD transaction dataset and deterministic
+  field-level evaluator through a failing-first unit-test cycle.
+- [x] Task 33: Add the explicit NVIDIA evaluation command and correct the prompt
+  regressions exposed by its first baseline.
+
+### Checkpoint: AI Parsing Evaluation
+
+- [x] Dataset `1.0.0` covers every PRD transaction phrase with stable Jakarta
+  date context and field-specific expectations.
+- [x] The first hosted-model baseline exposed amount, category, and time errors;
+  the unchanged dataset passes 5/5 after shared prompt corrections.
+- [x] Live evaluation is credentialed and explicit rather than making the
+  deterministic unit suite depend on NVIDIA availability.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -259,3 +275,13 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   Profile navigation, removal of stale copy, and the rendered privacy content.
   Chrome DevTools MCP is not configured in this environment, so screenshot,
   console, viewport, and accessibility-tree inspection remain unavailable.
+- Phase 11 adds dataset `1.0.0`, a deterministic field-level matcher, and
+  `npm run ai:eval:transactions`. The initial live NVIDIA run passed 3/5 and
+  identified `350k` normalization, Wi-Fi categorization, and qualitative-time
+  gaps. Shared transaction guidance now includes explicit IDR examples,
+  semantic default-category mappings, and editable representative time values;
+  the unchanged live dataset then passed 5/5.
+- Final Phase 11 gates pass: all 142 tests across 21 files, ESLint, route-aware
+  type checking, and the Next.js 16.3.2 production build. The credentialed live
+  evaluation passes all five dataset `1.0.0` cases against the configured
+  NVIDIA model.

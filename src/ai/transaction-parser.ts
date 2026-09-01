@@ -40,6 +40,13 @@ export const TRANSACTION_EXTRACTION_JSON_SCHEMA = {
   ],
 } as const;
 
+export const TRANSACTION_NORMALIZATION_PROMPT = `For transaction extraction, normalize Indonesian money shorthand to whole IDR digits.
+Examples: 25rb = 25000, 50 ribu = 50000, 350k = 350000, and 5jt = 5000000.
+Resolve relative dates from the supplied referenceDate in Asia/Jakarta.
+When a qualitative time is present, use an editable representative local time: pagi = 08:00, siang = 12:00, sore = 16:00, and malam = 20:00.
+Use null and list the field in missingFields when type, amount, or description is genuinely ambiguous.
+Do not guess a missing amount.`;
+
 type TransactionParserPromptInput = {
   categories: Array<{ name: string; type: "INCOME" | "EXPENSE" }>;
   referenceDate: string;
@@ -51,10 +58,7 @@ export function buildTransactionParserPrompts(
 ) {
   const system = [
     FINARA_AI_SYSTEM_PROMPT,
-    `Normalize Indonesian money shorthand: rb/ribu/k means thousands and jt/juta means millions.
-Resolve relative dates from the supplied referenceDate in Asia/Jakarta.
-Use null and list the field in missingFields when type, amount, or description is genuinely ambiguous.
-Do not guess a missing amount.`,
+    TRANSACTION_NORMALIZATION_PROMPT,
     CATEGORY_MAPPING_PROMPT,
     STRUCTURED_RESPONSE_PROMPT,
     `The JSON must conform to this schema:\n${JSON.stringify(TRANSACTION_EXTRACTION_JSON_SCHEMA)}`,

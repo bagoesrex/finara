@@ -26,6 +26,14 @@ Define evidence that Finara is fast, accurate, understandable, safe, and maintai
 - **QUAL-007:** Accuracy is evaluated against a versioned representative Indonesian input dataset, including shorthand amounts and relative dates.
 - **QUAL-008:** Track failure by field and phrase pattern rather than only one aggregate percentage.
 
+Dataset `1.0.0` covers the five PRD transaction phrases with a fixed Jakarta
+reference date. Its deterministic matcher reports intent, type, amount,
+description meaning, category, date, time, and missing-field failures
+individually. The normal unit suite verifies the dataset and matcher; the
+credentialed `npm run ai:eval:transactions` command runs those same cases
+sequentially against NVIDIA. The PRD golden-case gate requires 5/5 without
+claiming a broader product accuracy percentage.
+
 ### Continued tracking
 
 - **QUAL-009:** Week-one tracking measures users who record a meaningful transaction after their first-use week boundary.
@@ -44,7 +52,10 @@ Define evidence that Finara is fast, accurate, understandable, safe, and maintai
 | Responsive and accessible UI | Real-browser checks at supported viewports |
 | Build and type safety | Lint, route-aware typecheck, production build |
 
-The test framework is not yet selected. Tests should be added with the first business-logic implementation rather than creating an unused test architecture.
+Vitest covers deterministic unit contracts. PostgreSQL and production HTTP
+checks remain explicit repository commands, while hosted-model evaluation stays
+outside the default unit suite because it requires a credential and network
+access.
 
 ## UX state quality
 
@@ -97,7 +108,7 @@ A feature is ready for handoff when:
 ## Acceptance criteria
 
 - Every MVP spec points to measurable acceptance criteria.
-- The parsing evaluation dataset covers all natural-language examples in the PRD.
+- The parsing evaluation dataset covers all transaction-parsing examples in the PRD.
 - Authorization tests demonstrate that user A cannot access user B's finance records.
 - Product metrics have unambiguous event definitions before production analytics collection.
 - Quality gates can run locally and later in CI without relying on undocumented steps.
@@ -105,7 +116,7 @@ A feature is ready for handoff when:
 
 ## Open questions
 
-- Test runners for unit/integration and browser end-to-end tests.
+- Browser end-to-end runner and supported automation environment.
 - Supported browser/device matrix and representative network profile.
 - Quantitative AI parsing-success target.
 - Week-one tracking target and analytics provider.
