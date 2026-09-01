@@ -27,6 +27,8 @@
     "app:test:transaction-api": "node --conditions=react-server --import tsx scripts/check-transaction-api-flow.ts",
     "ai:check:nvidia": "node --import tsx scripts/check-nvidia-inference.ts",
     "ai:eval:transactions": "node --import tsx scripts/evaluate-nvidia-transaction-parsing.ts",
+    "pree2e": "npm run build",
+    "e2e": "playwright test --project=mobile-edge",
     "predev": "npm run db:generate",
     "dev": "next dev",
     "prebuild": "npm run db:generate",
@@ -53,6 +55,7 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "8.23.1",
