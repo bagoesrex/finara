@@ -20,9 +20,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ```bash
 npm test
+npm run test:integration
 npm run lint
 npm run typecheck
 npm run build
+```
+
+The integration command requires a migrated local PostgreSQL database from
+`.env` and runs the deterministic schema, authorization, finance-service, and
+rate-limit checks:
+
+```bash
+npm run db:migrate:deploy
+npm run test:integration
 ```
 
 The real-browser gate requires the ignored `.env` to point at PostgreSQL on
@@ -32,6 +42,25 @@ removes its generated user after the run:
 
 ```bash
 npm run e2e
+```
+
+Set `FINARA_E2E_PORT` when port 3000 is already occupied. The validated port is
+used consistently by the production server, Playwright base URL, and Better
+Auth test origin:
+
+```bash
+FINARA_E2E_PORT=3100 npm run e2e
+```
+
+GitHub Actions repeats frozen installation, migrations, lint, type checking,
+unit and PostgreSQL integration checks, production-runtime dependency audit,
+production build, and all mobile Edge journeys. It uses only an ephemeral CI
+database and test-only auth secret. Live NVIDIA checks are intentionally opt-in
+and stay outside pull request CI:
+
+```bash
+npm run ai:check:nvidia
+npm run ai:eval:transactions
 ```
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

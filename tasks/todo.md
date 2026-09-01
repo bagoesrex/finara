@@ -199,7 +199,7 @@
   - Verify: deterministic Playwright journeys with isolated users and clean
     console output except explicitly simulated failures.
 
-- [ ] Add deterministic pull-request CI gates.
+- [x] Add deterministic pull-request CI gates.
   - Acceptance: frozen install, local PostgreSQL migration, tests, lint,
     typecheck, build, and browser automation fail the workflow on regression.
   - Verify: workflow syntax and commands are source-verified and locally

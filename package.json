@@ -25,6 +25,8 @@
     "app:test:ai-composer-flow": "node --conditions=react-server --import tsx scripts/check-ai-composer-api-flow.ts",
     "app:test:budget-api": "node --conditions=react-server --import tsx scripts/check-budget-api-flow.ts",
     "app:test:transaction-api": "node --conditions=react-server --import tsx scripts/check-transaction-api-flow.ts",
+    "pretest:integration": "npm run db:generate",
+    "test:integration": "npm run db:check && npm run db:test:onboarding && npm run db:test:account-service && npm run db:test:persisted-onboarding && npm run db:test:transactions && npm run db:test:budgets && npm run db:test:budget-service && npm run db:test:ai-rate-limit && npm run db:test:ai-finance-tools && npm run db:test:transaction-service && npm run db:test:auth",
     "ai:check:nvidia": "node --import tsx scripts/check-nvidia-inference.ts",
     "ai:eval:transactions": "node --import tsx scripts/evaluate-nvidia-transaction-parsing.ts",
     "pree2e": "npm run build",

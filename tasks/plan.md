@@ -272,17 +272,17 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 17: Continuous quality gates
 
-- [ ] Task 48: Add a GitHub Actions workflow with frozen npm installation,
+- [x] Task 48: Add a GitHub Actions workflow with frozen npm installation,
   PostgreSQL migrations, deterministic tests, lint, type checking, build, and
   mobile Edge browser automation.
-- [ ] Task 49: Document local/CI commands and keep credentialed NVIDIA checks
+- [x] Task 49: Document local/CI commands and keep credentialed NVIDIA checks
   explicitly separate from deterministic pull-request gates.
 
 ### Checkpoint: CI
 
-- [ ] The workflow uses placeholders only, scopes permissions minimally, and
+- [x] The workflow uses placeholders only, scopes permissions minimally, and
   fails closed when any deterministic quality gate fails.
-- [ ] CI and local commands execute the same checked-in scripts.
+- [x] CI and local commands execute the same checked-in scripts.
 
 ### Phase 18: MVP specification closure
 
@@ -427,3 +427,13 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   document overflow, and a reachable manual-entry action. The delete journey
   also caught and removed an unnecessary post-delete detail refetch that logged
   an expected 404 to the browser console.
+- Phase 17 defines one fail-fast GitHub Actions job on pull requests and pushes
+  to `main`: Node 24 frozen install, PostgreSQL 17 health check and migrations,
+  lint, route-aware type checking, 161 unit tests, deterministic integration
+  scripts, high-severity production-runtime dependency audit, production build,
+  and all eight stable-Edge journeys. The job has read-only repository
+  permission, a 20-minute timeout, cancellable superseded runs, ephemeral
+  CI-only credentials, and retained Playwright evidence. NVIDIA credentials are
+  never required. Prisma's dev-only CLI chain retains an upstream high advisory;
+  its suggested automatic fix is a breaking major downgrade and is tracked for
+  an upstream-compatible release rather than hidden or force-applied.

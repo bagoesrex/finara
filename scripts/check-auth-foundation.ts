@@ -8,9 +8,11 @@ const baseURL = "http://localhost:3000";
 const testSecret = "finara-auth-integration-secret-32-chars";
 const testIpAddressHeader = "x-finara-test-ip";
 
-process.env.BETTER_AUTH_URL ??= baseURL;
-process.env.BETTER_AUTH_SECRET ??= testSecret;
-process.env.BETTER_AUTH_TRUSTED_IP_HEADER ??= testIpAddressHeader;
+// This process-level test boundary must not inherit a developer or production
+// origin, secret, or trusted proxy header from the surrounding environment.
+process.env.BETTER_AUTH_URL = baseURL;
+process.env.BETTER_AUTH_SECRET = testSecret;
+process.env.BETTER_AUTH_TRUSTED_IP_HEADER = testIpAddressHeader;
 
 type AuthError = {
   code?: string;
