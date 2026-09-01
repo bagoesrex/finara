@@ -219,6 +219,23 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] The expected simulated `503` is the only browser-console error; no uncaught
   page error or unrelated warning is accepted.
 
+### Phase 14: Real-browser Budget baseline
+
+- [x] Task 38: Share guarded E2E user lifecycle helpers across the transaction
+  and Budget journeys.
+- [x] Task 39: Cover category allocation and reload persistence in mobile Edge.
+- [x] Task 40: Simulate an ambiguous Budget save, preserve the draft, expose an
+  explicit retry, and prove natural-key idempotency in the rendered application.
+
+### Checkpoint: Browser Budget Baseline
+
+- [x] The empty Budget state can create one category allocation whose amount and
+  accessible progress survive a browser reload.
+- [x] A committed response rewritten as `503` leaves category and amount intact;
+  retry sends the same payload and renders one category/month allocation.
+- [x] All four feature journeys pass sequentially without sharing users or
+  loopback authentication rate-limit state.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -325,3 +342,9 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   ESLint, route-aware type checking, and the Next.js 16.3.2 production build are
   clean. The ambiguous-save journey preserves the complete draft, exposes
   `Coba lagi`, reuses its idempotency key, and renders one persisted transaction.
+- Final Phase 14 gates pass: all four mobile Edge journeys, all 142 unit tests,
+  ESLint, route-aware type checking, and the Next.js 16.3.2 production build are
+  clean. Budget creation survives reload; the ambiguous-save journey preserves
+  its draft, exposes `Coba lagi`, retries the exact payload, and renders one
+  persisted category/month allocation. Guarded local cleanup leaves zero E2E
+  users and zero loopback authentication rate-limit rows.

@@ -175,3 +175,15 @@
     draft field intact, announces the failure, and exposes an explicit retry.
   - Verify: retry reuses the original client request ID, renders exactly one
     transaction, and the mobile failure artifact remains readable and unclipped.
+
+- [x] Add a repeatable real-browser Budget quality gate.
+  - Acceptance: a new mobile user can allocate one category Budget and see the
+    authoritative amount and progress survive a full page reload.
+  - Verify: Playwright stable Edge/Pixel 7 renders one `Food & Drink` allocation,
+    reports a clean browser console, and produces an inspected mobile artifact.
+
+- [x] Cover recoverable Budget-save failure in the real browser.
+  - Acceptance: an ambiguous response after successful persistence preserves
+    the category and amount, announces the failure, and exposes `Coba lagi`.
+  - Verify: retry sends the original payload, renders exactly one category/month
+    allocation, and leaves no E2E identity or loopback auth-throttle state.

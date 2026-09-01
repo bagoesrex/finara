@@ -63,17 +63,19 @@ ADR 0009 selects Playwright with stable Microsoft Edge and the Pixel 7 device
 descriptor as the first supported local automation environment. The baseline
 uses a `412x839` mobile viewport, Indonesian locale, Jakarta timezone, production
 Next.js build, and a loopback PostgreSQL database. `npm run e2e` covers
-registration, first-account onboarding, confirmed manual expense creation, Home
-refresh, and Activity visibility in one rendered-browser journey. The generated
-identity is removed after the run, successful output includes a visual artifact,
+registration, first-account onboarding, confirmed manual expense creation,
+Budget allocation, reload persistence, Home refresh, and Activity visibility.
+Generated identities and loopback-only authentication rate-limit rows are
+removed after each feature journey, successful output includes visual artifacts,
 and failed runs retain screenshots and traces.
 
-The transaction baseline now covers one critical happy path and one recoverable
-ambiguous-save failure: the server commits, the browser receives a simulated
-`503`, the draft remains editable, and retry reuses the original idempotency key
-without creating a duplicate. It is not a cross-browser or complete E2E matrix.
-Budget recoverable failures, additional devices, and network profiles remain
-separate quality work.
+The transaction and Budget baselines each cover one critical happy path and one
+recoverable ambiguous-save failure: the server commits, the browser receives a
+simulated `503`, the draft remains editable, and retry reuses the original
+idempotent request without creating a duplicate. The Budget failure state also
+exposes an explicit `Coba lagi` action. This is not a cross-browser or complete
+E2E matrix; additional devices and network profiles remain separate quality
+work.
 
 ## UX state quality
 
