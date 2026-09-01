@@ -236,6 +236,71 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] All four feature journeys pass sequentially without sharing users or
   loopback authentication rate-limit state.
 
+### Phase 15: Activity contract closure
+
+- [ ] Task 41: Define exact-IDR search normalization with focused contract
+  tests for plain digits, Indonesian separators, and `rb` shorthand.
+- [ ] Task 42: Match normalized amounts in the authorized transaction query and
+  verify amount search through the production HTTP boundary.
+- [ ] Task 43: Make the Activity range label truthful for its all-history query
+  and cover search, clear, pagination, and detail navigation in mobile Edge.
+
+### Checkpoint: Activity Search
+
+- [ ] Description, account, category, and normalized amount searches remain
+  case-insensitive, user-scoped, and bounded by cursor pagination.
+- [ ] Activity never presents a current-month label over an all-history query.
+- [ ] Search, no-results, clear, and transaction-detail navigation are verified
+  in the rendered application.
+
+### Phase 16: Remaining critical browser flows
+
+- [ ] Task 44: Cover transaction edit and confirmed delete with authoritative
+  Home/Activity reconciliation.
+- [ ] Task 45: Cover persisted account rename and sign-out/session revocation.
+- [ ] Task 46: Cover AI transaction preview and current-month answer UI with a
+  deterministic authenticated provider boundary.
+- [ ] Task 47: Add narrow-mobile and large-viewport smoke checks without
+  changing Finara's mobile information architecture.
+
+### Checkpoint: MVP Browser Matrix
+
+- [ ] Every destructive or persisted MVP workflow has at least one real-browser
+  happy path and the highest-risk recovery path.
+- [ ] Supported viewport checks show no horizontal clipping, duplicate desktop
+  navigation, or inaccessible primary action.
+
+### Phase 17: Continuous quality gates
+
+- [ ] Task 48: Add a GitHub Actions workflow with frozen npm installation,
+  PostgreSQL migrations, deterministic tests, lint, type checking, build, and
+  mobile Edge browser automation.
+- [ ] Task 49: Document local/CI commands and keep credentialed NVIDIA checks
+  explicitly separate from deterministic pull-request gates.
+
+### Checkpoint: CI
+
+- [ ] The workflow uses placeholders only, scopes permissions minimally, and
+  fails closed when any deterministic quality gate fails.
+- [ ] CI and local commands execute the same checked-in scripts.
+
+### Phase 18: MVP specification closure
+
+- [ ] Task 50: Reconcile every Draft requirement with implementation evidence,
+  an explicit MVP exclusion grounded in the PRD, or a named external launch
+  blocker.
+- [ ] Task 51: Add measured browser timing evidence for the accepted transaction
+  baseline without introducing an analytics provider prematurely.
+- [ ] Task 52: Record the production-only decisions that require deployment,
+  legal/privacy, or business input and cannot be inferred from repository code.
+
+### Checkpoint: Specification Closure
+
+- [ ] Every in-repository MVP acceptance criterion is implemented and mapped to
+  a repeatable check.
+- [ ] Deferred behavior is explicit and does not masquerade as implemented UI.
+- [ ] Remaining blockers require external authority rather than more local code.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |

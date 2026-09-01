@@ -187,3 +187,26 @@
     the category and amount, announces the failure, and exposes `Coba lagi`.
   - Verify: retry sends the original payload, renders exactly one category/month
     allocation, and leaves no E2E identity or loopback auth-throttle state.
+
+- [ ] Complete normalized amount search and truthful Activity period context.
+  - Acceptance: amount queries use exact IDR normalization; all-history results
+    are not labeled as the current month.
+  - Verify: RED/GREEN unit, database/API, and mobile browser checks.
+
+- [ ] Cover the remaining persisted MVP workflows in a real browser.
+  - Acceptance: Activity search/detail, transaction edit/delete, account rename,
+    sign-out, AI preview/answer, and supported viewport behavior are exercised.
+  - Verify: deterministic Playwright journeys with isolated users and clean
+    console output except explicitly simulated failures.
+
+- [ ] Add deterministic pull-request CI gates.
+  - Acceptance: frozen install, local PostgreSQL migration, tests, lint,
+    typecheck, build, and browser automation fail the workflow on regression.
+  - Verify: workflow syntax and commands are source-verified and locally
+    reproducible; secrets and live NVIDIA access are not required.
+
+- [ ] Close the MVP spec audit.
+  - Acceptance: each Draft requirement is implemented, explicitly excluded from
+    MVP using PRD evidence, or recorded as an external launch blocker.
+  - Verify: requirement-to-evidence review, measured transaction timing, full
+    quality suite, documentation review, and clean Git status.
