@@ -688,6 +688,32 @@ a.transaction-row:active { transform: scale(.99); }
 .finance-note { margin-top: 30px; }
 .account-rename-form { margin-top: 24px; }
 
+.privacy-page .back-link { margin-bottom: 14px; }
+.privacy-page .page-header { margin-bottom: 4px; }
+.privacy-section { scroll-margin-top: 24px; }
+.privacy-list { padding: 0; margin: 0; border-top: 1px solid var(--border); list-style: none; }
+.privacy-list > li {
+  display: grid;
+  min-height: 86px;
+  align-items: start;
+  gap: 12px;
+  padding: 17px 0;
+  grid-template-columns: 38px minmax(0, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.privacy-list__icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.privacy-list h3, .privacy-list p { margin: 0; }
+.privacy-list h3 { font-size: .81rem; font-weight: 650; }
+.privacy-list p { margin-top: 5px; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+
 .home-empty-state {
   display: flex;
   min-height: 92px;

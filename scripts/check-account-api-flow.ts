@@ -83,6 +83,9 @@ async function checkAccountApiFlow() {
         .status,
       401,
     );
+    const signedOutPrivacy = await request("/profile/privacy");
+    assert.equal(signedOutPrivacy.status, 307);
+    assert.equal(signedOutPrivacy.headers.get("location"), "/welcome");
 
     const owner = await registerAndSignIn("Runtime Account Owner");
     const otherUser = await registerAndSignIn("Other Runtime Account Owner");
@@ -226,6 +229,23 @@ async function checkAccountApiFlow() {
     });
     assert.equal(financeSettings.status, 200);
     assert.match(await financeSettings.text(), /Runtime Dana Utama/);
+
+    const profile = await request("/profile", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(profile.status, 200);
+    const profileHtml = await profile.text();
+    assert.match(profileHtml, /href="\/profile\/privacy"/);
+    assert.doesNotMatch(profileHtml, /sesi browser/i);
+
+    const privacy = await request("/profile/privacy", {
+      headers: { cookie: owner.cookie },
+    });
+    assert.equal(privacy.status, 200);
+    const privacyHtml = await privacy.text();
+    assert.match(privacyHtml, /Data &amp; privasi/);
+    assert.match(privacyHtml, /Hanya konteks yang diperlukan/);
+    assert.match(privacyHtml, /Konfirmasi sebelum menyimpan/);
     assert.equal(
       (await request(`/api/accounts/${account.id}`)).status,
       405,

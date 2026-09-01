@@ -159,6 +159,20 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Unit, database, production HTTP, lint, typecheck, and production-build
   verification pass.
 
+### Phase 10: Truthful profile privacy
+
+- [x] Task 31: Replace obsolete prototype status with a protected Data & Privacy
+  surface that describes current storage, AI processing, and user controls.
+
+### Checkpoint: Profile Privacy
+
+- [x] Profile links to Data & Privacy and no longer claims persisted
+  transactions are browser-session-only.
+- [x] The disclosure matches the implemented AI prompt boundary without
+  promising unresolved export, retention, or deletion behavior.
+- [x] Signed-out protection and authenticated SSR are covered by the production
+  Profile runtime flow.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -232,3 +246,16 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   projection refresh, and authenticated SSR after reload. Chrome DevTools MCP
   remains unavailable, so interactive behavior is covered by focused query
   invalidation tests and source-level accessibility review.
+- Phase 10 replaces Profile's obsolete session-only prototype message with a
+  protected, server-rendered Data & Privacy route. The disclosure is grounded
+  in the current prompt builders: composer text and category names can reach
+  NVIDIA, while identity, internal IDs, balances, stored transaction history,
+  Budget amounts, and database access remain application-side. Export,
+  retention, and deletion controls remain outside this slice because their
+  behavior is still unresolved.
+- Final Phase 10 gates pass: all 137 tests across 20 files, ESLint, route-aware
+  type checking, the Next.js 16.3.2 production build, and the authenticated
+  production Profile HTTP flow. The flow covers signed-out redirect protection,
+  Profile navigation, removal of stale copy, and the rendered privacy content.
+  Chrome DevTools MCP is not configured in this environment, so screenshot,
+  console, viewport, and accessibility-tree inspection remain unavailable.

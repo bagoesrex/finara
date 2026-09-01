@@ -17,7 +17,7 @@ Define system boundaries that keep financial data authoritative, user-scoped, an
 - Zod for untrusted-boundary validation.
 - An LLM provider with structured output and tool calling.
 
-PostgreSQL, Prisma, Zod, Better Auth, and TanStack Query are installed. The persisted application slice covers database-backed email/password sessions, first-account onboarding, user-owned default categories, transactions, server-derived balances and monthly summaries, and category Budgets with server-derived progress. AI orchestration remains a future slice; an LLM provider is not selected or installed.
+PostgreSQL, Prisma, Zod, Better Auth, and TanStack Query are installed. The persisted application slice covers database-backed email/password sessions, first-account onboarding, user-owned default categories, transactions, server-derived balances and monthly summaries, and category Budgets with server-derived progress. NVIDIA Build provides the accepted structured transaction-preview and current-month intent-routing boundary defined by [ADR 0007](../decisions/0007-nvidia-build-for-ai-inference.md) and [ADR 0008](../decisions/0008-application-managed-ai-finance-tools.md).
 
 TanStack Query is accepted for mutable client server-state by [ADR 0002](../decisions/0002-tanstack-query-for-client-finance-state.md). It is a session-scoped UX cache, not an authorization boundary or source of financial truth.
 

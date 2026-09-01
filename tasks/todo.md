@@ -140,3 +140,11 @@
     sheet and announces persistence; failure preserves input and supports retry.
   - Verify: authenticated runtime flow, source-level accessibility review, unit
     tests, lint, typecheck, and production build.
+
+- [x] Make Profile's Data & Privacy boundary truthful and reachable.
+  - Acceptance: Profile no longer describes transactions as session-only; a
+    protected, informational page explains persisted data, the narrow composer
+    data sent to NVIDIA, and currently supported confirmation/sign-out controls
+    without inventing export or deletion behavior.
+  - Verify: signed-out redirect and authenticated SSR assertions, source-level
+    semantic/accessibility review, lint, typecheck, and production build.

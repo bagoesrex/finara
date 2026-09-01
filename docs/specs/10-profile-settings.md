@@ -26,6 +26,19 @@ Profile
 
 Only settings that are implemented and meaningful should be visible.
 
+## Current implementation boundary
+
+Profile shows the authenticated identity, persisted finance settings, fixed MVP
+currency/language context, a Data & Privacy disclosure, and sign out. The
+disclosure distinguishes data stored by Finara from the narrower composer data
+sent to the AI provider: submitted text and available category names. It also
+states that balances, transaction history, Budget amounts, identity, and
+internal IDs stay inside the application when financial questions are answered.
+
+The Data & Privacy surface is informational. It does not expose export,
+retention, account deletion, or other controls whose product and operational
+behavior has not been accepted.
+
 ## Requirements
 
 - **PROF-001:** Profile shows the minimum useful identity information and links to grouped settings.
@@ -36,6 +49,7 @@ Only settings that are implemented and meaningful should be visible.
 - **PROF-006:** AI preferences cannot weaken server authorization, validation, transaction confirmation, or safety boundaries.
 - **PROF-007:** Data & Privacy explains relevant data use in concise language and links to any supported data actions.
 - **PROF-008:** Sign out is clear, reachable, and uses the authentication behavior in [`04-authentication-onboarding.md`](./04-authentication-onboarding.md).
+- **PROF-009:** Privacy copy reflects the implemented AI data boundary and must not imply that balances, transaction history, or database access are sent to the model.
 
 ## UI states
 
@@ -47,6 +61,7 @@ Only settings that are implemented and meaningful should be visible.
 ## Acceptance criteria
 
 - A user can locate Accounts, Categories, Preferences, Data & Privacy, and Sign out without scanning an analytics dashboard.
+- Data & Privacy accurately distinguishes persisted application data, composer data sent to the AI provider, and controls that currently exist.
 - Rare settings are nested rather than displayed as equal-priority Home-style content.
 - A setting is not shown unless its value is persisted and affects behavior.
 - Failed saves preserve the previous persisted value and allow retry.

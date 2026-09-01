@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ChevronRight,
-  CircleHelp,
   Coins,
   Languages,
   LogOut,
@@ -30,7 +29,6 @@ export function ProfileDashboard() {
   const preferences = [
     { icon: Coins, label: "Mata uang", value: "Rupiah (IDR)" },
     { icon: Languages, label: "Bahasa", value: "Indonesia" },
-    { icon: ShieldCheck, label: "Akun", value: "Tersimpan" },
   ];
 
   async function handleSignOut() {
@@ -103,15 +101,23 @@ export function ProfileDashboard() {
         </dl>
       </section>
 
-      <section className="support-note" aria-label="Batas versi saat ini">
-        <CircleHelp aria-hidden="true" size={20} />
-        <div>
-          <h2>Preview MVP</h2>
-          <p>
-            Akun dan saldo awal sudah tersimpan. Transaksi percobaan masih hanya
-            hidup selama sesi browser ini.
-          </p>
+      <section className="section-block" aria-labelledby="privacy-settings-title">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Keamanan</p>
+            <h2 id="privacy-settings-title">Data &amp; privasi</h2>
+          </div>
         </div>
+        <Link className="settings-link" href="/profile/privacy">
+          <span className="settings-link__icon" aria-hidden="true">
+            <ShieldCheck size={20} />
+          </span>
+          <span className="settings-link__copy">
+            <strong>Penggunaan data</strong>
+            <small>Penyimpanan, AI, dan kendali saat ini</small>
+          </span>
+          <ChevronRight aria-hidden="true" size={18} />
+        </Link>
       </section>
 
       <button
