@@ -64,3 +64,4 @@ All specs start as **Draft**. A feature should not silently resolve its open que
 | [`ADR 0006`](./decisions/0006-category-month-budgets.md) | Budget MVP adalah alokasi kategori pengeluaran per bulan | Accepted |
 | [`ADR 0007`](./decisions/0007-nvidia-build-for-ai-inference.md) | NVIDIA Build menyediakan inference parsing transaksi dengan preview terautorisasi | Accepted |
 | [`ADR 0008`](./decisions/0008-application-managed-ai-finance-tools.md) | Intent NVIDIA memilih tool baca terbatas; aplikasi menghitung jawaban finansial | Accepted |
+| [`ADR 0009`](./decisions/0009-playwright-edge-mobile-browser-baseline.md) | Playwright mengotomasi baseline browser mobile dengan Edge stabil dan database lokal | Accepted |

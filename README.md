@@ -16,6 +16,24 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Quality checks
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+The real-browser gate requires the ignored `.env` to point at PostgreSQL on
+`localhost`, `127.0.0.1`, or `::1`, plus stable Microsoft Edge. It builds and
+starts the production application, uses an isolated mobile browser context, and
+removes its generated user after the run:
+
+```bash
+npm run e2e
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

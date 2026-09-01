@@ -162,3 +162,10 @@
     golden case without logging the credential or raw provider response.
   - Verify: first baseline records 3/5; shared prompt corrections make the same
     five cases pass without weakening evaluator expectations.
+
+- [x] Add a repeatable real-browser transaction quality gate.
+  - Acceptance: one documented command builds production code and verifies a
+    new mobile user can register, onboard, save a confirmed manual expense, and
+    find it on Home and Activity without reusing personal browser state.
+  - Verify: Playwright stable Edge/Pixel 7 run passes with a clean browser
+    console, guarded local-database cleanup, and an inspected mobile screenshot.

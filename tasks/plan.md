@@ -189,6 +189,22 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - [x] Live evaluation is credentialed and explicit rather than making the
   deterministic unit suite depend on NVIDIA availability.
 
+### Phase 12: Real-browser transaction baseline
+
+- [x] Task 34: Select and configure the first repeatable browser automation
+  environment with a production server and local-database safety boundary.
+- [x] Task 35: Cover registration through persisted manual transaction Activity
+  visibility in one isolated mobile Edge journey.
+
+### Checkpoint: Browser Transaction Baseline
+
+- [x] `npm run e2e` returns a normal pass/fail exit code and does not leave the
+  application server or generated E2E user running.
+- [x] The critical journey passes at the Pixel 7 viewport with Indonesian locale
+  and Jakarta timezone, with no captured console warning or error.
+- [x] The rendered Activity artifact shows the saved `Rp25.000` expense without
+  clipping or desktop-only navigation.
+
 ## Risks and mitigations
 
 | Risk | Impact | Mitigation |
@@ -285,3 +301,9 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   type checking, and the Next.js 16.3.2 production build. The credentialed live
   evaluation passes all five dataset `1.0.0` cases against the configured
   NVIDIA model.
+- Final Phase 12 gates pass: Playwright 1.62.1 on stable Microsoft Edge completes
+  the isolated Pixel 7 journey, all 142 unit tests pass, ESLint and route-aware
+  type checking are clean, and the Next.js 16.3.2 production build succeeds.
+  The browser gate records a confirmed `Rp25.000` Food & Drink expense, verifies
+  Home and Activity with a clean console and inspected mobile artifact, rejects
+  non-local database hosts, and leaves no generated E2E user behind.

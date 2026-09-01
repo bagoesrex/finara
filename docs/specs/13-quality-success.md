@@ -57,6 +57,21 @@ checks remain explicit repository commands, while hosted-model evaluation stays
 outside the default unit suite because it requires a credential and network
 access.
 
+### Browser automation baseline
+
+ADR 0009 selects Playwright with stable Microsoft Edge and the Pixel 7 device
+descriptor as the first supported local automation environment. The baseline
+uses a `412x839` mobile viewport, Indonesian locale, Jakarta timezone, production
+Next.js build, and a loopback PostgreSQL database. `npm run e2e` covers
+registration, first-account onboarding, confirmed manual expense creation, Home
+refresh, and Activity visibility in one rendered-browser journey. The generated
+identity is removed after the run, successful output includes a visual artifact,
+and failed runs retain screenshots and traces.
+
+This baseline is one critical happy path, not a cross-browser or complete E2E
+matrix. Transaction/Budget recoverable failures, additional devices, and network
+profiles remain separate quality work.
+
 ## UX state quality
 
 - **QUAL-011:** Every data-dependent surface defines loading, empty, populated, and failure behavior.
@@ -116,8 +131,8 @@ A feature is ready for handoff when:
 
 ## Open questions
 
-- Browser end-to-end runner and supported automation environment.
-- Supported browser/device matrix and representative network profile.
+- Cross-browser/device coverage beyond the accepted mobile Edge baseline and a
+  representative network profile.
 - Quantitative AI parsing-success target.
 - Week-one tracking target and analytics provider.
 - Performance budgets beyond time-to-transaction and Home comprehension.
