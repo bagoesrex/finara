@@ -170,11 +170,11 @@ export function FinanceProvider({
   });
   const { mutateAsync: deleteExistingTransaction } = useMutation({
     mutationFn: deleteTransactionRequest,
-    onSuccess: async (_data, transactionId) => {
+    onSuccess: async () => {
+      // Removing an observed detail query here recreates it immediately and
+      // fetches the just-deleted record. The detail screen owns its local
+      // tombstone state; inactive stale data is revalidated on any later mount.
       await invalidate();
-      queryClient.removeQueries({
-        queryKey: financeQueryKeys.transactionDetail(viewer.id, transactionId),
-      });
     },
   });
   const { mutateAsync: persistAccountRename } = useMutation(

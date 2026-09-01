@@ -255,19 +255,19 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 16: Remaining critical browser flows
 
-- [ ] Task 44: Cover transaction edit and confirmed delete with authoritative
+- [x] Task 44: Cover transaction edit and confirmed delete with authoritative
   Home/Activity reconciliation.
-- [ ] Task 45: Cover persisted account rename and sign-out/session revocation.
-- [ ] Task 46: Cover AI transaction preview and current-month answer UI with a
+- [x] Task 45: Cover persisted account rename and sign-out/session revocation.
+- [x] Task 46: Cover AI transaction preview and current-month answer UI with a
   deterministic authenticated provider boundary.
-- [ ] Task 47: Add narrow-mobile and large-viewport smoke checks without
+- [x] Task 47: Add narrow-mobile and large-viewport smoke checks without
   changing Finara's mobile information architecture.
 
 ### Checkpoint: MVP Browser Matrix
 
-- [ ] Every destructive or persisted MVP workflow has at least one real-browser
+- [x] Every destructive or persisted MVP workflow has at least one real-browser
   happy path and the highest-risk recovery path.
-- [ ] Supported viewport checks show no horizontal clipping, duplicate desktop
+- [x] Supported viewport checks show no horizontal clipping, duplicate desktop
   navigation, or inaccessible primary action.
 
 ### Phase 17: Continuous quality gates
@@ -419,3 +419,11 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   checks cover matching and non-matching amounts. Mobile Edge verifies the
   truthful all-history label, amount search, no-results/clear, detail navigation,
   and cursor pagination without resetting the Activity scroll container.
+- Final Phase 16 gates pass: mobile Edge reconciles transaction edit/delete
+  against Home and Activity, persists account rename, revokes the private
+  session on sign-out, renders deterministic AI preview/answer states, and
+  records separate parsing/persistence timing. Smoke checks at 320x700 and
+  1440x900 retain one four-item navigation, a maximum 480px app shell, no
+  document overflow, and a reachable manual-entry action. The delete journey
+  also caught and removed an unnecessary post-delete detail refetch that logged
+  an expected 404 to the browser console.

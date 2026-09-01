@@ -7,6 +7,7 @@ const TEST_EMAIL_PATTERN = /^e2e-[a-f0-9-]+@example\.invalid$/;
 const LOCAL_AUTH_RATE_LIMIT_KEYS = [
   "0000:0000:0000:0000:0000:0000:0000:0000|/sign-up/email",
   "0000:0000:0000:0000:0000:0000:0000:0000|/sign-in/email",
+  "0000:0000:0000:0000:0000:0000:0000:0000|/sign-out",
 ];
 
 function localDatabaseConnectionString() {
@@ -79,6 +80,10 @@ export async function registerAndOnboard(page: Page, email: string) {
     .getByRole("spinbutton", { name: /Saldo saat ini/ })
     .fill("1000000");
   await page.getByRole("button", { name: "Selesai dan buka Home" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.getByRole("heading", { name: "Halo, Uji", exact: true }),
+  ).toBeVisible();
 }
 
 export async function deleteTestUser(email: string) {

@@ -60,22 +60,37 @@ access.
 ### Browser automation baseline
 
 ADR 0009 selects Playwright with stable Microsoft Edge and the Pixel 7 device
-descriptor as the first supported local automation environment. The baseline
-uses a `412x839` mobile viewport, Indonesian locale, Jakarta timezone, production
+descriptor as the primary local automation environment. The baseline uses a
+`412x839` mobile viewport, Indonesian locale, Jakarta timezone, production
 Next.js build, and a loopback PostgreSQL database. `npm run e2e` covers
 registration, first-account onboarding, confirmed manual expense creation,
-Budget allocation, reload persistence, Home refresh, and Activity visibility.
-Generated identities and loopback-only authentication rate-limit rows are
-removed after each feature journey, successful output includes visual artifacts,
-and failed runs retain screenshots and traces.
+Budget allocation, reload persistence, Activity amount search/pagination/detail,
+transaction edit/delete, account rename, sign-out, and deterministic AI
+preview/answer rendering. Generated identities and loopback-only authentication
+rate-limit rows are removed after each feature journey, successful output
+includes visual/timing artifacts, and failed runs retain screenshots and traces.
 
 The transaction and Budget baselines each cover one critical happy path and one
 recoverable ambiguous-save failure: the server commits, the browser receives a
 simulated `503`, the draft remains editable, and retry reuses the original
 idempotent request without creating a duplicate. The Budget failure state also
-exposes an explicit `Coba lagi` action. This is not a cross-browser or complete
-E2E matrix; additional devices and network profiles remain separate quality
-work.
+exposes an explicit `Coba lagi` action. A deterministic provider-boundary test
+records AI UI parsing handoff and PostgreSQL persistence separately, asserts
+their combined automated journey is below 10 seconds, and does not misrepresent
+the intercepted response as live hosted-model latency. Credentialed NVIDIA
+latency remains a separate operational measurement.
+
+The 2026-09-01 acceptance run recorded `54ms` for the deterministic parsing UI
+handoff and `573ms` for confirmed PostgreSQL persistence (`627ms` combined) on
+the Pixel 7/Edge loopback profile. Every run writes its own
+`transaction-timing.json`; these local numbers are evidence for the accepted
+profile, not a production latency guarantee.
+
+The same stable Edge project also checks authenticated Home, Activity, Budget,
+and Profile at `320x700` and `1440x900`. Both retain one mobile information
+architecture, no document-level horizontal overflow, four primary navigation
+items, and a shell no wider than 480px. These are responsive smoke boundaries,
+not a claim of cross-browser support.
 
 ## UX state quality
 

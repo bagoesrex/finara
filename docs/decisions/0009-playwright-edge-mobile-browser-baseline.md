@@ -28,8 +28,9 @@ and [Playwright browser projects](https://playwright.dev/docs/browsers#run-tests
   Playwright's Pixel 7 device descriptor, Indonesian locale, and
   `Asia/Jakarta` timezone.
 - Make `npm run e2e` build the production application, start it on
-  `http://localhost:3000`, run one worker with no retries, and return a normal
-  pass/fail exit code.
+  a validated loopback port (`3000` by default), run one worker with no retries,
+  and return a normal pass/fail exit code. `FINARA_E2E_PORT` may isolate the gate
+  from an existing developer server.
 - Cover the highest-value happy path first: register, create the first account,
   open manual transaction entry, save a `Rp25.000` expense, and find it on Home
   and Activity without a reload.
@@ -43,6 +44,16 @@ and [Playwright browser projects](https://playwright.dev/docs/browsers#run-tests
 - Keep CI integration, additional browsers/devices, recoverable-failure flows,
   and a representative network profile as later quality increments.
 
+## Verification expansion (2026-09-01)
+
+The same accepted Edge baseline now also covers recoverable transaction and
+Budget saves, Activity search/detail/pagination, transaction edit/delete,
+account rename and sign-out, and deterministic AI preview/answer UI behavior.
+Responsive smoke checks exercise `320x700` and `1440x900` while preserving the
+single mobile information architecture. The AI journey records deterministic
+UI parsing handoff and real PostgreSQL persistence separately; live NVIDIA
+latency remains outside the pull-request-safe browser gate.
+
 ## Consequences
 
 - The critical persisted transaction journey is now reproducible from one
@@ -52,9 +63,9 @@ and [Playwright browser projects](https://playwright.dev/docs/browsers#run-tests
   profile or authenticated tabs.
 - The production build makes the gate slower than a unit test but closer to the
   application boundary users receive.
-- The initial baseline is intentionally not a cross-browser compatibility
-  claim and does not yet satisfy every transaction/Budget failure case in the
-  broader quality matrix.
+- The expanded baseline is intentionally not a cross-browser compatibility or
+  live-provider performance claim. Other browser engines and representative
+  network profiles remain later quality increments.
 
 ## Alternatives considered
 

@@ -193,7 +193,7 @@
     are not labeled as the current month.
   - Verify: RED/GREEN unit, database/API, and mobile browser checks.
 
-- [ ] Cover the remaining persisted MVP workflows in a real browser.
+- [x] Cover the remaining persisted MVP workflows in a real browser.
   - Acceptance: Activity search/detail, transaction edit/delete, account rename,
     sign-out, AI preview/answer, and supported viewport behavior are exercised.
   - Verify: deterministic Playwright journeys with isolated users and clean
