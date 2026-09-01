@@ -176,9 +176,11 @@ export function BudgetAllocationSheet({
               <Check aria-hidden="true" size={18} />
               {isSaving
                 ? "Menyimpan..."
-                : isEditing
-                  ? "Simpan perubahan"
-                  : "Tambah anggaran"}
+                : error
+                  ? "Coba lagi"
+                  : isEditing
+                    ? "Simpan perubahan"
+                    : "Tambah anggaran"}
             </button>
           </div>
         </form>

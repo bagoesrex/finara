@@ -4,6 +4,43 @@ import { expect, type Page } from "@playwright/test";
 import { Client } from "pg";
 
 const TEST_EMAIL_PATTERN = /^e2e-[a-f0-9-]+@example\.invalid$/;
+const LOCAL_AUTH_RATE_LIMIT_KEYS = [
+  "0000:0000:0000:0000:0000:0000:0000:0000|/sign-up/email",
+  "0000:0000:0000:0000:0000:0000:0000:0000|/sign-in/email",
+];
+
+function localDatabaseConnectionString() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not configured for E2E tests.");
+  }
+
+  const databaseUrl = new URL(connectionString);
+  if (
+    !["postgres:", "postgresql:"].includes(databaseUrl.protocol) ||
+    !["localhost", "127.0.0.1", "[::1]"].includes(databaseUrl.hostname)
+  ) {
+    throw new Error("E2E tests require a local PostgreSQL database.");
+  }
+
+  return connectionString;
+}
+
+async function resetLocalAuthRateLimits() {
+  const client = new Client({
+    connectionString: localDatabaseConnectionString(),
+  });
+  await client.connect();
+
+  try {
+    await client.query(
+      'DELETE FROM "AuthRateLimit" WHERE "key" = ANY($1::text[])',
+      [LOCAL_AUTH_RATE_LIMIT_KEYS],
+    );
+  } finally {
+    await client.end();
+  }
+}
 
 export function createTestEmail() {
   return `e2e-${randomUUID()}@example.invalid`;
@@ -25,6 +62,7 @@ export function collectBrowserProblems(page: Page) {
 }
 
 export async function registerAndOnboard(page: Page, email: string) {
+  await resetLocalAuthRateLimits();
   await page.goto("/register");
   await expect(
     page.getByRole("heading", { name: "Buat akunmu" }),
@@ -48,12 +86,9 @@ export async function deleteTestUser(email: string) {
     throw new Error(`Refusing to delete a non-E2E user: ${email}`);
   }
 
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is not configured for E2E cleanup.");
-  }
-
-  const client = new Client({ connectionString });
+  const client = new Client({
+    connectionString: localDatabaseConnectionString(),
+  });
   await client.connect();
 
   try {
@@ -77,6 +112,11 @@ export async function deleteTestUser(email: string) {
       ]);
       await client.query('DELETE FROM "User" WHERE "id" = $1', [userId]);
     }
+
+    await client.query(
+      'DELETE FROM "AuthRateLimit" WHERE "key" = ANY($1::text[])',
+      [LOCAL_AUTH_RATE_LIMIT_KEYS],
+    );
 
     await client.query("COMMIT");
   } catch (error) {
