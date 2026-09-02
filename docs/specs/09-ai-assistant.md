@@ -91,7 +91,7 @@ rather than one exact model-authored phrase; `tadi pagi` accepts an `HH:mm`
 inside the documented morning period.
 
 The deterministic matcher runs in the normal Vitest suite. Run
-`npm run ai:eval:transactions` with the ignored local NVIDIA credential to
+`bun run ai:eval:transactions` with the ignored local NVIDIA credential to
 evaluate the same cases against the configured hosted model. Every documented
 golden case must pass; this gate does not silently establish a broader model
 benchmark.

@@ -120,7 +120,7 @@ Current scaffold:
 - React 19 and TypeScript in strict mode.
 - Tailwind CSS 4.
 - ESLint 9 with the Next.js Core Web Vitals and TypeScript rules.
-- npm and the `@/*` alias mapped to `src/*`.
+- Bun 1.4.0 and the `@/*` alias mapped to `src/*`.
 
 Planned by the PRD but not installed or selected yet:
 
@@ -143,11 +143,11 @@ Planned by the PRD but not installed or selected yet:
 ## Commands
 
 ```bash
-npm run dev
-npm run lint
-npm run typecheck
-npm run build
-npm run start
+bun run dev
+bun run lint
+bun run typecheck
+bun run build
+bun run start
 ```
 
 Before handing off a code change, run lint, type checking, and the relevant tests. Run a production build for changes that affect routing, configuration, rendering boundaries, or dependencies.

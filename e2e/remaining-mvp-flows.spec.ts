@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import {
   financeSnapshotDtoSchema,
@@ -13,26 +13,7 @@ import {
   deleteTestUser,
   registerAndOnboard,
 } from "./support/test-user";
-
-async function recordManualExpense(
-  page: Page,
-  description: string,
-  amount: string,
-) {
-  await page
-    .getByRole("button", { name: "Buka formulir transaksi manual" })
-    .click();
-  const dialog = page.getByRole("dialog", { name: "Tinjau transaksi" });
-  await dialog.getByLabel("Deskripsi", { exact: true }).fill(description);
-  await dialog.getByLabel("Nominal", { exact: true }).fill(amount);
-  await dialog
-    .getByRole("combobox", { name: "Kategori", exact: true })
-    .selectOption({ label: "Food & Drink" });
-  await dialog.getByRole("button", { name: "Simpan transaksi" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    `${description} berhasil dicatat.`,
-  );
-}
+import { recordManualExpense } from "./support/transactions";
 
 test(
   "transaction edit and confirmed delete reconcile Home and Activity",
@@ -164,7 +145,8 @@ test(
         `/api/finance/snapshot?month=${getMonthKeyInTimeZone(now)}`,
       );
       expect(snapshotResponse.status()).toBe(200);
-      const snapshotEnvelope: unknown = await snapshotResponse.json();
+      /** @type {unknown} */
+      const snapshotEnvelope = await snapshotResponse.json();
       if (
         !snapshotEnvelope ||
         typeof snapshotEnvelope !== "object" ||
@@ -298,13 +280,13 @@ test(
       { name: "tablet-768", width: 768, height: 900, capture: false },
       { name: "desktop-1024", width: 1_024, height: 900, capture: false },
       { name: "large-1440", width: 1_440, height: 900, capture: true },
-    ] as const;
+    ];
     const routes = [
       { path: "/", heading: "Halo, Uji" },
       { path: "/activity", heading: "Aktivitas" },
       { path: "/budget", heading: "Anggaran" },
       { path: "/profile", heading: "Profil" },
-    ] as const;
+    ];
 
     try {
       await registerAndOnboard(page, email);
@@ -324,7 +306,7 @@ test(
           await expect(navigation.getByRole("link")).toHaveCount(4);
 
           const dimensions = await page.evaluate(() => {
-            const shell = document.querySelector<HTMLElement>(".app-shell");
+            const shell = document.querySelector(".app-shell");
             return {
               documentClientWidth: document.documentElement.clientWidth,
               documentScrollWidth: document.documentElement.scrollWidth,

@@ -8,22 +8,10 @@ import {
   deleteTestUser,
   registerAndOnboard,
 } from "./support/test-user";
+import { readClientRequestId } from "./support/transactions";
 
 const EXPECTED_SAVE_FAILURE_CONSOLE =
   "console error: Failed to load resource: the server responded with a status of 503 (Service Unavailable)";
-
-function readClientRequestId(postData: string | null) {
-  const body: unknown = postData ? JSON.parse(postData) : null;
-  if (
-    !body ||
-    typeof body !== "object" ||
-    !("clientRequestId" in body) ||
-    typeof body.clientRequestId !== "string"
-  ) {
-    throw new Error("Transaction request is missing its idempotency key.");
-  }
-  return body.clientRequestId;
-}
 
 test(
   "a new mobile user can record and find a manual expense",
@@ -174,8 +162,8 @@ test(
       await amount.fill("25000");
       await category.selectOption({ label: "Food & Drink" });
 
-      let initialClientRequestId: string | undefined;
-      let persistedStatus: number | undefined;
+      let initialClientRequestId;
+      let persistedStatus;
       await page.route(
         "**/api/transactions",
         async (route) => {

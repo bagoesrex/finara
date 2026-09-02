@@ -27,7 +27,7 @@ and [Playwright browser projects](https://playwright.dev/docs/browsers#run-tests
 - Establish one initial automation environment: stable Microsoft Edge using
   Playwright's Pixel 7 device descriptor, Indonesian locale, and
   `Asia/Jakarta` timezone.
-- Make `npm run e2e` build the production application, start it on
+- Make `bun run e2e` build the production application, start it on
   a validated loopback port (`3000` by default), run one worker with no retries,
   and return a normal pass/fail exit code. `FINARA_E2E_PORT` may isolate the gate
   from an existing developer server.

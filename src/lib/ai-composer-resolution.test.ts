@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "bun:test";
 
 import { resolveAiComposerIntent } from "./ai-composer-resolution";
 
@@ -57,7 +57,8 @@ describe("AI composer intent resolution", () => {
     await expect(
       resolveAiComposerIntent(intent, context, executeFinanceRead),
     ).resolves.toEqual(answer);
-    expect(executeFinanceRead).toHaveBeenCalledExactlyOnceWith(intent);
+    expect(executeFinanceRead).toHaveBeenCalledTimes(1);
+    expect(executeFinanceRead).toHaveBeenCalledWith(intent);
   });
 
   it("rejects unsupported requests without executing a financial query", async () => {

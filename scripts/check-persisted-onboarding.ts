@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import "dotenv/config";
-
 import { db } from "../src/server/db/client";
 import {
   DEFAULT_CATEGORIES,

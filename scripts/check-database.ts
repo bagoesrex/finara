@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { db } from "../src/server/db/client";
 
 async function checkDatabase() {

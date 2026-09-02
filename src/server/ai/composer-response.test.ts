@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock, vi } from "bun:test";
 
-const mocks = vi.hoisted(() => ({
+const mocks = {
   consumeQuota: vi.fn(),
   executeFinanceRead: vi.fn(),
   findAccounts: vi.fn(),
@@ -9,30 +9,30 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(async (queries: Array<Promise<unknown>>) =>
     Promise.all(queries),
   ),
-}));
+};
 
-vi.mock("server-only", () => ({}));
-vi.mock("@/server/ai/config", () => ({
+mock.module("server-only", () => ({}));
+mock.module("@/server/ai/config", () => ({
   getNvidiaConfig: () => ({ apiKey: "server-key", model: "nvidia/model" }),
 }));
-vi.mock("@/server/db/client", () => ({
+mock.module("@/server/db/client", () => ({
   db: {
     account: { findMany: mocks.findAccounts },
     category: { findMany: mocks.findCategories },
     $transaction: mocks.transaction,
   },
 }));
-vi.mock("@/server/ai/finance-tools", () => ({
+mock.module("@/server/ai/finance-tools", () => ({
   executeFinanceReadIntent: mocks.executeFinanceRead,
 }));
-vi.mock("@/server/ai/nvidia-client", () => ({
+mock.module("@/server/ai/nvidia-client", () => ({
   requestNvidiaStructuredJson: mocks.requestStructuredJson,
 }));
-vi.mock("@/server/ai/rate-limit", () => ({
+mock.module("@/server/ai/rate-limit", () => ({
   consumeAiPreviewQuota: mocks.consumeQuota,
 }));
 
-import { createAiComposerResponse } from "./composer-response";
+const { createAiComposerResponse } = await import("./composer-response");
 
 const now = new Date("2026-08-30T10:00:00.000Z");
 const financeAnswer = {
@@ -43,7 +43,7 @@ const financeAnswer = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  mock.clearAllMocks();
   mocks.findAccounts.mockResolvedValue([{ id: "account-1", name: "BCA" }]);
   mocks.findCategories.mockResolvedValue([
     { id: "category-1", name: "Food & Drink", type: "EXPENSE" },
@@ -66,12 +66,14 @@ describe("AI composer response service", () => {
     expect(mocks.findCategories).toHaveBeenCalledWith(
       expect.objectContaining({ where: { userId: "user-1" } }),
     );
-    expect(mocks.consumeQuota).toHaveBeenCalledExactlyOnceWith("user-1");
+    expect(mocks.consumeQuota).toHaveBeenCalledTimes(1);
+    expect(mocks.consumeQuota).toHaveBeenCalledWith("user-1");
     expect(mocks.requestStructuredJson).toHaveBeenCalledTimes(1);
     expect(mocks.consumeQuota.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.requestStructuredJson.mock.invocationCallOrder[0],
     );
-    expect(mocks.executeFinanceRead).toHaveBeenCalledExactlyOnceWith(
+    expect(mocks.executeFinanceRead).toHaveBeenCalledTimes(1);
+    expect(mocks.executeFinanceRead).toHaveBeenCalledWith(
       "user-1",
       { intent: "GET_BALANCE" },
       now,

@@ -2,8 +2,8 @@
 
 - [x] Add Prisma 7.10.0, the PostgreSQL adapter/driver, and safe database scripts.
   - Acceptance: runtime and CLI packages are pinned compatibly; build/typecheck regenerate the client.
-  - Verify: inspect the lockfile, run package signatures/audit, and run `npm run db:validate`.
-  - Files: `package.json`, `package-lock.json`.
+  - Verify: inspect the lockfile, run the dependency audit, and run `bun run db:validate`.
+  - Files: `package.json`, `bun.lock`.
 
 - [x] Configure local and example database environments.
   - Acceptance: the real connection string is ignored; the committed example contains placeholders only.
@@ -12,12 +12,12 @@
 
 - [x] Add the model-free Prisma foundation and server-only client.
   - Acceptance: Prisma targets PostgreSQL, emits the supported generated client, and cannot be imported into client code.
-  - Verify: `npm run db:generate`, runtime client connection check, lint, and typecheck.
+  - Verify: `bun run db:generate`, runtime client connection check, lint, and typecheck.
   - Files: `prisma.config.ts`, `prisma/schema.prisma`, `src/server/db/client.ts`, focused test.
 
 - [x] Verify the real local database connection read-only.
   - Acceptance: the application driver connects to `finara_db` and `SELECT 1` returns successfully without mutating schema or rows.
-  - Verify: `npm run db:check`.
+  - Verify: `bun run db:check`.
   - Files: a narrowly scoped script and `package.json`.
 
 - [x] Complete the domain decision checkpoint before creating tables.
@@ -26,7 +26,7 @@
 
 - [x] Create and apply the first onboarding schema migration.
   - Acceptance: only `User`, `Account`, and `Category` are persisted, with user ownership and the accepted IDR opening-snapshot invariants.
-  - Verify: migration status is current and `npm run db:test:onboarding` passes without leaving temporary rows.
+  - Verify: migration status is current and `bun run db:test:onboarding` passes without leaving temporary rows.
 
 - [x] Select authentication before implementing persisted onboarding.
   - Acceptance: session identity is server-resolved and credential endpoints have an approved security design.
@@ -74,7 +74,7 @@
 
 - [x] Verify hosted NVIDIA inference with a local credential.
   - Acceptance: the documented PRD phrase returns the expected strict extraction from the configured hosted model without exposing the key.
-  - Verify: set `NVIDIA_API_KEY` in ignored `.env`, then run `npm run ai:check:nvidia`.
+  - Verify: set `NVIDIA_API_KEY` in ignored `.env`, then run `bun run ai:check:nvidia`.
 
 - [x] Define additive composer and NVIDIA intent-routing contracts.
   - Acceptance: one strict discriminated union covers transaction preview,

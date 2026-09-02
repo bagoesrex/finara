@@ -29,19 +29,19 @@ scope under [ADR 0011](./decisions/0011-portfolio-mvp-as-the-acceptance-boundary
 ## Repeatable quality gates
 
 ```bash
-npm test
-npm run test:integration
-npm run lint
-npm run typecheck
-npm audit --omit=dev --omit=optional --omit=peer --audit-level=high
-npm run build
-npm run e2e
+bun run test
+bun run test:integration
+bun run lint
+bun run typecheck
+bun audit --prod --audit-level=high
+bun run build
+bun run e2e
 ```
 
 Live NVIDIA checks are optional portfolio demonstrations and require an ignored
 local credential:
 
 ```bash
-npm run ai:check:nvidia
-npm run ai:eval:transactions
+bun run ai:check:nvidia
+bun run ai:eval:transactions
 ```

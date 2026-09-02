@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import "dotenv/config";
-
 import type { ApiSuccessResponse } from "../src/lib/api";
 import type { AiComposerResponse } from "../src/lib/ai-composer";
 import { getAiPreviewRateLimitConfig } from "../src/server/ai/rate-limit-policy";

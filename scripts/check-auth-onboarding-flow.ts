@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import "dotenv/config";
-
 import { db } from "../src/server/db/client";
 
 const baseUrl = process.env.FINARA_TEST_BASE_URL ?? "http://localhost:3000";

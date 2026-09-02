@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "bun:test";
 
 import {
   fetchAiComposerResponse,
@@ -18,18 +18,24 @@ const readyResponse = {
     transactionDate: "2026-08-30",
     transactionTime: null,
   },
-};
+} as const;
+
+type FetchImplementation = (
+  ...args: Parameters<typeof fetch>
+) => ReturnType<typeof fetch>;
+
+const originalFetch = globalThis.fetch;
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  globalThis.fetch = originalFetch;
 });
 
 describe("AI transaction preview request", () => {
   it("posts the input to the authenticated preview resource", async () => {
-    const fetchMock = vi.fn<typeof fetch>(async () =>
+    const fetchMock = vi.fn<FetchImplementation>(async () =>
       Response.json({ data: readyResponse }),
     );
-    vi.stubGlobal("fetch", fetchMock);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(fetchAiTransactionPreview("makan ayam 25rb")).resolves.toEqual(
       readyResponse,
@@ -47,10 +53,9 @@ describe("AI transaction preview request", () => {
   });
 
   it("rejects a successful HTTP response with an invalid public contract", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ data: { status: "ready" } })),
-    );
+    globalThis.fetch = vi.fn(async () =>
+      Response.json({ data: { status: "ready" } }),
+    ) as unknown as typeof fetch;
 
     await expect(fetchAiTransactionPreview("makan 25rb")).rejects.toThrow();
   });
@@ -63,11 +68,11 @@ describe("AI composer request", () => {
       label: "Saldo tersedia",
       value: "Rp500.000",
       detail: "Dari 1 akun.",
-    };
-    const fetchMock = vi.fn<typeof fetch>(async () =>
+    } as const;
+    const fetchMock = vi.fn<FetchImplementation>(async () =>
       Response.json({ data: answer }),
     );
-    vi.stubGlobal("fetch", fetchMock);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(fetchAiComposerResponse("saldo saya?")).resolves.toEqual(
       answer,
@@ -84,20 +89,17 @@ describe("AI composer request", () => {
   });
 
   it("rejects extra financial data outside the public composer contract", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
-        Response.json({
-          data: {
-            kind: "finance_answer",
-            label: "Saldo tersedia",
-            value: "Rp500.000",
-            detail: null,
-            transactions: [],
-          },
-        }),
-      ),
-    );
+    globalThis.fetch = vi.fn(async () =>
+      Response.json({
+        data: {
+          kind: "finance_answer",
+          label: "Saldo tersedia",
+          value: "Rp500.000",
+          detail: null,
+          transactions: [],
+        },
+      }),
+    ) as unknown as typeof fetch;
 
     await expect(fetchAiComposerResponse("saldo saya?")).rejects.toThrow();
   });

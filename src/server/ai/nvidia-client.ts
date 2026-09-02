@@ -37,6 +37,10 @@ type NvidiaStructuredJsonRequest<T> = NvidiaJsonRequest & {
   outputSchema: z.ZodType<T>;
 };
 
+type FetchImplementation = (
+  ...args: Parameters<typeof fetch>
+) => ReturnType<typeof fetch>;
+
 export class NvidiaUnavailableError extends Error {
   constructor() {
     super("NVIDIA inference is unavailable.");
@@ -76,7 +80,7 @@ function parseCompletion<T>(raw: string, outputSchema: z.ZodType<T>) {
 
 export async function requestNvidiaStructuredJson<T>(
   request: NvidiaStructuredJsonRequest<T>,
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: FetchImplementation = fetch,
 ) {
   const maxTokens = request.maxTokens ?? 256;
   if (
@@ -133,7 +137,7 @@ export async function requestNvidiaStructuredJson<T>(
 
 export function requestNvidiaTransactionExtraction(
   request: NvidiaJsonRequest,
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: FetchImplementation = fetch,
 ) {
   return requestNvidiaStructuredJson(
     { ...request, outputSchema: aiTransactionExtractionSchema },

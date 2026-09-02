@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "bun:test";
 import { z } from "zod";
 
 import {
@@ -10,8 +10,8 @@ import {
 } from "./nvidia-client";
 
 const extraction = {
-  intent: "CREATE_TRANSACTION",
-  type: "EXPENSE",
+  intent: "CREATE_TRANSACTION" as const,
+  type: "EXPENSE" as const,
   amount: "25000",
   description: "Makan ayam",
   categoryHint: "Food & Drink",
@@ -19,6 +19,10 @@ const extraction = {
   transactionTime: null,
   missingFields: [],
 };
+
+type FetchImplementation = (
+  ...args: Parameters<typeof fetch>
+) => ReturnType<typeof fetch>;
 
 function completion(content: string) {
   return new Response(
@@ -67,7 +71,7 @@ describe("NVIDIA transaction extraction client", () => {
   });
 
   it("rejects an unsafe structured-output token limit before provider access", async () => {
-    const fetchImpl = vi.fn<typeof fetch>();
+    const fetchImpl = vi.fn<FetchImplementation>();
 
     await expect(
       requestNvidiaStructuredJson(
@@ -86,7 +90,7 @@ describe("NVIDIA transaction extraction client", () => {
   });
 
   it("sends one bounded, non-streaming JSON request and validates the result", async () => {
-    const fetchImpl = vi.fn<typeof fetch>(async () =>
+    const fetchImpl = vi.fn<FetchImplementation>(async () =>
       completion(JSON.stringify(extraction)),
     );
 

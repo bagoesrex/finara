@@ -198,7 +198,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Checkpoint: Browser Transaction Baseline
 
-- [x] `npm run e2e` returns a normal pass/fail exit code and does not leave the
+- [x] `bun run e2e` returns a normal pass/fail exit code and does not leave the
   application server or generated E2E user running.
 - [x] The critical journey passes at the Pixel 7 viewport with Indonesian locale
   and Jakarta timezone, with no captured console warning or error.
@@ -272,7 +272,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 17: Continuous quality gates
 
-- [x] Task 48: Add a GitHub Actions workflow with frozen npm installation,
+- [x] Task 48: Add a GitHub Actions workflow with frozen Bun installation,
   PostgreSQL migrations, deterministic tests, lint, type checking, build, and
   mobile Edge browser automation.
 - [x] Task 49: Document local/CI commands and keep credentialed NVIDIA checks
@@ -327,20 +327,20 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 - Migration `20260828120000_add_better_auth` extends the existing user boundary and adds isolated credential, session, verification, and rate-limit tables. Existing development users receive unique non-deliverable placeholder identities instead of being deleted.
 - The auth integration check verifies registration without email enumeration, non-plaintext credential storage, database-session resolution and immediate sign-out revocation, generic login failures, and three-attempt login and registration rate limits, then removes all synthetic rows.
 - Client IP headers remain deployment-specific: Finara accepts a configured single-value header only when a trusted reverse proxy overwrites it; otherwise Better Auth uses its safe fallback behavior.
-- The Prisma CLI currently brings `deepmerge-ts` 7.1.5 through `@prisma/config`. npm reports GHSA-ggr8-5vv4-36mx as high severity; this path is dev-optional, receives only repository-controlled Prisma configuration, and is not bundled into the application runtime. npm offers only an incompatible Prisma 6.12 downgrade, while Prisma 8 is still a release candidate in the registry as of this increment.
-- The restricted Windows sandbox causes Node `os.userInfo()` to fail before `tsx` starts. Database verification here used a process-only test preloader to supply a stable sandbox user ID; the committed project scripts remain standard and need no workaround in a normal shell.
-- Migrations `20260828150239_add_transactions` and `20260828150500_add_transaction_checks` add exact positive-IDR transactions, database-enforced same-user account/category references, category/type compatibility, per-user create idempotency, optional Jakarta local time, and soft deletion. `npm run db:test:transactions` verifies precision and every integrity boundary without leaving synthetic rows.
+- The Prisma CLI currently brings `deepmerge-ts` 7.1.5 through `@prisma/config`. The registry advisory for GHSA-ggr8-5vv4-36mx is high severity; this path is dev-optional, receives only repository-controlled Prisma configuration, and is not bundled into the application runtime. The registry offers only an incompatible Prisma 6.12 downgrade, while Prisma 8 is still a release candidate as of this increment.
+- The restricted Windows sandbox previously caused Node `os.userInfo()` to fail before the former TypeScript script runner started. Database verification used a process-only test preloader to supply a stable sandbox user ID; the current Bun scripts need no workaround in a normal shell.
+- Migrations `20260828150239_add_transactions` and `20260828150500_add_transaction_checks` add exact positive-IDR transactions, database-enforced same-user account/category references, category/type compatibility, per-user create idempotency, optional Jakarta local time, and soft deletion. `bun run db:test:transactions` verifies precision and every integrity boundary without leaving synthetic rows.
 - Transaction Route Handlers expose precise string-money DTOs for snapshot, cursor-paginated list, create, detail, edit, and soft delete. Service and HTTP checks cover malformed/oversized input, non-JSON and cross-origin mutations, invalid references, mismatched category types, cross-user access, idempotent retry/conflict, summary changes, and tombstone exclusion.
 - The development Prisma singleton now replaces a generated client that predates the `Transaction` delegate. This keeps `next dev` hot reload usable after an additive schema generation while preserving the normal single-client behavior.
 - The private app now server-prefetches viewer-scoped snapshot and transaction-list queries, dehydrates string-money DTOs, and uses authenticated browser query functions after hydration. Successful create, edit, and soft-delete mutations await snapshot, list, and affected-detail invalidation before the UI reports success.
 - Mock finance fixtures and their migration adapter were removed. Home, Activity, transaction detail, Profile account counts, finance settings, and Budget now read persisted projections. Account rename now persists through its user-scoped API and invalidates account-bearing projections.
 - Migration `20260829021840_add_budgets` adds positive exact-IDR category allocations, database-enforced same-user expense-category references, first-of-month periods, and per-user/category/month uniqueness. Schema and service checks cover precision, every constraint, idempotent create/conflict, cross-user denial, deleted and out-of-period transaction exclusion, derived totals, and each progress-status boundary.
 - Authenticated Budget Route Handlers expose monthly overview, create, and amount update contracts with precise string-money DTOs. The Budget Server Component preloads the viewer/month query, while successful Budget mutations and transaction changes await targeted TanStack Query invalidation before reporting success.
-- `npm test` passes 91 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flows pass, including authenticated SSR hydration on Home, Activity, and Budget; cross-user denial; sequential and concurrent idempotent create; transaction edit/soft delete; summary reconciliation; persisted Budget create/update calculations; duplicate-query rejection; and exact BIGINT rendering beyond JavaScript's safe-integer range.
+- `bun run test` passes 91 tests; lint, type checking, and the Next.js production build pass. PostgreSQL schema/service checks and the production HTTP smoke flows pass, including authenticated SSR hydration on Home, Activity, and Budget; cross-user denial; sequential and concurrent idempotent create; transaction edit/soft delete; summary reconciliation; persisted Budget create/update calculations; duplicate-query rejection; and exact BIGINT rendering beyond JavaScript's safe-integer range.
 - Chrome DevTools MCP was not available in this environment, so the no-reload behavior is covered by focused query invalidation tests and the production HTTP hydration smoke rather than an automated real-browser interaction.
 - ADR 0007 selects NVIDIA Build's OpenAI-compatible hosted endpoint with `nvidia/nemotron-3.5-lightning-30b-a3b` as the configurable default. The parser uses one non-streaming, non-retried, eight-second request with reasoning disabled and a 256-token output cap.
 - AI parsing is exposed only as authenticated `POST /api/ai/transaction-previews`. Strict schemas reject malformed provider output; server code maps hints to viewer-owned account/category records; the existing confirmation sheet and transaction API remain the only persistence path.
-- `npm test` passes 107 tests after the AI slice. Lint, type checking, the Next.js production build, unauthenticated POST `401`, unsupported GET `405`, and npm registry signatures pass. Live NVIDIA inference remains pending because no `NVIDIA_API_KEY` is present in the local environment; run `npm run ai:check:nvidia` after configuring it.
+- `bun run test` passes 107 tests after the AI slice. Lint, type checking, the Next.js production build, unauthenticated POST `401`, unsupported GET `405`, and the dependency audit pass. Live NVIDIA inference remains pending because no `NVIDIA_API_KEY` is present in the local environment; run `bun run ai:check:nvidia` after configuring it.
 - ADR 0008 keeps NVIDIA at the intent-routing boundary for current-month
   questions. Financial answers are calculated once by viewer-scoped server
   tools and are never returned to the model for rephrasing.
@@ -387,7 +387,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   Chrome DevTools MCP is not configured in this environment, so screenshot,
   console, viewport, and accessibility-tree inspection remain unavailable.
 - Phase 11 adds dataset `1.0.0`, a deterministic field-level matcher, and
-  `npm run ai:eval:transactions`. The initial live NVIDIA run passed 3/5 and
+  `bun run ai:eval:transactions`. The initial live NVIDIA run passed 3/5 and
   identified `350k` normalization, Wi-Fi categorization, and qualitative-time
   gaps. Shared transaction guidance now includes explicit IDR examples,
   semantic default-category mappings, and editable representative time values;

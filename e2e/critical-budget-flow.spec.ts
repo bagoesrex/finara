@@ -110,8 +110,8 @@ test(
       await category.selectOption({ label: "Food & Drink" });
       await amount.fill("800000");
 
-      let initialPayload: string | null = null;
-      let persistedStatus: number | undefined;
+      let initialPayload = null;
+      let persistedStatus;
       await page.route(
         "**/api/budgets",
         async (route) => {

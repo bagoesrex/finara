@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import "dotenv/config";
-
 import { AiPreviewRateLimitExceededError } from "../src/server/ai/rate-limit";
 import { handleFinanceApiError } from "../src/server/http/finance-api";
 

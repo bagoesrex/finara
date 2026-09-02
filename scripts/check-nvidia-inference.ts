@@ -1,6 +1,4 @@
 import assert from "node:assert/strict";
-import "dotenv/config";
-
 import { buildComposerRouterPrompts } from "../src/ai/composer-router";
 import { aiComposerIntentSchema } from "../src/lib/ai-composer";
 import { getNvidiaConfig } from "../src/server/ai/config";

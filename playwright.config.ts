@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { randomUUID } from "node:crypto";
 
 import { defineConfig, devices } from "@playwright/test";
@@ -24,12 +22,13 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL is required for E2E tests.");
 }
 
-let parsedDatabaseUrl: URL;
-try {
-  parsedDatabaseUrl = new URL(databaseUrl);
-} catch {
-  throw new Error("DATABASE_URL must be a valid PostgreSQL URL.");
-}
+const parsedDatabaseUrl = (() => {
+  try {
+    return new URL(databaseUrl);
+  } catch {
+    throw new Error("DATABASE_URL must be a valid PostgreSQL URL.");
+  }
+})();
 
 if (
   !["postgres:", "postgresql:"].includes(parsedDatabaseUrl.protocol) ||
@@ -74,7 +73,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "node ./scripts/start-e2e-server.mjs",
+    command: "bun ./scripts/start-e2e-server.mjs",
     url: `${baseURL}/welcome`,
     reuseExistingServer: false,
     timeout: 120_000,

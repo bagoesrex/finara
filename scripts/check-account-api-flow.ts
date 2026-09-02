@@ -1,7 +1,5 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import "dotenv/config";
-
 import type { AccountRenameDto } from "../src/lib/accounts";
 import type { ApiSuccessResponse } from "../src/lib/api";
 import type { TransactionDto } from "../src/lib/transactions";

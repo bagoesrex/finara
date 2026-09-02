@@ -30,7 +30,7 @@ Dataset `1.0.0` covers the five PRD transaction phrases with a fixed Jakarta
 reference date. Its deterministic matcher reports intent, type, amount,
 description meaning, category, date, time, and missing-field failures
 individually. The normal unit suite verifies the dataset and matcher; the
-credentialed `npm run ai:eval:transactions` command runs those same cases
+credentialed `bun run ai:eval:transactions` command runs those same cases
 sequentially against NVIDIA. The PRD golden-case gate requires 5/5 without
 claiming a broader product accuracy percentage.
 
@@ -62,7 +62,7 @@ access.
 ADR 0009 selects Playwright with stable Microsoft Edge and the Pixel 7 device
 descriptor as the primary local automation environment. The baseline uses a
 `412x839` mobile viewport, Indonesian locale, Jakarta timezone, production
-Next.js build, and a loopback PostgreSQL database. `npm run e2e` covers
+Next.js build, and a loopback PostgreSQL database. `bun run e2e` covers
 registration, first-account onboarding, confirmed manual expense creation,
 Budget allocation, reload persistence, Activity amount search/pagination/detail,
 transaction edit/delete, account rename, sign-out, and deterministic AI
@@ -134,8 +134,8 @@ A feature is ready for handoff when:
 1. Its spec has no blocking open question for the implemented behavior.
 2. Acceptance criteria are mapped to automated or explicit manual checks.
 3. Relevant unit, integration, end-to-end, and AI evaluation checks pass.
-4. `npm run lint` and `npm run typecheck` pass.
-5. `npm run build` passes for routing, rendering, configuration, or dependency changes.
+4. `bun run lint` and `bun run typecheck` pass.
+5. `bun run build` passes for routing, rendering, configuration, or dependency changes.
 6. Browser-facing behavior is verified in a real browser when tooling is available.
 7. Loading, empty, error, keyboard, responsive, and reduced-motion behavior is reviewed where relevant.
 8. No secret, unnecessary sensitive log, Phase 2 scope, or unrelated refactor is included.

@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { buildComposerRouterPrompts } from "../src/ai/composer-router";
 import {
   evaluateTransactionCase,
