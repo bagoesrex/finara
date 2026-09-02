@@ -1,6 +1,6 @@
 # Spec: Architecture, Security, and Privacy
 
-**Status:** Draft  
+**Status:** Accepted for repository MVP; production launch gates remain
 **PRD source:** Sections 27-29, 51, 56-57
 
 ## Objective
@@ -101,6 +101,11 @@ input -> structured parse -> validate/map category -> preview -> user confirms -
 - **ARCH-019:** AI logging, retention, and redaction are documented before production data is processed.
 - **ARCH-020:** Data deletion, export, and retention behavior must match the supported product capability and applicable policy before launch.
 
+`ARCH-017` applies to repository code now. `ARCH-018` through `ARCH-020` are
+production launch requirements: their implementation depends on the selected
+telemetry pipeline, data policy, retention, and deletion operations documented
+in `launch-readiness.md`.
+
 ## Suggested source boundaries
 
 Exact directories may evolve, but responsibilities should remain distinct:
@@ -127,11 +132,19 @@ Do not create all directories preemptively; introduce a boundary when its first 
 - Provider outages degrade to a safe retry/manual path without corrupting authoritative state.
 - Architecture remains functional without MCP in MVP.
 
-## Open questions
+## Accepted boundary and production launch gates
 
-- LLM provider and regional/data-processing terms.
-- Hosting, managed PostgreSQL provider, and deployment regions.
-- API style for client mutations: Server Actions, Route Handlers, or a deliberate mix.
-- Rate limits for authentication, AI, search, and mutations.
-- Encryption, retention, deletion, and backup policies.
-- Observability vendor and redaction controls.
+- The MVP deliberately mixes Server Components/application-service reads,
+  authenticated Route Handlers for mutable browser resources, and the
+  onboarding Server Action.
+- Better Auth credential endpoints and provider-bound AI endpoints have
+  persisted rate limits. Search is length-bounded and cursor-paginated;
+  mutation bodies, origins, IDs, and idempotency keys are validated. Production
+  traffic thresholds remain part of capacity and abuse qualification.
+- NVIDIA is accepted for the repository prototype boundary. Its production
+  regional/data-processing terms, quota, cost, and SLO require external review.
+- Hosting, database provider/region, encryption responsibility, backup restore,
+  retention/deletion policy, and production observability are launch gates.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+and [`launch-readiness.md`](../launch-readiness.md).

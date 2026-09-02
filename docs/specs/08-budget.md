@@ -78,8 +78,13 @@ It must not shame the user or recommend unrelated financial products.
 - Budget values on the page and in AI answers are calculated from the same source of truth.
 - Users cannot access or modify another user's budgets.
 
-## Open questions
+## Deferred behavior
 
-- Delete, archive, or replacement behavior when a user no longer wants an allocation.
-- Whether a future total-only planning mode should coexist with category allocations.
-- Multi-timezone behavior beyond the single Jakarta-calendar MVP.
+- MVP supports create and allocation-amount update; delete/archive/replacement
+  requires a later lifecycle decision.
+- Independent total-only planning remains a future mode; the MVP total is always
+  the sum of category allocations.
+- Budget periods use the single Jakarta calendar accepted for MVP. Multi-timezone
+  semantics require a separate money/date migration decision.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

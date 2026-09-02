@@ -1,6 +1,6 @@
 # Spec: Authentication and Onboarding
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 43-45, 48, 57
 
 ## Objective
@@ -15,7 +15,10 @@ Allow a user to establish a private Finara identity and reach a usable Home with
 - First financial account setup.
 - Redirecting an authenticated and initialized user to Home.
 
-Password recovery, social identity providers, email verification, multi-factor authentication, and account deletion are not defined by the PRD and require separate decisions.
+Password recovery, social identity providers, email verification, and
+multi-factor authentication are not defined by the PRD and are deferred.
+Account/data deletion requires an accepted retention and operations policy
+before a public launch.
 
 ## Requirements
 
@@ -77,7 +80,13 @@ Submission controls must prevent accidental duplicate requests while preserving 
 - Server-side ownership checks remain required even when UI routes are protected.
 - Authentication and onboarding errors are recoverable and do not produce duplicate users or accounts.
 
-## Open questions
+## Deferred behavior and launch gate
 
-- Password recovery and social-login scope.
-- Account deletion and personal-data deletion flow.
+- Email/password is the complete MVP identity boundary. Recovery, social login,
+  verification, and MFA require later feature specifications.
+- Account and personal-data deletion is a production launch gate because its UI
+  must match the approved retention, backup, legal, and operational behavior.
+  Finara does not expose a placeholder control before that behavior exists.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+and [`launch-readiness.md`](../launch-readiness.md).

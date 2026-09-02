@@ -286,20 +286,20 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 
 ### Phase 18: MVP specification closure
 
-- [ ] Task 50: Reconcile every Draft requirement with implementation evidence,
+- [x] Task 50: Reconcile every Draft requirement with implementation evidence,
   an explicit MVP exclusion grounded in the PRD, or a named external launch
   blocker.
-- [ ] Task 51: Add measured browser timing evidence for the accepted transaction
+- [x] Task 51: Add measured browser timing evidence for the accepted transaction
   baseline without introducing an analytics provider prematurely.
-- [ ] Task 52: Record the production-only decisions that require deployment,
+- [x] Task 52: Record the production-only decisions that require deployment,
   legal/privacy, or business input and cannot be inferred from repository code.
 
 ### Checkpoint: Specification Closure
 
-- [ ] Every in-repository MVP acceptance criterion is implemented and mapped to
+- [x] Every in-repository MVP acceptance criterion is implemented and mapped to
   a repeatable check.
-- [ ] Deferred behavior is explicit and does not masquerade as implemented UI.
-- [ ] Remaining blockers require external authority rather than more local code.
+- [x] Deferred behavior is explicit and does not masquerade as implemented UI.
+- [x] Remaining blockers require external authority rather than more local code.
 
 ## Risks and mitigations
 
@@ -313,7 +313,7 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 | Hosted NVIDIA tool-calling configuration differs from self-hosted NIM | Medium | Use the already verified JSON response mode to select one allowlisted server tool in a single bounded call. |
 | A model-selected read leaks another user's finance data | High | Derive identity from the server session and inject it into every tool; never accept `userId` or database IDs from model output. |
 
-## Open questions
+## Deferred work
 
 - Restore and permanent-retention behavior for soft-deleted transactions; neither is required by the current MVP.
 - Delete/archive behavior for Budget allocations; create and amount update are the accepted MVP operations.
@@ -437,3 +437,12 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   never required. Prisma's dev-only CLI chain retains an upstream high advisory;
   its suggested automatic fix is a breaking major downgrade and is tracked for
   an upstream-compatible release rather than hidden or force-applied.
+- Final Phase 18 gates pass: all 161 unit tests, the complete PostgreSQL/service
+  integration chain, ESLint, route-aware type checking, production-runtime
+  audit with zero findings, two production builds, and all eight stable-Edge
+  journeys. The final deterministic AI journey records 106ms parsing handoff,
+  374ms persistence, and 480ms combined on the Pixel 7/Edge loopback profile.
+  Responsive checks cover 320/480/768/1024/1440 widths, documentation links
+  resolve, every MVP spec is accepted within its explicit boundary, and all
+  remaining production launch gates require external ownership or environment
+  evidence.

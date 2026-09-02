@@ -1,6 +1,6 @@
 # Spec: Accounts and Categories
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 30, 32-33, 43-44, 48
 
 ## Objective
@@ -50,7 +50,9 @@ Onboarding creates user-owned copies of these defaults following [ADR 0003](../d
 
 ## Management behavior
 
-Account and category management is reached from Profile/Settings. The minimum useful operations are view and rename. Create, archive, delete, reorder, and custom icon behavior remain subject to the open questions below.
+Account and category management is reached from Profile/Settings. The accepted
+MVP operations are viewing the user-owned accounts/categories and renaming an
+account. Create, archive, delete, reorder, and custom icon behavior are deferred.
 
 Destructive actions must explain the effect on existing transactions before confirmation. Historical transactions must never become inaccessible merely because their account or category is no longer active.
 
@@ -64,7 +66,7 @@ TanStack Query invalidation.
 Account rename is persisted through the authenticated server contract below.
 Successful mutations invalidate the authoritative account and transaction
 projections before the UI reports success. Default categories remain view-only
-until category ownership and lifecycle are decided.
+in the MVP.
 
 ## Persisted account rename contract
 
@@ -97,7 +99,6 @@ can be added.
 - Account list empty, loading, populated, and failed.
 - Account/category selector loading, empty, selected, and invalidated.
 - Name validation and duplicate-name handling.
-- Attempt to remove an account/category referenced by transactions.
 
 ## Acceptance criteria
 
@@ -105,12 +106,16 @@ can be added.
 - A user can create or complete onboarding with a named Cash, Bank, or E-Wallet account.
 - Transaction entry never exposes another user's account or private category.
 - Income entry does not offer expense-only categories and vice versa.
-- Existing transaction history remains understandable after an account or category is renamed or made inactive.
+- Existing transaction history remains understandable after an account rename;
+  the MVP exposes no account/category destructive lifecycle.
 - AI output cannot persist an unknown category identifier.
 
-## Open questions
+## Deferred lifecycle
 
-- Whether custom categories are MVP or Phase 2.
-- Editing and reconciliation lifecycle for the opening-balance snapshot.
-- Archive versus hard-delete behavior for accounts and categories.
-- Duplicate category names and case sensitivity.
+- Custom categories follow the PRD's later boundary and are not part of MVP.
+- Opening-balance editing, account/category archive or delete, and historical
+  reconciliation require a separate lifecycle decision.
+- Duplicate category naming is deferred with category creation; the MVP creates
+  one known user-owned default set and does not expose category rename/create.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

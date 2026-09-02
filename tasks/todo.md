@@ -205,7 +205,7 @@
   - Verify: workflow syntax and commands are source-verified and locally
     reproducible; secrets and live NVIDIA access are not required.
 
-- [ ] Close the MVP spec audit.
+- [x] Close the MVP spec audit.
   - Acceptance: each Draft requirement is implemented, explicitly excluded from
     MVP using PRD evidence, or recorded as an external launch blocker.
   - Verify: requirement-to-evidence review, measured transaction timing, full

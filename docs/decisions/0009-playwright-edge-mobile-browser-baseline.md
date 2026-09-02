@@ -44,13 +44,14 @@ and [Playwright browser projects](https://playwright.dev/docs/browsers#run-tests
 - Keep CI integration, additional browsers/devices, recoverable-failure flows,
   and a representative network profile as later quality increments.
 
-## Verification expansion (2026-09-01)
+## Verification expansion (2026-09-01 through 2026-09-02)
 
 The same accepted Edge baseline now also covers recoverable transaction and
 Budget saves, Activity search/detail/pagination, transaction edit/delete,
 account rename and sign-out, and deterministic AI preview/answer UI behavior.
-Responsive smoke checks exercise `320x700` and `1440x900` while preserving the
-single mobile information architecture. The AI journey records deterministic
+Responsive smoke checks exercise the exact accepted widths 320, 480, 768, and
+1024 pixels plus a 1440-pixel large-screen boundary while preserving the single
+mobile information architecture. The AI journey records deterministic
 UI parsing handoff and real PostgreSQL persistence separately; live NVIDIA
 latency remains outside the pull-request-safe browser gate.
 

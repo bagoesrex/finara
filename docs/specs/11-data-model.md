@@ -1,11 +1,19 @@
 # Spec: Data Model
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 30-33
 
 ## Objective
 
-Define the relational boundaries required for Finara's MVP without settling unresolved financial semantics silently. PostgreSQL is the source of truth and Prisma is the selected ORM direction. IDR money, opening snapshots, timestamp semantics, and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md). Positive transaction amounts, optional local time, idempotent creation, and soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md). Category-only monthly Budget semantics are accepted by [ADR 0006](../decisions/0006-category-month-budgets.md); category lifecycle questions remain open.
+Define the relational boundaries required for Finara's MVP without settling
+future financial semantics silently. PostgreSQL is the source of truth and
+Prisma is the selected ORM. IDR money, opening snapshots, timestamp semantics,
+and category ownership are accepted by [ADR 0003](../decisions/0003-idr-money-and-user-owned-onboarding-schema.md).
+Positive transaction amounts, optional local time, idempotent creation, and
+soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md).
+Category-only monthly Budget semantics are accepted by
+[ADR 0006](../decisions/0006-category-month-budgets.md); destructive category
+lifecycle remains deferred by ADR 0010.
 
 ## Core relationships
 
@@ -50,7 +58,9 @@ createdAt
 updatedAt
 ```
 
-Current balance is derived later from the opening snapshot and authorized transactions. It is not stored as a second mutable balance field. Archive behavior remains unresolved.
+Current balance is derived from the opening snapshot and authorized
+transactions. It is not stored as a second mutable balance field. Archive
+behavior is outside the accepted MVP.
 
 ### Category
 
@@ -150,13 +160,17 @@ The following are explicitly deferred and do not belong in the MVP schema withou
 - Database and server validation prevent cross-user account/category references.
 - The chosen money type round-trips values without precision loss.
 - The required Activity, balance, monthly spending, search, and budget queries have deliberate access paths.
-- Deactivating an account or category does not erase historical transaction meaning.
+- The MVP exposes no destructive account/category lifecycle that can erase
+  historical transaction meaning.
 - Migrations are reviewable, reversible where practical, and tested against representative records.
 
-## Open questions
+## Deferred schema decisions and launch gate
 
-- Custom categories in MVP.
-- Restore UI, audit history, and permanent-retention policy for soft-deleted records.
-- Delete/archive behavior for Budgets.
-- Merchant, note, and AI provenance fields.
-- Multi-timezone behavior beyond the single `Asia/Jakarta` MVP.
+- Custom categories, Budget/account/category lifecycle, restore/audit UI,
+  merchant/note/provenance fields, and multi-timezone behavior are outside MVP.
+- Permanent retention and deletion must be settled with the production privacy,
+  backup, and account-deletion policy before destructive controls are added.
+- Each future field or lifecycle changes the relational contract and therefore
+  requires its own accepted migration decision.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

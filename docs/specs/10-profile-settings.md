@@ -1,6 +1,6 @@
 # Spec: Profile and Settings
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 43-44
 
 ## Objective
@@ -68,10 +68,14 @@ behavior has not been accepted.
 - Signing out invalidates the active session.
 - No setting permits access to another user's financial data.
 
-## Open questions
+## Accepted MVP boundary and deferred controls
 
-- Which identity fields users may edit.
-- Language and currency availability at launch.
-- Dark mode MVP scope.
-- AI preference options beyond the explicitly post-MVP auto-save feature.
-- Export and account/data deletion timing; export is listed as Phase 2.
+- Identity is view-only. Editing identity requires an accepted verification and
+  recovery flow.
+- Language is Indonesian, currency is IDR, timezone is Jakarta, and appearance
+  is light-only for MVP.
+- AI preferences are not exposed; auto-save remains explicitly post-MVP.
+- Export remains Phase 2. Account/data deletion is a production launch gate and
+  is not shown until policy and operations match the control.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

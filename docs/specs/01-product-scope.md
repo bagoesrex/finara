@@ -1,6 +1,6 @@
 # Spec: Product Scope
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 1-4, 45-47, 58-60
 
 ## Objective
@@ -60,10 +60,19 @@ The product must feel like a finance application with an intelligent interaction
 - A high-confidence AI parse needs no more than one confirmation after input.
 - A new user understands the Home balance and monthly spending without onboarding explanation.
 - All shipped MVP capabilities map to the scope above; no explicit non-goal appears in navigation or settings.
-- Product usability can be measured through time-to-transaction, parsing success, and week-one continued tracking.
+- Repository evidence measures time-to-transaction and the accepted parsing
+  dataset; week-one continued tracking has an explicit pre-production
+  measurement gate.
 
-## Open questions
+## Accepted MVP boundary and launch gate
 
-- Is the launch language Indonesian only, or must English be available immediately?
-- What quantitative target defines successful week-one retention?
-- Which transaction samples form the baseline dataset for measuring parsing success?
+- Product UI launches in Indonesian; code identifiers remain English. Additional
+  languages are later product work.
+- Transaction parsing uses versioned dataset `1.0.0`, which contains all five
+  PRD phrases and field-level expectations.
+- Week-one retention remains a production measurement gate. Its cohort, event,
+  consent, provider, and target must be approved before analytics collection;
+  it does not expand the repository MVP.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+and the [MVP specification audit](../mvp-specification-audit.md).

@@ -155,12 +155,16 @@ Financial records are fetched at request time and are not embedded in static pro
 - Prompts and logs do not receive a user's complete financial dataset by default.
 - Provider failure has a recoverable manual path.
 
-## Open questions
+## Deferred behavior and production gates
 
-- Production quota, availability target, privacy review, and cost ceiling if
-  NVIDIA changes the free prototype endpoint.
-- Confidence calibration and a quantitative parsing-success target beyond the
-  accepted PRD golden cases.
-- Conversation persistence and retention; `AIConversation` is Phase 2.
-- Date-language coverage beyond the accepted Jakarta-relative MVP examples.
-- Whether natural-language transaction search remains Phase 2 or is included through basic query tools.
+- NVIDIA production terms, processing region, quota, availability, privacy,
+  cost, live latency, and a broader parsing target are launch gates. The
+  deterministic PRD dataset remains the repository gate.
+- Conversation persistence and `AIConversation` remain Phase 2 and require a
+  retention decision.
+- Date-language coverage is limited to the accepted Jakarta-relative examples;
+  new phrases expand the versioned dataset before implementation.
+- Natural-language transaction search remains Phase 2, as stated by the PRD.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+and [`launch-readiness.md`](../launch-readiness.md).

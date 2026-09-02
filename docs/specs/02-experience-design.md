@@ -1,6 +1,6 @@
 # Spec: Experience and Design System
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 5, 7-12, 34-41, 49-53
 
 ## Objective
@@ -65,9 +65,15 @@ Create a calm, clean, precise, and slightly playful interface that communicates 
 - Primary tasks can be completed with keyboard-only navigation.
 - Reduced-motion mode remains understandable without animation.
 
-## Open questions
+## Accepted MVP design boundary
 
-- Final font family and whether it is bundled locally.
-- Final accent and semantic color token values.
-- Dark mode inclusion in MVP.
-- Exact supported minimum viewport width.
+- Typography uses the committed `"Segoe UI", Arial, sans-serif` system stack;
+  the MVP does not add a bundled font dependency.
+- The accent and semantic colors in `src/app/globals.css` are the accepted light
+  tokens. Dark mode is deferred until it has a separately reviewed palette.
+- The supported minimum is 320 CSS pixels. Edge smoke checks exercise
+  320/480/768/1024/1440 widths while keeping the shell at or below 480 pixels.
+- Cross-browser and production accessibility/performance qualification remain
+  launch gates rather than silently inferred support claims.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

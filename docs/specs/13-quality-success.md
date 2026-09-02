@@ -1,6 +1,6 @@
 # Spec: Quality and Success Metrics
 
-**Status:** Draft  
+**Status:** Accepted for repository MVP; production success gates remain
 **PRD source:** Sections 34-36, 58-60
 
 ## Objective
@@ -80,17 +80,18 @@ their combined automated journey is below 10 seconds, and does not misrepresent
 the intercepted response as live hosted-model latency. Credentialed NVIDIA
 latency remains a separate operational measurement.
 
-The 2026-09-01 acceptance run recorded `54ms` for the deterministic parsing UI
-handoff and `573ms` for confirmed PostgreSQL persistence (`627ms` combined) on
-the Pixel 7/Edge loopback profile. Every run writes its own
+The final 2026-09-02 acceptance run recorded `106ms` for the deterministic
+parsing UI handoff and `374ms` for confirmed PostgreSQL persistence (`480ms`
+combined) on the Pixel 7/Edge loopback profile. Every run writes its own
 `transaction-timing.json`; these local numbers are evidence for the accepted
 profile, not a production latency guarantee.
 
 The same stable Edge project also checks authenticated Home, Activity, Budget,
-and Profile at `320x700` and `1440x900`. Both retain one mobile information
-architecture, no document-level horizontal overflow, four primary navigation
-items, and a shell no wider than 480px. These are responsive smoke boundaries,
-not a claim of cross-browser support.
+and Profile at widths `320`, `480`, `768`, `1024`, and `1440`. Every width
+retains one mobile information architecture, no document-level horizontal
+overflow, four primary navigation items, and a shell no wider than 480px. The
+320 and 1440 boundaries retain visual artifacts. These are responsive smoke
+boundaries, not a claim of cross-browser support.
 
 ## UX state quality
 
@@ -149,11 +150,18 @@ A feature is ready for handoff when:
 - Quality gates can run locally and later in CI without relying on undocumented steps.
 - Failed quality checks block feature completion rather than being documented as known-good warnings.
 
-## Open questions
+## Production success gates
 
-- Cross-browser/device coverage beyond the accepted mobile Edge baseline and a
-  representative network profile.
-- Quantitative AI parsing-success target.
-- Week-one tracking target and analytics provider.
-- Performance budgets beyond time-to-transaction and Home comprehension.
-- CI quality-gate configuration and required checks.
+- GitHub Actions now defines deterministic pull-request gates for frozen
+  install, PostgreSQL migrations/integration, runtime dependency audit, tests,
+  lint, typecheck, build, and all Edge journeys. The repository cannot enforce
+  branch protection until the remote project owner enables the required check.
+- Cross-browser/device/network support, production Core Web Vitals, live NVIDIA
+  latency, and additional performance budgets require staging/production-like
+  evidence.
+- Broader AI parsing success and week-one continued tracking need approved
+  definitions, consent-aware analytics, providers, and targets before
+  production measurement.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+and [`launch-readiness.md`](../launch-readiness.md).

@@ -1,6 +1,6 @@
 # Spec: Activity, Search, and Transaction Detail
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 19-21
 
 ## Objective

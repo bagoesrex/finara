@@ -1,6 +1,6 @@
 # Spec: Application Shell and Home
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 6, 13-16, 42, 48-50, 53-54
 
 ## Objective
@@ -87,9 +87,15 @@ Enter ambiguous text -> show what is missing -> preserve original input -> allow
 - A failed parse or save does not discard the user's original input.
 - Bottom navigation does not obscure the last item or composer at supported viewport sizes.
 
-## Open questions
+## Accepted MVP presentation
 
-- Whether `Available` aggregates all active accounts or a selected account.
-- Exact number of transactions shown under Recent.
-- Whether the composer is inline, sticky, or opened through a focused bottom sheet.
-- Whether Home includes income for the current month or only balance and spending.
+- `Available` aggregates the opening snapshots and non-deleted transactions of
+  every usable account owned by the current user.
+- Recent shows the four newest transactions; Activity provides complete history.
+- The composer is inline on Home. Its transaction result opens a focused
+  confirmation sheet.
+- Home shows both current-month spending and current-month income below the
+  primary available balance.
+
+These choices preserve the PRD hierarchy and are recorded by
+[ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

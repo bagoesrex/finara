@@ -1,6 +1,6 @@
 # Spec: Transaction Lifecycle
 
-**Status:** Draft  
+**Status:** Accepted for MVP
 **PRD source:** Sections 14, 17-18, 21-22, 38, 48
 
 ## Objective
@@ -67,8 +67,14 @@ The accepted storage and lifecycle semantics are defined by [ADR 0005](../decisi
 - Save, edit, and delete each update every affected financial summary.
 - A retry or rapid repeated tap does not unintentionally create duplicate transactions.
 
-## Open questions
+## Deferred behavior and launch gate
 
-- Restore UX and permanent-retention policy for soft-deleted transactions.
-- Whether merchant, note, and AI provenance become separate post-MVP fields.
-- Transfer semantics if transfers enter product scope after the MVP.
+- Soft delete is the accepted MVP mutation. Restore UI is later work;
+  permanent-retention/deletion behavior must follow the approved production
+  privacy, backup, and user-deletion policy.
+- Description remains the single free-text field. Separate merchant, note, and
+  AI provenance fields are post-MVP schema changes.
+- Transfers remain outside MVP and require explicit double-entry/account
+  semantics before implementation.
+
+See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).

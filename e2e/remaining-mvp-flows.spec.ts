@@ -288,13 +288,16 @@ test(
 );
 
 test(
-  "the mobile information architecture remains intact at 320px and 1440px",
+  "the mobile information architecture remains intact at every accepted viewport",
   async ({ page }, testInfo) => {
     const email = createTestEmail();
     const browserProblems = collectBrowserProblems(page);
     const viewports = [
-      { name: "narrow-320", width: 320, height: 700 },
-      { name: "large-1440", width: 1_440, height: 900 },
+      { name: "narrow-320", width: 320, height: 700, capture: true },
+      { name: "mobile-480", width: 480, height: 800, capture: false },
+      { name: "tablet-768", width: 768, height: 900, capture: false },
+      { name: "desktop-1024", width: 1_024, height: 900, capture: false },
+      { name: "large-1440", width: 1_440, height: 900, capture: true },
     ] as const;
     const routes = [
       { path: "/", heading: "Halo, Uji" },
@@ -335,15 +338,17 @@ test(
           expect(dimensions.shellWidth).toBeLessThanOrEqual(480);
         }
 
-        await page.goto("/");
-        const composerButton = page.getByRole("button", {
-          name: "Buka formulir transaksi manual",
-        });
-        await composerButton.scrollIntoViewIfNeeded();
-        await expect(composerButton).toBeVisible();
-        const screenshot = testInfo.outputPath(`${viewport.name}-home.png`);
-        await page.screenshot({ fullPage: true, path: screenshot });
-        await testInfo.attach(`${viewport.name}-home`, { path: screenshot });
+        if (viewport.capture) {
+          await page.goto("/");
+          const composerButton = page.getByRole("button", {
+            name: "Buka formulir transaksi manual",
+          });
+          await composerButton.scrollIntoViewIfNeeded();
+          await expect(composerButton).toBeVisible();
+          const screenshot = testInfo.outputPath(`${viewport.name}-home.png`);
+          await page.screenshot({ fullPage: true, path: screenshot });
+          await testInfo.attach(`${viewport.name}-home`, { path: screenshot });
+        }
       }
 
       expect(browserProblems).toEqual([]);
