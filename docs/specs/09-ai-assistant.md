@@ -93,8 +93,8 @@ inside the documented morning period.
 The deterministic matcher runs in the normal Vitest suite. Run
 `npm run ai:eval:transactions` with the ignored local NVIDIA credential to
 evaluate the same cases against the configured hosted model. Every documented
-golden case must pass; this gate does not silently establish a broader
-production accuracy target.
+golden case must pass; this gate does not silently establish a broader model
+benchmark.
 
 ## Accepted current-month question boundary
 
@@ -155,16 +155,14 @@ Financial records are fetched at request time and are not embedded in static pro
 - Prompts and logs do not receive a user's complete financial dataset by default.
 - Provider failure has a recoverable manual path.
 
-## Deferred behavior and production gates
+## Deferred behavior
 
-- NVIDIA production terms, processing region, quota, availability, privacy,
-  cost, live latency, and a broader parsing target are launch gates. The
-  deterministic PRD dataset remains the repository gate.
+- The deterministic PRD dataset is the portfolio gate. Live NVIDIA checks are
+  optional demonstrations, not a vendor-approval requirement.
 - Conversation persistence and `AIConversation` remain Phase 2 and require a
   retention decision.
 - Date-language coverage is limited to the accepted Jakarta-relative examples;
   new phrases expand the versioned dataset before implementation.
 - Natural-language transaction search remains Phase 2, as stated by the PRD.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
-and [`launch-readiness.md`](../launch-readiness.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

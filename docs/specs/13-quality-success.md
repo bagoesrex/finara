@@ -1,6 +1,6 @@
 # Spec: Quality and Success Metrics
 
-**Status:** Accepted for repository MVP; production success gates remain
+**Status:** Accepted for portfolio MVP
 **PRD source:** Sections 34-36, 58-60
 
 ## Objective
@@ -84,7 +84,7 @@ The final 2026-09-02 acceptance run recorded `106ms` for the deterministic
 parsing UI handoff and `374ms` for confirmed PostgreSQL persistence (`480ms`
 combined) on the Pixel 7/Edge loopback profile. Every run writes its own
 `transaction-timing.json`; these local numbers are evidence for the accepted
-profile, not a production latency guarantee.
+profile, not a live-provider latency claim.
 
 The same stable Edge project also checks authenticated Home, Activity, Budget,
 and Profile at widths `320`, `480`, `768`, `1024`, and `1440`. Every width
@@ -146,22 +146,18 @@ A feature is ready for handoff when:
 - Every MVP spec points to measurable acceptance criteria.
 - The parsing evaluation dataset covers all transaction-parsing examples in the PRD.
 - Authorization tests demonstrate that user A cannot access user B's finance records.
-- Product metrics have unambiguous event definitions before production analytics collection.
+- Product metrics require unambiguous event definitions if analytics are added later.
 - Quality gates can run locally and later in CI without relying on undocumented steps.
 - Failed quality checks block feature completion rather than being documented as known-good warnings.
 
-## Production success gates
+## Portfolio verification boundary
 
 - GitHub Actions now defines deterministic pull-request gates for frozen
   install, PostgreSQL migrations/integration, runtime dependency audit, tests,
-  lint, typecheck, build, and all Edge journeys. The repository cannot enforce
-  branch protection until the remote project owner enables the required check.
-- Cross-browser/device/network support, production Core Web Vitals, live NVIDIA
-  latency, and additional performance budgets require staging/production-like
-  evidence.
-- Broader AI parsing success and week-one continued tracking need approved
-  definitions, consent-aware analytics, providers, and targets before
-  production measurement.
+  lint, typecheck, build, and all Edge journeys.
+- The accepted Edge and responsive matrix is sufficient for the portfolio demo;
+  broader browser/network coverage is optional future evidence.
+- Dataset `1.0.0` is the accepted parsing benchmark. Product analytics,
+  week-one tracking, and live-provider performance operations are out of scope.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
-and [`launch-readiness.md`](../launch-readiness.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

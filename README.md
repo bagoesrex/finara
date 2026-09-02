@@ -5,9 +5,8 @@ combines precise PostgreSQL-backed transactions and Budgets with concise AI
 transaction previews and current-month financial questions.
 
 The product requirements live in [`docs/PRD.md`](./docs/PRD.md). The accepted
-repository boundary and outstanding production gates are summarized in
-[`docs/mvp-specification-audit.md`](./docs/mvp-specification-audit.md) and
-[`docs/launch-readiness.md`](./docs/launch-readiness.md).
+portfolio boundary is summarized in
+[`docs/mvp-specification-audit.md`](./docs/mvp-specification-audit.md).
 
 ## Local setup
 

@@ -61,18 +61,15 @@ The product must feel like a finance application with an intelligent interaction
 - A new user understands the Home balance and monthly spending without onboarding explanation.
 - All shipped MVP capabilities map to the scope above; no explicit non-goal appears in navigation or settings.
 - Repository evidence measures time-to-transaction and the accepted parsing
-  dataset; week-one continued tracking has an explicit pre-production
-  measurement gate.
+  dataset. Week-one analytics are outside the portfolio MVP.
 
-## Accepted MVP boundary and launch gate
+## Accepted portfolio boundary
 
-- Product UI launches in Indonesian; code identifiers remain English. Additional
+- Product UI uses Indonesian; code identifiers remain English. Additional
   languages are later product work.
 - Transaction parsing uses versioned dataset `1.0.0`, which contains all five
   PRD phrases and field-level expectations.
-- Week-one retention remains a production measurement gate. Its cohort, event,
-  consent, provider, and target must be approved before analytics collection;
-  it does not expand the repository MVP.
+- Week-one retention analytics are not required for this portfolio project.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md)
 and the [MVP specification audit](../mvp-specification-audit.md).

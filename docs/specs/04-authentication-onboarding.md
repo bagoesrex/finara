@@ -17,8 +17,7 @@ Allow a user to establish a private Finara identity and reach a usable Home with
 
 Password recovery, social identity providers, email verification, and
 multi-factor authentication are not defined by the PRD and are deferred.
-Account/data deletion requires an accepted retention and operations policy
-before a public launch.
+Account/data deletion is outside the portfolio MVP.
 
 ## Requirements
 
@@ -80,13 +79,11 @@ Submission controls must prevent accidental duplicate requests while preserving 
 - Server-side ownership checks remain required even when UI routes are protected.
 - Authentication and onboarding errors are recoverable and do not produce duplicate users or accounts.
 
-## Deferred behavior and launch gate
+## Deferred behavior
 
 - Email/password is the complete MVP identity boundary. Recovery, social login,
   verification, and MFA require later feature specifications.
-- Account and personal-data deletion is a production launch gate because its UI
-  must match the approved retention, backup, legal, and operational behavior.
-  Finara does not expose a placeholder control before that behavior exists.
+- Account and personal-data deletion is not included in the portfolio MVP, so
+  Finara does not expose a placeholder control.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md)
-and [`launch-readiness.md`](../launch-readiness.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

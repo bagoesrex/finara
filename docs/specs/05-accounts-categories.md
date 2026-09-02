@@ -118,4 +118,4 @@ can be added.
 - Duplicate category naming is deferred with category creation; the MVP creates
   one known user-owned default set and does not expose category rename/create.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

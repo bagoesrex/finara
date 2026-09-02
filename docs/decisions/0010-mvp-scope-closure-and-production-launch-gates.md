@@ -1,6 +1,6 @@
 # ADR 0010: MVP Scope Closure and Production Launch Gates
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0011](./0011-portfolio-mvp-as-the-acceptance-boundary.md)
 **Date:** 2026-09-02
 **Decision owner:** Product owner
 
@@ -73,8 +73,8 @@ remains blocked until externally owned decisions and environment evidence cover:
 7. compatible remediation or explicit risk acceptance for any high-severity
    build-tooling advisory that remains outside the production runtime graph.
 
-The detailed entry and exit criteria live in
-[`launch-readiness.md`](../launch-readiness.md).
+These gates were later removed from the active portfolio checklist by
+[ADR 0011](./0011-portfolio-mvp-as-the-acceptance-boundary.md).
 
 ## Consequences
 

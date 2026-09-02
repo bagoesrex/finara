@@ -287,19 +287,18 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
 ### Phase 18: MVP specification closure
 
 - [x] Task 50: Reconcile every Draft requirement with implementation evidence,
-  an explicit MVP exclusion grounded in the PRD, or a named external launch
-  blocker.
+  or an explicit portfolio-MVP exclusion grounded in the PRD.
 - [x] Task 51: Add measured browser timing evidence for the accepted transaction
   baseline without introducing an analytics provider prematurely.
-- [x] Task 52: Record the production-only decisions that require deployment,
-  legal/privacy, or business input and cannot be inferred from repository code.
+- [x] Task 52: Record that public-production operations are outside the
+  portfolio acceptance boundary.
 
 ### Checkpoint: Specification Closure
 
 - [x] Every in-repository MVP acceptance criterion is implemented and mapped to
   a repeatable check.
 - [x] Deferred behavior is explicit and does not masquerade as implemented UI.
-- [x] Remaining blockers require external authority rather than more local code.
+- [x] Remaining items are explicitly deferred beyond the portfolio MVP.
 
 ## Risks and mitigations
 
@@ -443,6 +442,5 @@ Establish a verified, server-only PostgreSQL foundation, complete persisted onbo
   journeys. The final deterministic AI journey records 106ms parsing handoff,
   374ms persistence, and 480ms combined on the Pixel 7/Edge loopback profile.
   Responsive checks cover 320/480/768/1024/1440 widths, documentation links
-  resolve, every MVP spec is accepted within its explicit boundary, and all
-  remaining production launch gates require external ownership or environment
-  evidence.
+  resolve, and every MVP spec is accepted within the portfolio boundary defined
+  by ADR 0011.

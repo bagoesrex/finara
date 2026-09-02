@@ -13,7 +13,7 @@ Positive transaction amounts, optional local time, idempotent creation, and
 soft deletion are accepted by [ADR 0005](../decisions/0005-positive-idr-transactions-and-soft-delete.md).
 Category-only monthly Budget semantics are accepted by
 [ADR 0006](../decisions/0006-category-month-budgets.md); destructive category
-lifecycle remains deferred by ADR 0010.
+lifecycle remains deferred by ADR 0011.
 
 ## Core relationships
 
@@ -164,13 +164,12 @@ The following are explicitly deferred and do not belong in the MVP schema withou
   historical transaction meaning.
 - Migrations are reviewable, reversible where practical, and tested against representative records.
 
-## Deferred schema decisions and launch gate
+## Deferred schema decisions
 
 - Custom categories, Budget/account/category lifecycle, restore/audit UI,
   merchant/note/provenance fields, and multi-timezone behavior are outside MVP.
-- Permanent retention and deletion must be settled with the production privacy,
-  backup, and account-deletion policy before destructive controls are added.
+- Permanent purge behavior is outside the portfolio MVP.
 - Each future field or lifecycle changes the relational contract and therefore
   requires its own accepted migration decision.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

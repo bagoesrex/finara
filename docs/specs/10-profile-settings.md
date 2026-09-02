@@ -75,7 +75,6 @@ behavior has not been accepted.
 - Language is Indonesian, currency is IDR, timezone is Jakarta, and appearance
   is light-only for MVP.
 - AI preferences are not exposed; auto-save remains explicitly post-MVP.
-- Export remains Phase 2. Account/data deletion is a production launch gate and
-  is not shown until policy and operations match the control.
+- Export remains Phase 2. Account/data deletion is outside the portfolio MVP.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

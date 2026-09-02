@@ -87,4 +87,4 @@ It must not shame the user or recommend unrelated financial products.
 - Budget periods use the single Jakarta calendar accepted for MVP. Multi-timezone
   semantics require a separate money/date migration decision.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

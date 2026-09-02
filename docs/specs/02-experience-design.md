@@ -73,7 +73,7 @@ Create a calm, clean, precise, and slightly playful interface that communicates 
   tokens. Dark mode is deferred until it has a separately reviewed palette.
 - The supported minimum is 320 CSS pixels. Edge smoke checks exercise
   320/480/768/1024/1440 widths while keeping the shell at or below 480 pixels.
-- Cross-browser and production accessibility/performance qualification remain
-  launch gates rather than silently inferred support claims.
+- A broader browser/device matrix is optional future evidence rather than a
+  portfolio completion requirement.
 
-See [ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+See [ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

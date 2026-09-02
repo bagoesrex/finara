@@ -6,9 +6,7 @@ Dokumentasi Finara dibagi menjadi dua lapisan:
 2. [`specs/`](./specs/) menerjemahkan PRD menjadi requirement implementasi dan acceptance criteria per domain.
 3. [`decisions/`](./decisions/) mencatat keputusan produk dan arsitektur yang menyelesaikan pertanyaan terbuka secara eksplisit.
 4. [`mvp-specification-audit.md`](./mvp-specification-audit.md) memetakan seluruh
-   spec MVP ke bukti atau penundaan yang eksplisit.
-5. [`launch-readiness.md`](./launch-readiness.md) memisahkan kelengkapan repository
-   dari keputusan dan bukti yang wajib ada sebelum produksi publik.
+   spec portfolio MVP ke bukti atau penundaan yang eksplisit.
 
 Jika spec turunan bertentangan dengan PRD, PRD berlaku sampai keputusan baru dicatat secara eksplisit. Item berlabel **Open question** belum menjadi keputusan implementasi.
 
@@ -51,12 +49,11 @@ Jika spec turunan bertentangan dengan PRD, PRD berlaku sampai keputusan baru dic
 ## Status convention
 
 - **Draft**: derived from the PRD and ready for review, but unresolved questions remain.
-- **Accepted**: explicitly approved and safe to implement within its stated
-  boundary. A production qualifier means external launch gates still apply.
+- **Accepted**: explicitly approved and complete within its stated boundary.
 - **Superseded**: replaced by a newer spec or ADR.
 
-Specs start as **Draft**. ADR 0010 closes the repository MVP while preserving
-externally owned production questions as named launch gates.
+Specs start as **Draft**. ADR 0011 closes the portfolio MVP without treating
+production operations as a project-completion requirement.
 
 ## Decision index
 
@@ -71,4 +68,5 @@ externally owned production questions as named launch gates.
 | [`ADR 0007`](./decisions/0007-nvidia-build-for-ai-inference.md) | NVIDIA Build menyediakan inference parsing transaksi dengan preview terautorisasi | Accepted |
 | [`ADR 0008`](./decisions/0008-application-managed-ai-finance-tools.md) | Intent NVIDIA memilih tool baca terbatas; aplikasi menghitung jawaban finansial | Accepted |
 | [`ADR 0009`](./decisions/0009-playwright-edge-mobile-browser-baseline.md) | Playwright mengotomasi baseline browser mobile dengan Edge stabil dan database lokal | Accepted |
-| [`ADR 0010`](./decisions/0010-mvp-scope-closure-and-production-launch-gates.md) | Batas MVP repository diterima; keputusan produksi eksternal tetap menjadi launch gate | Accepted |
+| [`ADR 0010`](./decisions/0010-mvp-scope-closure-and-production-launch-gates.md) | Batas MVP repository dan production launch gate | Superseded by ADR 0011 |
+| [`ADR 0011`](./decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md) | Portfolio MVP menjadi batas penerimaan proyek | Accepted |

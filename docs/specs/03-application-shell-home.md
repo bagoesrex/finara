@@ -98,4 +98,4 @@ Enter ambiguous text -> show what is missing -> preserve original input -> allow
   primary available balance.
 
 These choices preserve the PRD hierarchy and are recorded by
-[ADR 0010](../decisions/0010-mvp-scope-closure-and-production-launch-gates.md).
+[ADR 0011](../decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md).

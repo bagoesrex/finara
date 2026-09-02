@@ -207,6 +207,6 @@
 
 - [x] Close the MVP spec audit.
   - Acceptance: each Draft requirement is implemented, explicitly excluded from
-    MVP using PRD evidence, or recorded as an external launch blocker.
+    the portfolio MVP using PRD evidence.
   - Verify: requirement-to-evidence review, measured transaction timing, full
     quality suite, documentation review, and clean Git status.
