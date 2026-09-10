@@ -39,7 +39,7 @@ export class InvalidJsonBodyError extends Error {
 }
 
 export class CrossOriginMutationError extends Error {
-  constructor() {
+  constructor(readonly details?: Record<string, string | null>) {
     super("Cross-origin mutation rejected.");
     this.name = "CrossOriginMutationError";
   }
@@ -59,16 +59,58 @@ export class PayloadTooLargeError extends Error {
   }
 }
 
+function toHostOrigin(request: Request, requestUrl: URL) {
+  const host = request.headers.get("host")?.trim();
+  if (!host) return null;
+  const forwardedProto = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim()
+    .toLowerCase();
+  const scheme =
+    forwardedProto === "http" || forwardedProto === "https"
+      ? forwardedProto
+      : requestUrl.protocol.replace(":", "").toLowerCase();
+  if (scheme !== "http" && scheme !== "https") return null;
+  try {
+    return new URL(`${scheme}://${host}`).origin;
+  } catch {
+    return null;
+  }
+}
+
 export function assertTrustedMutationRequest(request: Request) {
   const origin = request.headers.get("origin");
   const fetchSite = request.headers.get("sec-fetch-site");
-  const requestOrigin = new URL(request.url).origin;
+  const requestUrl = new URL(request.url);
+  const requestOrigin = requestUrl.origin;
+  const hostOrigin = toHostOrigin(request, requestUrl);
+  const allowedOrigins = new Set([requestOrigin]);
+  if (hostOrigin) allowedOrigins.add(hostOrigin);
 
   if (
-    (origin && origin !== requestOrigin) ||
+    (origin && !allowedOrigins.has(origin)) ||
     (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none")
   ) {
-    throw new CrossOriginMutationError();
+    const details = {
+      method: request.method,
+      requestUrl: request.url,
+      requestOrigin,
+      hostOrigin,
+      allowedOrigins: [...allowedOrigins].join(","),
+      origin,
+      fetchSite,
+      fetchMode: request.headers.get("sec-fetch-mode"),
+      referer: request.headers.get("referer"),
+      host: request.headers.get("host"),
+      forwardedHost: request.headers.get("x-forwarded-host"),
+      forwardedProto: request.headers.get("x-forwarded-proto"),
+    };
+    console.warn(
+      "[finara-debug] cross-origin-mutation-rejected",
+      JSON.stringify(details),
+    );
+    throw new CrossOriginMutationError(details);
   }
 }
 

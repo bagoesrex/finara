@@ -1,6 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
+import { randomClientRequestId } from "./client-request-id";
+
 import type { FinanceAccount } from "./accounts";
 import type {
   FinanceSummary,
@@ -279,7 +281,7 @@ export async function createTransactionRequest(draft: TransactionDraft) {
     method: "POST",
     body: JSON.stringify({
       ...toTransactionMutationPayload(draft),
-      clientRequestId: draft.clientRequestId ?? crypto.randomUUID(),
+      clientRequestId: draft.clientRequestId ?? randomClientRequestId(),
     }),
   });
   return transactionDtoSchema.parse(await readApiData(response));

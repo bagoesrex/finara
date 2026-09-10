@@ -19,6 +19,7 @@ import type { AiFinanceAnswer } from "@/lib/ai-composer";
 import { MAX_AI_COMPOSER_INPUT_LENGTH } from "@/lib/ai-composer";
 import { fetchAiComposerResponse } from "@/lib/ai-query";
 import { adaptAiTransactionPreview } from "@/lib/ai-transaction";
+import { randomClientRequestId } from "@/lib/client-request-id";
 import type { TransactionDraft } from "@/lib/finance-query";
 import { createManualTransactionDraft } from "@/lib/manual-transaction";
 import { getDateKeyInTimeZone } from "@/lib/transactions";
@@ -79,7 +80,7 @@ export function HomeComposer() {
         setSaveError("");
         setPreview({
           ...adaptAiTransactionPreview(result.preview),
-          clientRequestId: crypto.randomUUID(),
+          clientRequestId: randomClientRequestId(),
         });
       } catch {
         setError("AI belum dapat memproses permintaan. Coba lagi.");
@@ -106,7 +107,7 @@ export function HomeComposer() {
     setError("");
     setShowManualFallback(false);
     setSaveError("");
-    setPreview({ ...draft, clientRequestId: crypto.randomUUID() });
+    setPreview({ ...draft, clientRequestId: randomClientRequestId() });
   }
 
   async function saveTransaction() {
