@@ -18,6 +18,11 @@ export async function createAiComposerResponse(
   text: string,
   now = new Date(),
 ) {
+  const startedAt = Date.now();
+  console.info(
+    "[finara-ai] composer-response-start",
+    JSON.stringify({ textLength: text.length }),
+  );
   const { apiKey, model } = getNvidiaConfig();
   const [accounts, categories] = await db.$transaction([
     db.account.findMany({
@@ -38,6 +43,14 @@ export async function createAiComposerResponse(
     referenceDate,
     text,
   });
+  console.info(
+    "[finara-ai] composer-response-context-loaded",
+    JSON.stringify({
+      accountCount: accounts.length,
+      categoryCount: categories.length,
+      durationMs: Date.now() - startedAt,
+    }),
+  );
 
   await consumeAiPreviewQuota(userId);
   const intent = await requestNvidiaStructuredJson({
@@ -48,6 +61,10 @@ export async function createAiComposerResponse(
     systemPrompt: prompts.system,
     userPrompt: prompts.user,
   });
+  console.info(
+    "[finara-ai] composer-response-intent",
+    JSON.stringify({ intent: intent.intent, durationMs: Date.now() - startedAt }),
+  );
 
   return resolveAiComposerIntent(
     intent,

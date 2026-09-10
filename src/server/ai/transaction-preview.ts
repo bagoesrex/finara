@@ -12,6 +12,11 @@ export async function createAiTransactionPreview(
   userId: string,
   text: string,
 ) {
+  const startedAt = Date.now();
+  console.info(
+    "[finara-ai] transaction-preview-start",
+    JSON.stringify({ textLength: text.length }),
+  );
   const { apiKey, model } = getNvidiaConfig();
   const [accounts, categories] = await db.$transaction([
     db.account.findMany({
@@ -32,12 +37,29 @@ export async function createAiTransactionPreview(
     text,
   });
   await consumeAiPreviewQuota(userId);
+  console.info(
+    "[finara-ai] transaction-preview-context-loaded",
+    JSON.stringify({
+      accountCount: accounts.length,
+      categoryCount: categories.length,
+      durationMs: Date.now() - startedAt,
+    }),
+  );
   const extraction = await requestNvidiaTransactionExtraction({
     apiKey,
     model,
     systemPrompt: prompts.system,
     userPrompt: prompts.user,
   });
+  console.info(
+    "[finara-ai] transaction-preview-extracted",
+    JSON.stringify({
+      type: extraction.type,
+      hasAmount: extraction.amount !== null,
+      missingFieldCount: extraction.missingFields.length,
+      durationMs: Date.now() - startedAt,
+    }),
+  );
 
   return resolveAiTransactionPreview(extraction, {
     accounts,

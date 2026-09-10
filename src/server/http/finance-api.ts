@@ -281,6 +281,10 @@ export function handleFinanceApiError(error: unknown) {
   }
 
   if (error instanceof AiPreviewRateLimitExceededError) {
+    console.warn(
+      "[finara-ai] ai-preview-rate-limited",
+      JSON.stringify({ retryAfterSeconds: error.retryAfterSeconds }),
+    );
     return apiError(
       429,
       "AI_RATE_LIMITED",
@@ -296,6 +300,14 @@ export function handleFinanceApiError(error: unknown) {
     error instanceof NvidiaInvalidResponseError ||
     error instanceof NvidiaUnavailableError
   ) {
+    console.warn(
+      "[finara-ai] ai-unavailable",
+      JSON.stringify({
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        hasNvidiaApiKey: Boolean(process.env.NVIDIA_API_KEY?.trim()),
+        model: process.env.NVIDIA_MODEL?.trim() || null,
+      }),
+    );
     return apiError(
       503,
       "AI_UNAVAILABLE",

@@ -92,6 +92,18 @@ export async function requestNvidiaStructuredJson<T>(
   }
 
   try {
+    const startedAt = Date.now();
+    const systemBytes = new TextEncoder().encode(request.systemPrompt).byteLength;
+    const userBytes = new TextEncoder().encode(request.userPrompt).byteLength;
+    console.info(
+      "[finara-ai] nvidia-request-start",
+      JSON.stringify({
+        model: request.model,
+        maxTokens,
+        systemBytes,
+        userBytes,
+      }),
+    );
     const response = await fetchImpl(NVIDIA_CHAT_COMPLETIONS_URL, {
       method: "POST",
       headers: {
@@ -116,14 +128,56 @@ export async function requestNvidiaStructuredJson<T>(
       signal: AbortSignal.timeout(NVIDIA_REQUEST_TIMEOUT_MS),
     });
 
-    if (!response.ok) throw new NvidiaUnavailableError();
+    if (!response.ok) {
+      console.warn(
+        "[finara-ai] nvidia-request-non-ok",
+        JSON.stringify({
+          model: request.model,
+          maxTokens,
+          status: response.status,
+          durationMs: Date.now() - startedAt,
+        }),
+      );
+      throw new NvidiaUnavailableError();
+    }
 
     const raw = await response.text();
-    if (new TextEncoder().encode(raw).byteLength > MAX_NVIDIA_RESPONSE_BYTES) {
+    const rawBytes = new TextEncoder().encode(raw).byteLength;
+    if (rawBytes > MAX_NVIDIA_RESPONSE_BYTES) {
+      console.warn(
+        "[finara-ai] nvidia-response-too-large",
+        JSON.stringify({
+          model: request.model,
+          rawBytes,
+          durationMs: Date.now() - startedAt,
+        }),
+      );
       throw new NvidiaInvalidResponseError();
     }
 
-    return parseCompletion(raw, request.outputSchema);
+    try {
+      const parsed = parseCompletion(raw, request.outputSchema);
+      console.info(
+        "[finara-ai] nvidia-request-success",
+        JSON.stringify({
+          model: request.model,
+          rawBytes,
+          durationMs: Date.now() - startedAt,
+        }),
+      );
+      return parsed;
+    } catch (error) {
+      console.warn(
+        "[finara-ai] nvidia-response-invalid",
+        JSON.stringify({
+          model: request.model,
+          rawBytes,
+          durationMs: Date.now() - startedAt,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+        }),
+      );
+      throw error;
+    }
   } catch (error) {
     if (
       error instanceof NvidiaUnavailableError ||
@@ -131,6 +185,13 @@ export async function requestNvidiaStructuredJson<T>(
     ) {
       throw error;
     }
+    console.warn(
+      "[finara-ai] nvidia-request-failed",
+      JSON.stringify({
+        model: request.model,
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      }),
+    );
     throw new NvidiaUnavailableError();
   }
 }

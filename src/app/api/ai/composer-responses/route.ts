@@ -11,16 +11,38 @@ import {
 } from "@/server/http/finance-api";
 
 export async function POST(request: Request) {
+  const startedAt = Date.now();
   try {
     const viewer = await getSessionViewer();
-    if (!viewer) return unauthorizedResponse();
+    if (!viewer) {
+      console.warn("[finara-ai] composer-responses-unauthorized");
+      return unauthorizedResponse();
+    }
     assertTrustedMutationRequest(request);
 
     const parsed = parseAiComposerInput(await readJsonBody(request));
-    if (!parsed.success) return validationErrorResponse(parsed);
+    if (!parsed.success) {
+      console.warn("[finara-ai] composer-responses-invalid-input");
+      return validationErrorResponse(parsed);
+    }
 
-    return apiData(await createAiComposerResponse(viewer.id, parsed.data.text));
+    const data = await createAiComposerResponse(viewer.id, parsed.data.text);
+    console.info(
+      "[finara-ai] composer-responses-success",
+      JSON.stringify({
+        textLength: parsed.data.text.length,
+        durationMs: Date.now() - startedAt,
+      }),
+    );
+    return apiData(data);
   } catch (error) {
+    console.warn(
+      "[finara-ai] composer-responses-failed",
+      JSON.stringify({
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        durationMs: Date.now() - startedAt,
+      }),
+    );
     return handleFinanceApiError(error);
   }
 }

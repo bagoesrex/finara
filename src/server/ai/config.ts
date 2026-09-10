@@ -25,7 +25,19 @@ export function getNvidiaConfig(
   const apiKey = environment.NVIDIA_API_KEY?.trim();
   const model = environment.NVIDIA_MODEL?.trim() || DEFAULT_NVIDIA_MODEL;
 
-  if (!apiKey || !modelPattern.test(model)) {
+  if (!apiKey) {
+    console.warn(
+      "[finara-ai] nvidia-config-missing",
+      JSON.stringify({ hasApiKey: false, model }),
+    );
+    throw new NvidiaConfigurationError();
+  }
+
+  if (!modelPattern.test(model)) {
+    console.warn(
+      "[finara-ai] nvidia-config-invalid-model",
+      JSON.stringify({ hasApiKey: true, model }),
+    );
     throw new NvidiaConfigurationError();
   }
 
