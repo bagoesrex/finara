@@ -95,7 +95,7 @@ export function DeleteTransactionDialog({
             onClick={onConfirm}
           >
             <Trash2 aria-hidden="true" size={17} />
-            {isDeleting ? "Menghapusâ€¦" : "Hapus transaksi"}
+            {isDeleting ? "Menghapus…" : "Hapus transaksi"}
           </button>
         </div>
       </section>

@@ -98,7 +98,7 @@ export function ActivitySearch() {
             disabled={transactionQuery.isFetchingNextPage}
             onClick={() => transactionQuery.fetchNextPage()}
           >
-            {transactionQuery.isFetchingNextPage ? "Memuatâ€¦" : "Muat lainnya"}
+            {transactionQuery.isFetchingNextPage ? "Memuat…" : "Muat lainnya"}
           </button>
         ) : null}
       </div>
