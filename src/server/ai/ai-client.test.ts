@@ -64,7 +64,7 @@ describe("OpenAI-compatible AI client", () => {
     ).resolves.toEqual({ intent: "GET_BALANCE" });
   });
 
-  it("handles JSON wrapped in markdown code blocks", async () => {
+  it("handles JSON wrapped in markdown code blocks or reasoning tags", async () => {
     const intentSchema = z
       .object({ intent: z.literal("GET_BALANCE") })
       .strict();
@@ -79,7 +79,7 @@ describe("OpenAI-compatible AI client", () => {
           userPrompt: "saldo saya?",
         },
         async () =>
-          completion("```json\n" + JSON.stringify({ intent: "GET_BALANCE" }) + "\n```"),
+          completion("<think>pondering...</think>\n```json\n" + JSON.stringify({ intent: "GET_BALANCE" }) + "\n```"),
       ),
     ).resolves.toEqual({ intent: "GET_BALANCE" });
   });
@@ -131,6 +131,7 @@ describe("OpenAI-compatible AI client", () => {
 
     const body = JSON.parse(String(init?.body));
     expect(body).toMatchObject({
+      chat_template_kwargs: { enable_thinking: false },
       max_tokens: 256,
       model: "meta-llama/llama-3.3-70b-instruct",
       response_format: { type: "json_object" },

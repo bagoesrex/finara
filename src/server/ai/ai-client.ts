@@ -67,9 +67,9 @@ export const NvidiaInvalidResponseError = AiInvalidResponseError;
 export type NvidiaInvalidResponseError = AiInvalidResponseError;
 
 function extractJsonContent(content: string): unknown {
-  const trimmed = content.trim();
-  const codeBlockMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-  const candidate = codeBlockMatch ? codeBlockMatch[1].trim() : trimmed;
+  const stripped = content.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const codeBlockMatch = stripped.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const candidate = codeBlockMatch ? codeBlockMatch[1].trim() : stripped;
   return JSON.parse(candidate);
 }
 
@@ -145,6 +145,7 @@ export async function requestAiStructuredJson<T>(
         max_tokens: maxTokens,
         stream: false,
         response_format: { type: "json_object" },
+        chat_template_kwargs: { enable_thinking: false },
       }),
       cache: "no-store",
       redirect: "error",
