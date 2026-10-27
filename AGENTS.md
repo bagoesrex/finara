@@ -139,6 +139,7 @@ Planned by the PRD but not installed or selected yet:
 - Do not expose database models directly as public API contracts.
 - Add tests for new business logic and regression tests for bug fixes.
 - Keep changes narrowly scoped. Do not add Phase 2 features or speculative abstractions.
+- Commit frequently after completing a logical unit of change using semantic commit messages (`feat:`, `fix:`, `refactor:`, `chore:`, `test:`, `docs:`, `perf:`). Do not accumulate large uncommitted diffs across separate tasks.
 
 ## Commands
 
