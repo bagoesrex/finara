@@ -69,9 +69,11 @@ Tool implementations must authenticate, authorize, validate, and return only the
 
 ## Accepted transaction-parsing boundary
 
-Following [ADR 0007](../decisions/0007-nvidia-build-for-ai-inference.md),
-transaction parsing uses NVIDIA Build's hosted Chat Completions endpoint with
-`nvidia/nemotron-3.5-lightning-30b-a3b` as the configurable default model.
+Following [ADR 0007](../decisions/0007-nvidia-build-for-ai-inference.md) and
+[ADR 0012](../decisions/0012-openai-compatible-inference-provider.md),
+transaction parsing uses an OpenAI-compatible Chat Completions endpoint
+(configurable via `AI_BASE_URL`, `AI_API_KEY`, and `AI_MODEL`, supporting
+platforms such as 9router, OpenRouter, or NVIDIA Build).
 Parsing is exposed as authenticated `POST /api/ai/transaction-previews` and can
 only return `ready` or `needs_input`; it cannot persist a transaction. The
 server maps model hints to the authenticated user's account and category IDs,
@@ -90,16 +92,17 @@ time, and missing fields separately. Description checks use required terms
 rather than one exact model-authored phrase; `tadi pagi` accepts an `HH:mm`
 inside the documented morning period.
 
-The deterministic matcher runs in the normal Vitest suite. Run
-`bun run ai:eval:transactions` with the ignored local NVIDIA credential to
+The deterministic matcher runs in the normal test suite. Run
+`bun run ai:eval:transactions` with the configured AI credential to
 evaluate the same cases against the configured hosted model. Every documented
 golden case must pass; this gate does not silently establish a broader model
 benchmark.
 
 ## Accepted current-month question boundary
 
-Following [ADR 0008](../decisions/0008-application-managed-ai-finance-tools.md),
-authenticated `POST /api/ai/composer-responses` uses one strict NVIDIA JSON
+Following [ADR 0008](../decisions/0008-application-managed-ai-finance-tools.md)
+and [ADR 0012](../decisions/0012-openai-compatible-inference-provider.md),
+authenticated `POST /api/ai/composer-responses` uses one strict OpenAI-compatible JSON
 response to select an allowlisted intent. It receives user text, Jakarta date
 context, and available category names/types, but no account IDs, category IDs,
 balances, transactions, budgets, or calculated answers. Server tools inject the
@@ -108,7 +111,7 @@ application-authored text without a second model call.
 
 The accepted first slice covers available balance; current-month income,
 expense, category totals, and top category; and current-month category or
-overall budget remaining. It shares the persisted quota from ADR 0007. Home
+overall budget remaining. It shares the persisted quota from ADR 0007/0012. Home
 renders a transaction preview, one announced financial answer, or a short
 unsupported message from the same composer without storing chat history.
 
