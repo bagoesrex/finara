@@ -6,11 +6,16 @@ import type {
   ApiSuccessResponse,
 } from "@/lib/api";
 import type { ContractParseResult } from "@/lib/transactions";
-import { NvidiaConfigurationError } from "@/server/ai/config";
 import {
+  AiConfigurationError,
+  NvidiaConfigurationError,
+} from "@/server/ai/config";
+import {
+  AiInvalidResponseError,
+  AiUnavailableError,
   NvidiaInvalidResponseError,
   NvidiaUnavailableError,
-} from "@/server/ai/nvidia-client";
+} from "@/server/ai/ai-client";
 import { AiPreviewRateLimitExceededError } from "@/server/ai/rate-limit";
 import { AiRateLimitConfigurationError } from "@/server/ai/rate-limit-policy";
 import {
@@ -296,16 +301,25 @@ export function handleFinanceApiError(error: unknown) {
 
   if (
     error instanceof AiRateLimitConfigurationError ||
+    error instanceof AiConfigurationError ||
+    error instanceof AiInvalidResponseError ||
+    error instanceof AiUnavailableError ||
     error instanceof NvidiaConfigurationError ||
     error instanceof NvidiaInvalidResponseError ||
     error instanceof NvidiaUnavailableError
   ) {
+    const hasAiApiKey = Boolean(
+      process.env.AI_API_KEY?.trim() || process.env.NVIDIA_API_KEY?.trim(),
+    );
     console.warn(
       "[finara-ai] ai-unavailable",
       JSON.stringify({
         errorName: error instanceof Error ? error.name : "UnknownError",
-        hasNvidiaApiKey: Boolean(process.env.NVIDIA_API_KEY?.trim()),
-        model: process.env.NVIDIA_MODEL?.trim() || null,
+        hasAiApiKey,
+        model:
+          process.env.AI_MODEL?.trim() ||
+          process.env.NVIDIA_MODEL?.trim() ||
+          null,
       }),
     );
     return apiError(

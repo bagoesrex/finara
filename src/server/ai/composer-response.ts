@@ -8,22 +8,23 @@ import {
   getMonthKeyInTimeZone,
 } from "@/lib/transactions";
 import { db } from "@/server/db/client";
-import { getNvidiaConfig } from "./config";
+import { getAiConfig } from "./config";
 import { executeFinanceReadIntent } from "./finance-tools";
-import { requestNvidiaStructuredJson } from "./nvidia-client";
+import { requestAiStructuredJson } from "./ai-client";
 import { consumeAiPreviewQuota } from "./rate-limit";
 
 export async function createAiComposerResponse(
   userId: string,
   text: string,
   now = new Date(),
+  requestStructuredJson = requestAiStructuredJson,
 ) {
   const startedAt = Date.now();
   console.info(
     "[finara-ai] composer-response-start",
     JSON.stringify({ textLength: text.length }),
   );
-  const { apiKey, model } = getNvidiaConfig();
+  const { apiKey, baseUrl, model } = getAiConfig();
   const [accounts, categories] = await db.$transaction([
     db.account.findMany({
       where: { userId },
@@ -53,8 +54,9 @@ export async function createAiComposerResponse(
   );
 
   await consumeAiPreviewQuota(userId);
-  const intent = await requestNvidiaStructuredJson({
+  const intent = await requestStructuredJson({
     apiKey,
+    baseUrl,
     maxTokens: 384,
     model,
     outputSchema: aiComposerIntentSchema,

@@ -11,10 +11,11 @@ const mocks = {
   ),
 };
 
+process.env.AI_API_KEY = "server-key";
+process.env.AI_BASE_URL = "https://api.test/v1";
+process.env.AI_MODEL = "test/model";
+
 mock.module("server-only", () => ({}));
-mock.module("@/server/ai/config", () => ({
-  getNvidiaConfig: () => ({ apiKey: "server-key", model: "nvidia/model" }),
-}));
 mock.module("@/server/db/client", () => ({
   db: {
     account: { findMany: mocks.findAccounts },
@@ -24,9 +25,6 @@ mock.module("@/server/db/client", () => ({
 }));
 mock.module("@/server/ai/finance-tools", () => ({
   executeFinanceReadIntent: mocks.executeFinanceRead,
-}));
-mock.module("@/server/ai/nvidia-client", () => ({
-  requestNvidiaStructuredJson: mocks.requestStructuredJson,
 }));
 mock.module("@/server/ai/rate-limit", () => ({
   consumeAiPreviewQuota: mocks.consumeQuota,
@@ -57,7 +55,12 @@ describe("AI composer response service", () => {
     mocks.requestStructuredJson.mockResolvedValue({ intent: "GET_BALANCE" });
 
     await expect(
-      createAiComposerResponse("user-1", "saldo saya?", now),
+      createAiComposerResponse(
+        "user-1",
+        "saldo saya?",
+        now,
+        mocks.requestStructuredJson,
+      ),
     ).resolves.toEqual(financeAnswer);
 
     expect(mocks.findAccounts).toHaveBeenCalledWith(
@@ -82,8 +85,9 @@ describe("AI composer response service", () => {
     const providerRequest = mocks.requestStructuredJson.mock.calls[0][0];
     expect(providerRequest).toMatchObject({
       apiKey: "server-key",
+      baseUrl: "https://api.test/v1",
       maxTokens: 384,
-      model: "nvidia/model",
+      model: "test/model",
     });
     expect(providerRequest.userPrompt).toContain('"text":"saldo saya?"');
     expect(JSON.stringify(providerRequest)).not.toContain("user-1");
@@ -105,7 +109,12 @@ describe("AI composer response service", () => {
     });
 
     await expect(
-      createAiComposerResponse("user-1", "makan ayam 25rb", now),
+      createAiComposerResponse(
+        "user-1",
+        "makan ayam 25rb",
+        now,
+        mocks.requestStructuredJson,
+      ),
     ).resolves.toMatchObject({
       kind: "transaction_preview",
       preview: { status: "ready", draft: { amount: "25000" } },
@@ -117,7 +126,12 @@ describe("AI composer response service", () => {
     mocks.consumeQuota.mockRejectedValue(new Error("rate limited"));
 
     await expect(
-      createAiComposerResponse("user-1", "saldo saya?", now),
+      createAiComposerResponse(
+        "user-1",
+        "saldo saya?",
+        now,
+        mocks.requestStructuredJson,
+      ),
     ).rejects.toThrow("rate limited");
     expect(mocks.requestStructuredJson).not.toHaveBeenCalled();
     expect(mocks.executeFinanceRead).not.toHaveBeenCalled();

@@ -4,20 +4,21 @@ import { buildTransactionParserPrompts } from "@/ai/transaction-parser";
 import { resolveAiTransactionPreview } from "@/lib/ai-transaction";
 import { getDateKeyInTimeZone } from "@/lib/transactions";
 import { db } from "@/server/db/client";
-import { getNvidiaConfig } from "./config";
-import { requestNvidiaTransactionExtraction } from "./nvidia-client";
+import { getAiConfig } from "./config";
+import { requestAiTransactionExtraction } from "./ai-client";
 import { consumeAiPreviewQuota } from "./rate-limit";
 
 export async function createAiTransactionPreview(
   userId: string,
   text: string,
+  requestExtraction = requestAiTransactionExtraction,
 ) {
   const startedAt = Date.now();
   console.info(
     "[finara-ai] transaction-preview-start",
     JSON.stringify({ textLength: text.length }),
   );
-  const { apiKey, model } = getNvidiaConfig();
+  const { apiKey, baseUrl, model } = getAiConfig();
   const [accounts, categories] = await db.$transaction([
     db.account.findMany({
       where: { userId },
@@ -45,8 +46,9 @@ export async function createAiTransactionPreview(
       durationMs: Date.now() - startedAt,
     }),
   );
-  const extraction = await requestNvidiaTransactionExtraction({
+  const extraction = await requestExtraction({
     apiKey,
+    baseUrl,
     model,
     systemPrompt: prompts.system,
     userPrompt: prompts.user,
