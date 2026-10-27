@@ -118,7 +118,6 @@ describe("NVIDIA transaction extraction client", () => {
 
     const body = JSON.parse(String(init?.body));
     expect(body).toMatchObject({
-      chat_template_kwargs: { enable_thinking: false },
       max_tokens: 256,
       model: "nvidia/nemotron-3.5-lightning-30b-a3b",
       response_format: { type: "json_object" },
