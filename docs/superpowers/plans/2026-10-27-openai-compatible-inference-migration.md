@@ -43,25 +43,25 @@
   - `AiConfigurationError` class
   - Backward-compatibility aliases: `getNvidiaConfig`, `NvidiaConfigurationError`
 
-- [ ] **Step 1: Write failing tests in `src/server/ai/config.test.ts`**
+- [x] **Step 1: Write failing tests in `src/server/ai/config.test.ts`**
   Cover `AI_API_KEY`, custom `AI_BASE_URL` normalization, `AI_MODEL`, fallback to `NVIDIA_API_KEY`, and validation errors.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
   Run: `bun test src/server/ai/config.test.ts`
   Expected: FAIL (missing exports or properties)
 
-- [ ] **Step 3: Implement `src/server/ai/config.ts`**
+- [x] **Step 3: Implement `src/server/ai/config.ts`**
   Add `getAiConfig`, `AiConfigurationError`, and backward-compatible aliases. Default `AI_BASE_URL` to `https://openrouter.ai/api/v1` or standard endpoint.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
   Run: `bun test src/server/ai/config.test.ts`
   Expected: PASS
 
-- [ ] **Step 5: Run linter and typecheck**
+- [x] **Step 5: Run linter and typecheck**
   Run: `bun run lint && bun run typecheck`
   Expected: PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   ```bash
   git add src/server/ai/config.ts src/server/ai/config.test.ts
   git commit -m "feat(ai): support flexible openai-compatible configuration with fallback"
@@ -85,28 +85,28 @@
   - `requestAiTransactionExtraction(request, fetchImpl)`
   - Aliases for existing NVIDIA symbols.
 
-- [ ] **Step 1: Write tests in `src/server/ai/ai-client.test.ts`**
+- [x] **Step 1: Write tests in `src/server/ai/ai-client.test.ts`**
   Test OpenAI-compatible payload generation (`Authorization: Bearer ...`, `messages`, `response_format`), valid JSON handling, invalid response handling, and timeout/network error handling.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
   Run: `bun test src/server/ai/ai-client.test.ts`
   Expected: FAIL
 
-- [ ] **Step 3: Implement `src/server/ai/ai-client.ts`**
+- [x] **Step 3: Implement `src/server/ai/ai-client.ts`**
   Implement `requestAiStructuredJson` targeting `${baseUrl}/chat/completions` with 8s timeout, text encoder byte logging, and Zod output schema parsing.
 
-- [ ] **Step 4: Wire `src/server/ai/nvidia-client.ts` to delegate to `ai-client.ts`**
+- [x] **Step 4: Wire `src/server/ai/nvidia-client.ts` to delegate to `ai-client.ts`**
   Keep `nvidia-client.ts` as an alias wrapper to avoid breaking any callers during migration.
 
-- [ ] **Step 5: Run client tests to verify they pass**
+- [x] **Step 5: Run client tests to verify they pass**
   Run: `bun test src/server/ai/ai-client.test.ts src/server/ai/nvidia-client.test.ts`
   Expected: PASS
 
-- [ ] **Step 6: Run linter and typecheck**
+- [x] **Step 6: Run linter and typecheck**
   Run: `bun run lint && bun run typecheck`
   Expected: PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
   ```bash
   git add src/server/ai/ai-client.ts src/server/ai/ai-client.test.ts src/server/ai/nvidia-client.ts src/server/ai/nvidia-client.test.ts
   git commit -m "feat(ai): add generic openai-compatible chat completions client"
@@ -126,21 +126,21 @@
 - Consumes: `getAiConfig`, `requestAiStructuredJson`, `requestAiTransactionExtraction`, `AiConfigurationError`, `AiUnavailableError`, `AiInvalidResponseError`.
 - Produces: Updated application services and HTTP error handlers recognizing generic AI errors.
 
-- [ ] **Step 1: Update `src/server/ai/transaction-preview.ts` and `composer-response.ts`**
+- [x] **Step 1: Update `src/server/ai/transaction-preview.ts` and `composer-response.ts`**
   Switch from `getNvidiaConfig` and `requestNvidia*` to `getAiConfig` and `requestAi*`.
 
-- [ ] **Step 2: Update `src/server/http/finance-api.ts`**
+- [x] **Step 2: Update `src/server/http/finance-api.ts`**
   Catch `AiConfigurationError`, `AiUnavailableError`, `AiInvalidResponseError` (along with their backward-compatible aliases) and map cleanly to `503 AI_UNAVAILABLE`.
 
-- [ ] **Step 3: Run existing unit and integration tests**
+- [x] **Step 3: Run existing unit and integration tests**
   Run: `bun test src/server/ai/`
   Expected: PASS
 
-- [ ] **Step 4: Run linter and typecheck**
+- [x] **Step 4: Run linter and typecheck**
   Run: `bun run lint && bun run typecheck`
   Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add src/server/ai/transaction-preview.ts src/server/ai/composer-response.ts src/server/ai/composer-response.test.ts src/server/http/finance-api.ts
   git commit -m "refactor(ai): integrate generic ai client into composer and preview services"
@@ -159,16 +159,16 @@
 - Modify: `.env.example`
 - Modify: `.env`
 
-- [ ] **Step 1: Update scripts to use generic AI client**
+- [x] **Step 1: Update scripts to use generic AI client**
   Point scripts to `getAiConfig` and `requestAiStructuredJson`.
 
-- [ ] **Step 2: Update `package.json` scripts**
+- [x] **Step 2: Update `package.json` scripts**
   Add `"ai:check": "bun ./scripts/check-ai-inference.ts"`, keeping `"ai:check:nvidia"` as an alias.
 
-- [ ] **Step 3: Update `.env.example` and `.env`**
+- [x] **Step 3: Update `.env.example` and `.env`**
   Add `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` to `.env.example` and local `.env`.
 
-- [ ] **Step 4: Run all test and build quality gates**
+- [x] **Step 4: Run all test and build quality gates**
   Run:
   - `bun run test`
   - `bun run lint`
@@ -176,7 +176,7 @@
   - `bun run build`
   Expected: All PASS with 0 errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add scripts/ package.json .env.example
   git commit -m "chore(ai): update inference verification scripts and environment templates"
