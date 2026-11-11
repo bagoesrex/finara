@@ -124,16 +124,16 @@
 - Produces: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`.
 - Behavior: Registrasi langsung membuat User, Sesi token, akun default "Tunai" (type `CASH`, saldo 0), dan kategori standar secara atomik dalam satu DB transaction.
 
-- [ ] **Step 1: Tulis failing test untuk atomic registration di `auth_usecase_test.go`**
+- [x] **Step 1: Tulis failing test untuk atomic registration di `auth_usecase_test.go`**
   Pastikan saat `Register` dipanggil, akun "Tunai" dan kategori default langsung terbuat untuk user baru.
-- [ ] **Step 2: Implementasi `UserRepo` dan DB transaction di `user_repo.go`**
+- [x] **Step 2: Implementasi `UserRepo` dan DB transaction di `user_repo.go`**
   Gunakan bcrypt/argon2 untuk hash password dan pgx `BeginTx` untuk atomisitas.
-- [ ] **Step 3: Implementasi `AuthUsecase` dan JWT/Session token generation**
-- [ ] **Step 4: Implementasi Echo `AuthHandler` dan `AuthMiddleware`**
+- [x] **Step 3: Implementasi `AuthUsecase` dan JWT/Session token generation**
+- [x] **Step 4: Implementasi Echo `AuthHandler` dan `AuthMiddleware`**
   Pastikan `AuthMiddleware` mengekstrak `user_id` dari Bearer token dan menyimpannya di context Echo.
-- [ ] **Step 5: Jalankan test dan verifikasi pass**
+- [x] **Step 5: Jalankan test dan verifikasi pass**
   `cd server && go test -v ./internal/usecase/... ./internal/delivery/http/...`.
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   `git commit -m "feat(auth): implement atomic registration with zero onboarding and session auth"`
 
 ---
