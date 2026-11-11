@@ -4,6 +4,7 @@ import { useAuth } from './features/auth/useAuth';
 import { AuthPages } from './features/auth/AuthPages';
 import { HomeDashboard } from './features/home';
 import { ActivityPage } from './features/activity';
+import { BudgetPage } from './features/budgets';
 
 export function AppContent() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -15,12 +16,7 @@ export function AppContent() {
 
       {activeTab === 'activity' && <ActivityPage />}
 
-      {activeTab === 'budget' && (
-        <section className="p-4 rounded-2xl bg-[#12141D] border border-[#232738]">
-          <h2 className="text-sm font-semibold text-[#F8FAFC]">Budget Bulanan</h2>
-          <p className="mt-2 text-xs text-[#94A3B8]">Belum ada alokasi budget.</p>
-        </section>
-      )}
+      {activeTab === 'budget' && <BudgetPage />}
 
       {activeTab === 'profile' && (
         <section className="p-4 rounded-2xl bg-[#12141D] border border-[#232738] space-y-4">

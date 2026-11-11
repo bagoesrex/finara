@@ -93,6 +93,26 @@ export interface ParseTransactionResponse {
   draft: ParsedTransactionDraft;
 }
 
+export interface BudgetWithProgress {
+  id: string;
+  user_id: string;
+  category_id: string;
+  category_type: TransactionType;
+  period_start: string;
+  amount: number;
+  created_at: string;
+  updated_at: string;
+  category_name: string;
+  spent: number;
+  remaining: number;
+}
+
+export interface UpsertBudgetInput {
+  category_id: string;
+  month: string;
+  amount: number;
+}
+
 export function formatCurrency(amount: number): string {
   const isNegative = amount < 0;
   const abs = Math.abs(Math.round(amount || 0));
@@ -157,5 +177,16 @@ export const financeApi = {
     apiFetch<ParseTransactionResponse>('/api/ai/parse-transaction', {
       method: 'POST',
       body: JSON.stringify({ prompt }),
+    }),
+
+  getBudgets: (month?: string): Promise<BudgetWithProgress[]> => {
+    const query = month ? `?month=${encodeURIComponent(month)}` : '';
+    return apiFetch<BudgetWithProgress[]>(`/api/budgets${query}`);
+  },
+
+  upsertBudget: (data: UpsertBudgetInput): Promise<BudgetWithProgress> =>
+    apiFetch<BudgetWithProgress>('/api/budgets', {
+      method: 'POST',
+      body: JSON.stringify(data),
     }),
 };
