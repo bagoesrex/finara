@@ -50,12 +50,31 @@ func main() {
 		defer pool.Close()
 
 		userRepo := postgres.NewUserRepository(pool)
+		accountRepo := postgres.NewAccountRepository(pool)
+		categoryRepo := postgres.NewCategoryRepository(pool)
+		txRepo := postgres.NewTransactionRepository(pool)
+		budgetRepo := postgres.NewBudgetRepository(pool)
+
 		authUsecase := usecase.NewAuthUsecase(userRepo)
 		authMiddleware := authmw.NewAuthMiddleware(authUsecase)
 		authHandler := httpDelivery.NewAuthHandler(authUsecase)
 
-		authGroup := e.Group("/api/auth")
+		txUsecase := usecase.NewTransactionUsecase(txRepo, accountRepo, categoryRepo)
+		txHandler := httpDelivery.NewTransactionHandler(txUsecase)
+
+		budgetUsecase := usecase.NewBudgetUsecase(budgetRepo, categoryRepo)
+		budgetHandler := httpDelivery.NewBudgetHandler(budgetUsecase)
+
+		financeUsecase := usecase.NewFinanceUsecase(accountRepo, categoryRepo, txRepo)
+		financeHandler := httpDelivery.NewFinanceHandler(financeUsecase)
+
+		apiGroup := e.Group("/api")
+		authGroup := apiGroup.Group("/auth")
 		authHandler.RegisterRoutes(authGroup, authMiddleware)
+
+		txHandler.RegisterRoutes(apiGroup, authMiddleware)
+		budgetHandler.RegisterRoutes(apiGroup, authMiddleware)
+		financeHandler.RegisterRoutes(apiGroup, authMiddleware)
 	} else {
 		e.Logger.Warn("DATABASE_URL not set; skipping auth route initialization")
 	}

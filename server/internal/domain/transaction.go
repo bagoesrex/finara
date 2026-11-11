@@ -63,6 +63,7 @@ type TransactionFilter struct {
 	Search     string           `json:"search,omitempty"`
 	Cursor     string           `json:"cursor,omitempty"`
 	Limit      int              `json:"limit,omitempty"`
+	Offset     int              `json:"offset,omitempty"`
 }
 
 type FinancialSnapshot struct {
@@ -74,6 +75,7 @@ type FinancialSnapshot struct {
 type TransactionRepository interface {
 	Create(ctx context.Context, tx *Transaction) error
 	GetByID(ctx context.Context, userID, txID string) (*Transaction, error)
+	GetByClientRequestID(ctx context.Context, userID, clientRequestID string) (*Transaction, error)
 	List(ctx context.Context, filter TransactionFilter) ([]Transaction, error)
 	Update(ctx context.Context, tx *Transaction) error
 	SoftDelete(ctx context.Context, userID, txID string) error
