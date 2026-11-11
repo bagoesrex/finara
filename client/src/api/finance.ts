@@ -120,6 +120,12 @@ export function formatCurrency(amount: number): string {
   return `${isNegative ? '-Rp ' : 'Rp '}${formatted}`;
 }
 
+export const generateUUID = (): string =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+
 export const financeApi = {
   getSnapshot: (): Promise<FinancialSnapshot> =>
     apiFetch<FinancialSnapshot>('/api/finance/snapshot'),
@@ -165,7 +171,7 @@ export const financeApi = {
       data.client_request_id ||
       (typeof crypto !== 'undefined' && crypto.randomUUID
         ? crypto.randomUUID()
-        : `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
+        : generateUUID());
 
     return apiFetch<Transaction>('/api/transactions', {
       method: 'POST',
