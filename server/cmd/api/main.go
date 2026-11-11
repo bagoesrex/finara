@@ -15,6 +15,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	_ "github.com/jackc/pgx/v5"
+
+	httpDelivery "finara/server/internal/delivery/http"
+	authmw "finara/server/internal/delivery/http/middleware"
+	"finara/server/internal/repository/postgres"
+	"finara/server/internal/usecase"
 )
 
 func main() {
@@ -35,6 +40,25 @@ func main() {
 			"status": "ok",
 		})
 	})
+
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL != "" {
+		pool, err := postgres.NewDBPool(context.Background(), databaseURL)
+		if err != nil {
+			e.Logger.Fatalf("failed to connect to database: %v", err)
+		}
+		defer pool.Close()
+
+		userRepo := postgres.NewUserRepository(pool)
+		authUsecase := usecase.NewAuthUsecase(userRepo)
+		authMiddleware := authmw.NewAuthMiddleware(authUsecase)
+		authHandler := httpDelivery.NewAuthHandler(authUsecase)
+
+		authGroup := e.Group("/api/auth")
+		authHandler.RegisterRoutes(authGroup, authMiddleware)
+	} else {
+		e.Logger.Warn("DATABASE_URL not set; skipping auth route initialization")
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
