@@ -1,0 +1,52 @@
+:root {
+  color-scheme: dark;
+  --bg-base: #090a0f;
+  --bg-surface: #12141d;
+  --bg-elevated: #1a1d2b;
+  --border-hairline: #232738;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-emerald: #10b981;
+  --status-expense: #f43f5e;
+  --status-income: #10b981;
+  --status-warning: #f59e0b;
+}
+
+[data-theme="light"],
+.light {
+  color-scheme: light;
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --border-hairline: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-emerald: #10b981;
+  --status-expense: #f43f5e;
+  --status-income: #10b981;
+  --status-warning: #f59e0b;
+}
+
+@theme {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border-hairline: var(--border-hairline);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-status-expense: var(--status-expense);
+  --color-status-income: var(--status-income);
+  --color-status-warning: var(--status-warning);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
