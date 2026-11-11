@@ -72,15 +72,15 @@
 **Interfaces:**
 - Produces: `postgres.NewDBPool(ctx, databaseURL) (*pgxpool.Pool, error)`
 
-- [ ] **Step 1: Tulis file migration SQL up dan down**
+- [x] **Step 1: Tulis file migration SQL up dan down**
   Terapkan skema lengkap sesuai `docs/ARCHITECTURE.md` (`users`, `auth_sessions`, `accounts`, `categories`, `transactions`, `budgets`, `ai_rate_limits`).
-- [ ] **Step 2: Tulis test koneksi database `db_test.go`**
+- [x] **Step 2: Tulis test koneksi database `db_test.go`**
   Test verifikasi koneksi pool pgx ke database PostgreSQL lokal (`SELECT 1`).
-- [ ] **Step 3: Implementasi pool connection helper di `db.go`**
+- [x] **Step 3: Implementasi pool connection helper di `db.go`**
   Inisialisasi `pgxpool.New(ctx, databaseURL)` dengan batas timeout dan health check.
-- [ ] **Step 4: Jalankan test database dan apply migrasi**
+- [x] **Step 4: Jalankan test database dan apply migrasi**
   Jalankan migrasi dan test: `cd server && go test -v ./internal/repository/postgres -run TestDBConnection`.
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   `git commit -m "feat(db): add initial postgresql migrations and pgx pool client"`
 
 ---
