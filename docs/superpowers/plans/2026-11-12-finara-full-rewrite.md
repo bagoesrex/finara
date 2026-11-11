@@ -351,10 +351,10 @@
   4. Alokasi budget bulanan.
   5. Verifikasi zero-reload (pindah tab tanpa jeda/reload browser).
 
-- [ ] **Step 1: Implementasi skrip pembantu reset test database di Go**
-- [ ] **Step 2: Tulis test Playwright untuk alur kritis registrasi -> AI expense -> manual expense**
-- [ ] **Step 3: Tulis test Playwright untuk verifikasi zero-reload dan cache persistence**
-- [ ] **Step 4: Jalankan seluruh suite E2E**
+- [x] **Step 1: Implementasi skrip pembantu reset test database di Go**
+- [x] **Step 2: Tulis test Playwright untuk alur kritis registrasi -> AI expense -> manual expense**
+- [x] **Step 3: Tulis test Playwright untuk verifikasi zero-reload dan cache persistence**
+- [x] **Step 4: Jalankan seluruh suite E2E**
   `cd e2e && bun run test`.
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   `git commit -m "test(e2e): cover all critical user flows with mobile playwright journeys"`
