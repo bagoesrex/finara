@@ -1,40 +1,40 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
 
-# dependencies
-/node_modules
+# Build artifacts & outputs
+dist/
+build/
+out/
+.next/
 
-# testing
-/coverage
-/playwright-report/
-/test-results/
+# Go binaries & artifacts
+bin/
+*.exe
+server/api
 
-# next.js
-/.next/
-/out/
+# Testing & coverage
+coverage/
+playwright-report/
+test-results/
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-bun-debug.log*
-
-# env files (can opt-in for committing if needed)
+# Environment files
 .env*
 !.env.example
 
-# generated database client
-/src/generated/prisma/
+# Logs & debug
+*.log
+bun-debug.log*
 
-# vercel
-.vercel
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.pem
 
-# typescript
+# TypeScript & tooling
 *.tsbuildinfo
 next-env.d.ts
-
-.artifacts
+.vercel/
+.artifacts/
 .superpowers/
