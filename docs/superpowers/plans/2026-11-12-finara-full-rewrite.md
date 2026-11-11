@@ -212,13 +212,13 @@
 **Interfaces:**
 - Produces: Layout wrapper dengan max-width 440px di tengah layar, safe area support, dan BottomNav 4 tab (Home, Aktivitas, Budget, Profil).
 
-- [ ] **Step 1: Setup CSS tokens untuk Dark Obsidian dan Light Daylight di Tailwind 4**
+- [x] **Step 1: Setup CSS tokens untuk Dark Obsidian dan Light Daylight di Tailwind 4**
   Terapkan warna `#090A0F`, `#12141D`, `#1A1D2B`, `#10B981` sesuai `docs/DESIGN.md`.
-- [ ] **Step 2: Implementasi `AppShell.tsx` dengan kontainer centered 440px**
-- [ ] **Step 3: Implementasi `BottomNav.tsx` dengan icon tab minimalis dan tap target 44px**
-- [ ] **Step 4: Jalankan test layout component**
+- [x] **Step 2: Implementasi `AppShell.tsx` dengan kontainer centered 440px**
+- [x] **Step 3: Implementasi `BottomNav.tsx` dengan icon tab minimalis dan tap target 44px**
+- [x] **Step 4: Jalankan test layout component**
   `cd client && bun test`.
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   `git commit -m "feat(ui): implement mobile-first 440px app shell and theme tokens"`
 
 ---
