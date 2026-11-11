@@ -1,72 +1,12 @@
-# Finara Documentation
+# Finara Documentation Index
 
-Dokumentasi Finara dibagi menjadi dua lapisan:
+Selamat datang di repositori dokumentasi Finara (Rewrite). Seluruh spesifikasi produk, arsitektur teknis, dan sistem desain didokumentasikan secara terpusat di direktori ini:
 
-1. [`PRD.md`](./PRD.md) adalah sumber utama untuk visi, scope, dan prinsip produk.
-2. [`specs/`](./specs/) menerjemahkan PRD menjadi requirement implementasi dan acceptance criteria per domain.
-3. [`decisions/`](./decisions/) mencatat keputusan produk dan arsitektur yang menyelesaikan pertanyaan terbuka secara eksplisit.
-4. [`mvp-specification-audit.md`](./mvp-specification-audit.md) memetakan seluruh
-   spec portfolio MVP ke bukti atau penundaan yang eksplisit.
+1. **[Product Requirements Document (PRD.md)](./PRD.md)**  
+   Visi produk, target pengguna, alur interaksi pencatatan AI vs manual, ruang lingkup MVP, dan metrik keberhasilan.
 
-Jika spec turunan bertentangan dengan PRD, PRD berlaku sampai keputusan baru dicatat secara eksplisit. Item berlabel **Open question** belum menjadi keputusan implementasi.
+2. **[Technical Architecture (ARCHITECTURE.md)](./ARCHITECTURE.md)**  
+   Rincian arsitektur client-server decoupled (React 19 + Bun di `client/`, Go 1.24 + Echo Clean Architecture di `server/`), skema database PostgreSQL, strategi persistensi TanStack Query (zero-reload), integrasi universal gateway AI completions (9router/OpenRouter), dan Playwright E2E testing.
 
-## Spec index
-
-| Area | Dokumen | Requirement ID |
-| --- | --- | --- |
-| Visi, pengguna, scope | [`01-product-scope.md`](./specs/01-product-scope.md) | `PROD-*` |
-| Design system dan interaction | [`02-experience-design.md`](./specs/02-experience-design.md) | `UX-*` |
-| Navigation, shell, dan Home | [`03-application-shell-home.md`](./specs/03-application-shell-home.md) | `SHELL-*` |
-| Authentication dan onboarding | [`04-authentication-onboarding.md`](./specs/04-authentication-onboarding.md) | `AUTH-*` |
-| Account dan category | [`05-accounts-categories.md`](./specs/05-accounts-categories.md) | `ACCT-*` |
-| Transaction lifecycle | [`06-transactions.md`](./specs/06-transactions.md) | `TXN-*` |
-| Activity, search, dan detail | [`07-activity-search.md`](./specs/07-activity-search.md) | `ACT-*` |
-| Budget | [`08-budget.md`](./specs/08-budget.md) | `BUD-*` |
-| AI parsing, query, dan insight | [`09-ai-assistant.md`](./specs/09-ai-assistant.md) | `AI-*` |
-| Profile dan settings | [`10-profile-settings.md`](./specs/10-profile-settings.md) | `PROF-*` |
-| Database dan domain model | [`11-data-model.md`](./specs/11-data-model.md) | `DATA-*` |
-| Architecture, security, privacy | [`12-architecture-security.md`](./specs/12-architecture-security.md) | `ARCH-*` |
-| Quality dan success metrics | [`13-quality-success.md`](./specs/13-quality-success.md) | `QUAL-*` |
-
-## PRD coverage
-
-| PRD section | Covered by |
-| --- | --- |
-| 1-4, 45-47, 59-60 | Product scope |
-| 5, 7-12, 34-41, 49-53 | Experience design |
-| 6, 13-16, 42, 48-50, 53-54 | Application shell and Home |
-| 43-45, 48, 57 | Authentication and onboarding |
-| 30, 32-33, 43-44, 48 | Accounts and categories |
-| 14, 17-18, 21-22, 38, 48 | Transactions |
-| 19-21 | Activity and search |
-| 23-24, 26 | Budget |
-| 15-18, 24-29, 54-56 | AI assistant |
-| 43-44 | Profile and settings |
-| 30-33 | Data model |
-| 27-29, 51, 56-57 | Architecture and security |
-| 34-36, 58 | Quality and success |
-
-## Status convention
-
-- **Draft**: derived from the PRD and ready for review, but unresolved questions remain.
-- **Accepted**: explicitly approved and complete within its stated boundary.
-- **Superseded**: replaced by a newer spec or ADR.
-
-Specs start as **Draft**. ADR 0011 closes the portfolio MVP without treating
-production operations as a project-completion requirement.
-
-## Decision index
-
-| ID | Keputusan | Status |
-| --- | --- | --- |
-| [`ADR 0001`](./decisions/0001-current-balance-as-opening-snapshot.md) | Saldo saat ini menjadi snapshot pembuka, bukan transaksi pemasukan | Accepted |
-| [`ADR 0002`](./decisions/0002-tanstack-query-for-client-finance-state.md) | TanStack Query mengelola mutable client server-state selama sesi private app | Accepted |
-| [`ADR 0003`](./decisions/0003-idr-money-and-user-owned-onboarding-schema.md) | Uang MVP memakai IDR utuh, opening snapshot, dan category milik user | Accepted |
-| [`ADR 0004`](./decisions/0004-better-auth-with-database-sessions.md) | Better Auth menangani email/password dengan database session dan rate limiting | Accepted |
-| [`ADR 0005`](./decisions/0005-positive-idr-transactions-and-soft-delete.md) | Transaksi memakai nominal positif, create idempotent, dan soft delete | Accepted |
-| [`ADR 0006`](./decisions/0006-category-month-budgets.md) | Budget MVP adalah alokasi kategori pengeluaran per bulan | Accepted |
-| [`ADR 0007`](./decisions/0007-nvidia-build-for-ai-inference.md) | NVIDIA Build menyediakan inference parsing transaksi dengan preview terautorisasi | Accepted |
-| [`ADR 0008`](./decisions/0008-application-managed-ai-finance-tools.md) | Intent NVIDIA memilih tool baca terbatas; aplikasi menghitung jawaban finansial | Accepted |
-| [`ADR 0009`](./decisions/0009-playwright-edge-mobile-browser-baseline.md) | Playwright mengotomasi baseline browser mobile dengan Edge stabil dan database lokal | Accepted |
-| [`ADR 0010`](./decisions/0010-mvp-scope-closure-and-production-launch-gates.md) | Batas MVP repository dan production launch gate | Superseded by ADR 0011 |
-| [`ADR 0011`](./decisions/0011-portfolio-mvp-as-the-acceptance-boundary.md) | Portfolio MVP menjadi batas penerimaan proyek | Accepted |
+3. **[Design System & UI/UX (DESIGN.md)](./DESIGN.md)**  
+   Filosofi visual *Tactile Financial Precision*, panduan anti-slop, ergonomi layar mobile (440px container & thumb-zone), token warna (Dark Obsidian & Light Daylight), tipografi tabular, interaksi mikro, dan copywriting.

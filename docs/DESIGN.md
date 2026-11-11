@@ -1,0 +1,107 @@
+# Finara Design System & UI/UX Guidelines
+
+## 1. Visual Philosophy: *Tactile Financial Precision*
+
+Finara dirancang dengan standar visual tinggi (*anti-slop*), menolak estetika klise antarmuka AI generik dan dashboard SaaS yang membosankan.
+
+### Anti-Slop Principles:
+1. **No AI Clichés:** Dilarang menggunakan gradien ungu-biru neon, ikon bintang berkilau (*sparkles* ✨) yang berlebihan, maskot robotik kartun, dan efek *glassmorphism* buram yang mengaburkan teks.
+2. **No Nested Cards:** Hindari kartu di dalam kartu (*cards inside cards*). Gunakan tipografi yang kuat, garis batas halus (1px hairline dividers), dan whitespace untuk membedakan kelompok informasi.
+3. **Motion with Intent:** Animasi hanya hadir untuk menjelaskan perubahan status fisik antarmuka (misalnya: drawer bawah yang meluncur naik secara pegas saat AI selesai mengurai input, atau bar progres budget yang terisi secara halus). Tidak ada animasi dekoratif yang berputar tanpa tujuan.
+4. **Information Over Decoration:** Angka dan status keuangan adalah bintang utama aplikasi. Setiap warna dan badge harus memiliki makna fungsional.
+
+---
+
+## 2. Ergonomi & Layout Mobile-First
+
+- **Maximum Application Container:** `440px` lebar maksimum, diposisikan di tengah viewport desktop dengan latar belakang netral.
+- **Thumb Zone Design:**
+  - Komponen interaksi utama (Bottom Navigation, AI Composer Bar, Action Buttons) diletakkan di 40% area bawah layar agar nyaman dijangkau satu tangan.
+  - Target sentuhan (*touch target*) minimal **44x44px** dengan ruang antar tombol minimal 8px.
+- **Safe Area Insets:** Mendukung penuh notch layar atas dan home indicator bar bawah (`pb-safe`, `pt-safe`).
+
+---
+
+## 3. Palet Warna (Color Tokens)
+
+Finara mendukung tema **Dark Obsidian** (default untuk kenyamanan mata) dan **Light Daylight** yang bersih.
+
+### Dark Obsidian (Default)
+| Token | Hex Value | Penggunaan |
+|---|---|---|
+| `bg-base` | `#090A0F` | Latar belakang aplikasi utama |
+| `bg-surface` | `#12141D` | Kartu ringkasan & bottom drawer |
+| `bg-elevated`| `#1A1D2B` | Input field, hover state, dropdown |
+| `border-subtle` | `#232738` | Border pemisah halus (1px) |
+| `text-primary` | `#F8FAFC` | Angka saldo, judul halaman, nilai transaksi |
+| `text-secondary` | `#94A3B8` | Label tanggal, nama kategori, catatan |
+| `text-muted` | `#64748B` | Timestamp, instruksi placeholder |
+
+### Light Daylight
+| Token | Hex Value | Penggunaan |
+|---|---|---|
+| `bg-base` | `#F8FAFC` | Latar belakang aplikasi utama |
+| `bg-surface` | `#FFFFFF` | Kartu putih bersih |
+| `bg-elevated`| `#F1F5F9` | Input field & pill filter |
+| `border-subtle` | `#E2E8F0` | Border pembatas elemen |
+| `text-primary` | `#0F172A` | Teks utama & angka keuangan |
+| `text-secondary` | `#475569` | Keterangan subteks |
+| `text-muted` | `#94A3B8` | Placeholder |
+
+### Semantic & Status Tokens
+| Token | Hex Value | Makna |
+|---|---|---|
+| `accent-primary` | `#10B981` (Emerald) | Tombol aksi utama, saldo positif |
+| `status-expense` | `#F43F5E` (Rose) | Nominal pengeluaran, over-budget warning |
+| `status-income` | `#10B981` (Mint) | Nominal pemasukan, budget safe |
+| `status-warning` | `#F59E0B` (Amber) | Peringatan mendekati batas budget (>80%) |
+
+---
+
+## 4. Tipografi & Format Angka
+
+- **Primary Font Family:** `Plus Jakarta Sans`, sans-serif (modern, ramah di layar mobile).
+- **Tabular Figures:**
+  Semua angka nominal keuangan wajib menggunakan CSS class:
+  ```css
+  font-variant-numeric: tabular-nums;
+  ```
+  Ini mencegah angka bergoyang atau melompat horizontal saat nilainya berubah dinamis.
+- **Type Scale:**
+  - `Hero Balance`: 32px / Bold / Tabular
+  - `Section Title`: 18px / SemiBold
+  - `Card Header / Row Title`: 15px / Medium
+  - `Body / Input Text`: 14px / Regular
+  - `Meta / Caption`: 12px / Medium
+
+---
+
+## 5. Komponen Utama & Interaksi Mikro
+
+### A. The Persistent AI Composer
+- Diletakkan di atas bottom navigation pada halaman Home atau mengambang dengan latar surface terangkat.
+- Menyerupai *chat input bar*:
+  - Icon mikrofon / send yang tegas.
+  - Placeholder edukatif bergulir (*"Makan siang 25rb"*, *"Beli bensin 50rb pake bca"*).
+  - Indikator parsing: Animasi garis progress tipis (2px) emerald di atas input saat request dikirim (latensi < 1s).
+
+### B. The Tactile Bottom Sheet (Confirmation Drawer)
+- Menggunakan pola pegas fisik (*spring physics*) yang mengikuti gestur sentuhan jari:
+  - Swipe ke bawah untuk membatalkan draf.
+  - Nominal angka ditampilkan besar dengan pill kategori yang dapat diganti dengan 1 tap.
+  - Tombol simpan berukuran penuh (*full-width CTA*) dengan haptic feedback saat ditekan.
+
+### C. Budget Progress Gauge
+- Menggunakan visual linear terukur, bukan lingkaran grafik donat yang membuang ruang vertikal.
+- Berubah warna secara mulus dari Emerald (0-75%) -> Amber (76-90%) -> Rose (>90%).
+
+---
+
+## 6. Nada Bahasa & Copywriting (Voice of Finara)
+
+- **Bahasa Indonesia Lugas:** Gunakan kata kerja aktif dan kalimat singkat sehari-hari (*Sentence case*):
+  - *Baik:* "Simpan pengeluaran", "Coba lagi", "Batal".
+  - *Buruk:* "Submit form", "Klik di sini untuk melanjutkan proses penyimpanan".
+- **Netral & Faktual:** Finara tidak pernah menghakimi pengguna atau menggunakan gaya bahasa yang sok menggurui:
+  - *Buruk:* "Aduh, kamu boros banget minggu ini!" ❌
+  - *Baik:* "Pengeluaran minggu ini Rp450.000, 15% lebih tinggi dari minggu lalu." ✅
