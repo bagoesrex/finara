@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { AppShell, type TabType } from './components/layout';
 import { useAuth } from './features/auth/useAuth';
 import { AuthPages } from './features/auth/AuthPages';
+import { HomeDashboard } from './features/home';
 
 export function AppContent() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -10,32 +10,7 @@ export function AppContent() {
 
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
-      {activeTab === 'home' && (
-        <section className="space-y-4">
-          <div className="p-4 rounded-2xl bg-[#12141D] border border-[#232738]">
-            <p className="text-xs uppercase tracking-wider text-[#94A3B8]">Total Saldo</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight tabular-nums text-[#F8FAFC]">
-              Rp 0
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-xl bg-[#1A1D2B] border border-[#232738]/60 flex items-center gap-2">
-                <ArrowDownLeft className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
-                <div>
-                  <span className="text-[10px] text-[#94A3B8] block">Pemasukan</span>
-                  <span className="text-xs font-semibold tabular-nums text-[#F8FAFC]">Rp 0</span>
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-[#1A1D2B] border border-[#232738]/60 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
-                <div>
-                  <span className="text-[10px] text-[#94A3B8] block">Pengeluaran</span>
-                  <span className="text-xs font-semibold tabular-nums text-[#F8FAFC]">Rp 0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {activeTab === 'home' && <HomeDashboard />}
 
       {activeTab === 'activity' && (
         <section className="p-4 rounded-2xl bg-[#12141D] border border-[#232738]">
