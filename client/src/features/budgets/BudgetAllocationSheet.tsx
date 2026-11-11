@@ -80,7 +80,7 @@ export function BudgetAllocationSheet({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} title="Alokasi Budget">
-      <form onSubmit={handleSubmit} className="p-5 space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="p-5 space-y-4">
         {/* Category Selector */}
         <div>
           <label className="block text-xs font-medium text-slate-400 mb-2">

@@ -183,7 +183,7 @@ export function TransactionConfirmationSheet({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} title={sheetTitle}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Type Selector */}
         <div className="grid grid-cols-2 gap-2 p-1 bg-[#1A1D2B] border border-[#232738] rounded-xl">
           <button
