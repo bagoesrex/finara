@@ -327,11 +327,11 @@
 **Interfaces:**
 - Produces: Halaman Budget dengan linear progress gauge per kategori, peringatan over-budget, dan sheet alokasi limit budget bulanan dengan input numerik murni.
 
-- [ ] **Step 1: Tulis test kalkulasi progres persentase budget dan warna gauge**
-- [ ] **Step 2: Implementasi `BudgetPage.tsx` dan `BudgetAllocationSheet.tsx`**
-- [ ] **Step 3: Jalankan test budget**
+- [x] **Step 1: Tulis test kalkulasi progres persentase budget dan warna gauge**
+- [x] **Step 2: Implementasi `BudgetPage.tsx` dan `BudgetAllocationSheet.tsx`**
+- [x] **Step 3: Jalankan test budget**
   `cd client && bun test`.
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   `git commit -m "feat(budget): build monthly category budget dashboard and allocation sheet"`
 
 ---
