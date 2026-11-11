@@ -359,6 +359,8 @@ func TestRespondError(t *testing.T) {
 		{domain.ErrCategoryNotFound, http.StatusNotFound},
 		{domain.ErrConflict, http.StatusConflict},
 		{domain.ErrDuplicateRequest, http.StatusConflict},
+		{domain.ErrRateLimitExceeded, http.StatusTooManyRequests},
+		{domain.ErrAIServiceUnavailable, http.StatusServiceUnavailable},
 		{errors.New("db connection failed"), http.StatusInternalServerError},
 	}
 

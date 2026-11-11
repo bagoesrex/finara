@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 
 	_ "github.com/jackc/pgx/v5"
 
+	"finara/server/internal/ai"
 	httpDelivery "finara/server/internal/delivery/http"
 	authmw "finara/server/internal/delivery/http/middleware"
 	"finara/server/internal/repository/postgres"
@@ -68,6 +70,24 @@ func main() {
 		financeUsecase := usecase.NewFinanceUsecase(accountRepo, categoryRepo, txRepo)
 		financeHandler := httpDelivery.NewFinanceHandler(financeUsecase)
 
+		aiRateLimitRepo := postgres.NewAIRateLimitRepository(pool)
+		aiTimeout := 8
+		if timeoutStr := os.Getenv("AI_TIMEOUT_SECONDS"); timeoutStr != "" {
+			if t, err := strconv.Atoi(timeoutStr); err == nil && t > 0 {
+				aiTimeout = t
+			}
+		}
+
+		aiClient := ai.NewClient(ai.ClientConfig{
+			BaseURL:        os.Getenv("AI_BASE_URL"),
+			APIKey:         os.Getenv("AI_API_KEY"),
+			Model:          os.Getenv("AI_MODEL"),
+			TimeoutSeconds: aiTimeout,
+		})
+
+		aiUsecase := usecase.NewAIUsecase(aiRateLimitRepo, accountRepo, categoryRepo, aiClient)
+		aiHandler := httpDelivery.NewAIHandler(aiUsecase)
+
 		apiGroup := e.Group("/api")
 		authGroup := apiGroup.Group("/auth")
 		authHandler.RegisterRoutes(authGroup, authMiddleware)
@@ -75,6 +95,7 @@ func main() {
 		txHandler.RegisterRoutes(apiGroup, authMiddleware)
 		budgetHandler.RegisterRoutes(apiGroup, authMiddleware)
 		financeHandler.RegisterRoutes(apiGroup, authMiddleware)
+		aiHandler.RegisterRoutes(apiGroup, authMiddleware)
 	} else {
 		e.Logger.Warn("DATABASE_URL not set; skipping auth route initialization")
 	}
