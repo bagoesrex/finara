@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { queryClient, persister } from './lib/queryClient';
+import { AuthProvider } from './features/auth/useAuth';
 import App from './App';
 import './index.css';
 
@@ -10,6 +13,13 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <App />
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </PersistQueryClientProvider>
   </React.StrictMode>
 );
