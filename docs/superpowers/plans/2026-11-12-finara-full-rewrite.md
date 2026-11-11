@@ -262,14 +262,14 @@
   - `<NumericInput value={amount} onChange={(rawInt) => ...} />`
   - `<BottomSheet open={isOpen} onClose={...} />`
 
-- [ ] **Step 1: Tulis failing test untuk `NumericInput`**
+- [x] **Step 1: Tulis failing test untuk `NumericInput`**
   Verifikasi: hanya menerima digit angka positif, memblokir tanda minus `-` dan huruf, memformat tampilan visual menjadi `Rp50.000`, mengembalikan integer murni `50000`.
-- [ ] **Step 2: Implementasi `NumericInput.tsx`**
+- [x] **Step 2: Implementasi `NumericInput.tsx`**
   Atribut `inputMode="numeric"`, `pattern="[0-9]*"`, tinggi 48-52px, elevated surface, emerald focus ring, quick clear "X" button.
-- [ ] **Step 3: Implementasi `BottomSheet.tsx` dengan physics drag down / spring animation**
-- [ ] **Step 4: Jalankan test komponen input**
+- [x] **Step 3: Implementasi `BottomSheet.tsx` dengan physics drag down / spring animation**
+- [x] **Step 4: Jalankan test komponen input**
   `cd client && bun test`.
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   `git commit -m "feat(ui): add custom numeric currency input and tactile bottom sheet"`
 
 ---
