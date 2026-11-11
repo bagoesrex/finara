@@ -186,16 +186,16 @@
 - Produces: `POST /api/ai/parse-transaction` (input natural language, output `ParsedTransactionDraft`).
 - Behavior: Berjalan dengan 9router / OpenRouter / Groq / OpenAI via `AI_BASE_URL` dan `AI_API_KEY`. Timeout 8 detik. Selalu mengembalikan Draft, tidak auto-save.
 
-- [ ] **Step 1: Tulis unit test untuk client HTTP AI dan parser response JSON**
+- [x] **Step 1: Tulis unit test untuk client HTTP AI dan parser response JSON**
   Test verifikasi parsing JSON output, timeout context handling, dan error mapping.
-- [ ] **Step 2: Implementasi generic OpenAI-compatible completions client di `internal/ai/client.go`**
+- [x] **Step 2: Implementasi generic OpenAI-compatible completions client di `internal/ai/client.go`**
   Menggunakan standar `POST {AI_BASE_URL}/chat/completions` dengan `response_format: {"type": "json_object"}`.
-- [ ] **Step 3: Implementasi prompt injeksi konteks minimal (kategori user, akun, tanggal Jakarta)**
-- [ ] **Step 4: Implementasi `AiUsecase` dengan rate limiting berbasis database per user**
-- [ ] **Step 5: Implementasi `AiHandler` di Echo**
-- [ ] **Step 6: Jalankan test AI backend**
+- [x] **Step 3: Implementasi prompt injeksi konteks minimal (kategori user, akun, tanggal Jakarta)**
+- [x] **Step 4: Implementasi `AiUsecase` dengan rate limiting berbasis database per user**
+- [x] **Step 5: Implementasi `AiHandler` di Echo**
+- [x] **Step 6: Jalankan test AI backend**
   `cd server && go test -v ./internal/ai/... ./internal/usecase/...`.
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
   `git commit -m "feat(ai): add universal openai-compatible transaction parsing gateway"`
 
 ---
