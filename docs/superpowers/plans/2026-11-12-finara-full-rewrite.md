@@ -99,13 +99,13 @@
 **Interfaces:**
 - Produces: Domain structs murni, value object `int64` Money IDR, dan error constants (`ErrNotFound`, `ErrUnauthorized`, `ErrDuplicateRequest`, `ErrInvalidAmount`).
 
-- [ ] **Step 1: Tulis test validasi domain model `transaction_test.go`**
+- [x] **Step 1: Tulis test validasi domain model `transaction_test.go`**
   Test verifikasi nominal harus positif (`Amount > 0`), tanggal transaksi tidak boleh kosong, dan format kategori cocok.
-- [ ] **Step 2: Definisikan seluruh domain entities dan interfaces di `internal/domain`**
+- [x] **Step 2: Definisikan seluruh domain entities dan interfaces di `internal/domain`**
   Tulis struct `User`, `Account`, `Category`, `Transaction`, `Budget`, beserta interface repository yang dibutuhkan.
-- [ ] **Step 3: Jalankan test domain**
+- [x] **Step 3: Jalankan test domain**
   Jalankan `cd server && go test -v ./internal/domain/...`.
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   `git commit -m "feat(domain): define core business entities and error sentinels"`
 
 ---
