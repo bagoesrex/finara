@@ -46,17 +46,17 @@
 **Interfaces:**
 - Produces: Setup scaffolding yang dapat di-build mandiri (`go test ./...` di `server/`, `bun run build` di `client/`, `bun run test` di `e2e/`).
 
-- [ ] **Step 1: Inisialisasi backend Go module dan dependency dasar**
+- [x] **Step 1: Inisialisasi backend Go module dan dependency dasar**
   Inisialisasi Go module `finara/server` di folder `server/`, unduh Echo v4, pgx/v5, godotenv, validator.
-- [ ] **Step 2: Inisialisasi frontend React 19 + Bun + Vite di folder `client/`**
+- [x] **Step 2: Inisialisasi frontend React 19 + Bun + Vite di folder `client/`**
   Setup `client/` dengan React 19, TypeScript strict mode, Tailwind CSS 4, TanStack Query v5, lucide-react.
-- [ ] **Step 3: Setup Playwright di `e2e/`**
+- [x] **Step 3: Setup Playwright di `e2e/`**
   Setup `e2e/` dengan `@playwright/test` dan konfigurasi emulasi mobile Edge/Pixel 7.
-- [ ] **Step 4: Update `.gitignore` root**
+- [x] **Step 4: Update `.gitignore` root**
   Pastikan `node_modules/`, `.env`, build artifacts, dan binary Go di-ignore.
-- [ ] **Step 5: Verifikasi build baseline**
+- [x] **Step 5: Verifikasi build baseline**
   Jalankan `cd client && bun run build` dan `cd ../server && go vet ./...`.
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   `git commit -m "chore: scaffold monorepo workspace for server, client, and e2e"`
 
 ---
