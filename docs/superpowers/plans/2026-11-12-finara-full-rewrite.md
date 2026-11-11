@@ -160,14 +160,14 @@
   - `GET /api/budgets?month=YYYY-MM` (list with progress)
   - `POST /api/budgets` (allocate/update category budget)
 
-- [ ] **Step 1: Tulis failing tests untuk kalkulasi saldo snapshot, transaksi, dan budget**
-- [ ] **Step 2: Implementasi `TransactionRepo` dan `BudgetRepo` PostgreSQL**
-- [ ] **Step 3: Implementasi `TransactionUsecase` dan `BudgetUsecase`**
+- [x] **Step 1: Tulis failing tests untuk kalkulasi saldo snapshot, transaksi, dan budget**
+- [x] **Step 2: Implementasi `TransactionRepo` dan `BudgetRepo` PostgreSQL**
+- [x] **Step 3: Implementasi `TransactionUsecase` dan `BudgetUsecase`**
   Pastikan validasi multitenan (`userID`) dan isolasi data 100% ketat.
-- [ ] **Step 4: Implementasi Echo handlers dan route registration**
-- [ ] **Step 5: Jalankan test integrasi backend**
+- [x] **Step 4: Implementasi Echo handlers dan route registration**
+- [x] **Step 5: Jalankan test integrasi backend**
   `cd server && go test -v ./...`.
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   `git commit -m "feat(finance): implement transactions, budgets, and financial snapshot APIs"`
 
 ---
