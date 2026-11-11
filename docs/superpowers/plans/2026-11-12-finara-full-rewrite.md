@@ -286,13 +286,13 @@
 **Interfaces:**
 - Produces: Halaman Home dengan total saldo tabular, ringkasan pengeluaran/pemasukan bulan berjalan, recent transactions, tombol transaksi manual, dan persistent AI Composer yang membuka `TransactionConfirmationSheet`.
 
-- [ ] **Step 1: Tulis failing test untuk parsing flow AI Composer dan confirmation sheet**
-- [ ] **Step 2: Implementasi `AIComposer.tsx` (input teks seperti chat, loading indicator tipis emerald)**
-- [ ] **Step 3: Implementasi `TransactionConfirmationSheet.tsx` (tinjau tipe, nominal besar, pill kategori, tombol simpan 1 tap)**
-- [ ] **Step 4: Sambungkan optimistic update ke TanStack Query saat transaksi disimpan**
-- [ ] **Step 5: Jalankan test Home & Composer**
+- [x] **Step 1: Tulis failing test untuk parsing flow AI Composer dan confirmation sheet**
+- [x] **Step 2: Implementasi `AIComposer.tsx` (input teks seperti chat, loading indicator tipis emerald)**
+- [x] **Step 3: Implementasi `TransactionConfirmationSheet.tsx` (tinjau tipe, nominal besar, pill kategori, tombol simpan 1 tap)**
+- [x] **Step 4: Sambungkan optimistic update ke TanStack Query saat transaksi disimpan**
+- [x] **Step 5: Jalankan test Home & Composer**
   `cd client && bun test`.
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   `git commit -m "feat(home): build home dashboard, ai composer, and confirmation sheet with optimistic updates"`
 
 ---
