@@ -236,15 +236,15 @@
 **Interfaces:**
 - Produces: `PersistQueryClientProvider` dengan localStorage/IndexedDB sync persister, zero-reload state, dan auth session token management.
 
-- [ ] **Step 1: Tulis test konfigurasi persist query client dan fallback cache**
-- [ ] **Step 2: Implementasi `queryClient.ts` dengan `@tanstack/react-query-persist-client`**
+- [x] **Step 1: Tulis test konfigurasi persist query client dan fallback cache**
+- [x] **Step 2: Implementasi `queryClient.ts` dengan `@tanstack/react-query-persist-client`**
   Konfigurasi `gcTime` 24 jam dan `staleTime` 5 menit untuk data keuangan utama.
-- [ ] **Step 3: Implementasi API fetcher wrapper dengan token injection di `api/client.ts`**
-- [ ] **Step 4: Implementasi hook `useAuth` dan halaman Register/Login (Zero Onboarding)**
+- [x] **Step 3: Implementasi API fetcher wrapper dengan token injection di `api/client.ts`**
+- [x] **Step 4: Implementasi hook `useAuth` dan halaman Register/Login (Zero Onboarding)**
   Setelah registrasi berhasil, langsung simpan token dan redirect ke Home.
-- [ ] **Step 5: Jalankan test auth & query client**
+- [x] **Step 5: Jalankan test auth & query client**
   `cd client && bun test`.
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   `git commit -m "feat(query): configure persisted query client and zero-onboarding auth flow"`
 
 ---
