@@ -67,7 +67,9 @@ finara/
    - Minimum touch target: `44x44px` with at least `8px` spacing.
    - Respect safe area insets for notches and mobile home bars.
    - **Zero Onboarding:** Registration transitions directly to Home without onboarding wizards.
+   - **Custom-Styled Fields (Never Default HTML):** All inputs must use elevated surfaces (`bg-[#1A1D2B]` / `bg-[#F1F5F9]`), 48px-52px height, 14px rounded corners, integrated currency prefix (`Rp`), and emerald focus rings (`focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500`).
    - **Strict Numeric Inputs:** All currency/amount input fields must specify `inputMode="numeric"` and `pattern="[0-9]*"` to trigger numeric keypads on mobile. Block all non-digit characters (`-`, `+`, `,`, `.`, letters) and disallow negative values (< 0).
+   - **Typography & Glanceable UI:** Input text must be 16px (to prevent mobile Safari auto-zoom). Display amounts must be 28px-32px bold tabular numbers. Disallow text bloat—use concise 1-3 word labels and action buttons ("Simpan", "Batal", "Hapus") without walls of instructional text.
    - Anti-slop: strictly adhere to `docs/DESIGN.md` (no emojis in markdown, no generic purple-blue gradients, no decorative sparkles, no cards inside cards, tabular numbers for currency).
 
 ---

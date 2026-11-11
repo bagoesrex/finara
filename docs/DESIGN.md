@@ -67,12 +67,12 @@ Finara mendukung tema **Dark Obsidian** (default untuk kenyamanan mata) dan **Li
   font-variant-numeric: tabular-nums;
   ```
   Ini mencegah angka bergoyang atau melompat horizontal saat nilainya berubah dinamis.
-- **Type Scale:**
-  - `Hero Balance`: 32px / Bold / Tabular
-  - `Section Title`: 18px / SemiBold
-  - `Card Header / Row Title`: 15px / Medium
-  - `Body / Input Text`: 14px / Regular
-  - `Meta / Caption`: 12px / Medium
+- **Standar Ukuran Teks Mobile (Anti Teks Terlalu Kecil):**
+  - `Hero & Amount Display`: 28px - 32px / Bold / Tabular (sangat jelas terbaca sekilas).
+  - `Section Title`: 18px - 20px / SemiBold
+  - `Input Field Text`: 16px / Regular (wajib minimal 16px untuk mencegah auto-zoom di browser mobile seperti iOS Safari saat focus).
+  - `Body / Row Title`: 14px - 15px / Medium
+  - `Meta / Caption`: 12px - 13px / Medium (dilarang menggunakan font di bawah 12px agar tidak buram di layar smartphone).
 
 ---
 
@@ -105,10 +105,21 @@ Finara mendukung tema **Dark Obsidian** (default untuk kenyamanan mata) dan **Li
   - Menampilkan angka berformat mata uang lokal secara visual saat diketik (contoh: input `50000` otomatis ditampilkan sebagai `Rp50.000` dengan font tabular).
   - State dan payload yang dikirim ke backend tetap berupa nilai integer murni `int64` tanpa simbol.
 
+### E. Standar Desain Input Field (Bukan Default HTML)
+- **Container Terangkat:** Tidak menggunakan border default browser. Field menggunakan surface terangkat (`bg-[#1A1D2B]` di dark mode, `bg-[#F1F5F9]` di light mode) dengan border halus 1px (`border-[#232738]` / `border-[#E2E8F0]`).
+- **Touch Ergonomics:** Tinggi field minimal 48px–52px dengan sudut membulat modern (`rounded-xl` / 14px), sangat nyaman dijangkau dan ditekan oleh jempol.
+- **Focus State Elegan:** Transisi halus 150ms saat fokus dengan ring aksen emerald teredam (`focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500`).
+- **Prefix Terintegrasi:** Simbol mata uang `Rp` atau ikon diletakkan rapi di dalam container input dengan warna muted, bukan elemen terpisah yang canggung.
+- **Quick Clear Button:** Tombol hapus instan (ikon X halus) muncul otomatis saat field berisi teks/angka, memungkinkan reset dalam 1 tap tanpa perlu menahan backspace.
+
 ---
 
 ## 6. Nada Bahasa & Copywriting (Voice of Finara)
 
+- **Glanceable UI (Bebas Teks Berlebihan):**
+  - Pengguna mobile malas membaca teks panjang. Singkirkan paragraf pengantar, instruksi panjang, atau dinding teks yang tidak diperlukan.
+  - Gunakan label dan aksi ringkas 1–3 kata: "Simpan", "Batal", "Tambah manual", "Hapus transaksi".
+  - Field harus intuitif dari placeholder dan konteksnya tanpa membutuhkan teks petunjuk tambahan di bawahnya.
 - **Bahasa Indonesia Lugas:** Gunakan kata kerja aktif dan kalimat singkat sehari-hari (*Sentence case*):
   - *Baik:* "Simpan pengeluaran", "Coba lagi", "Batal".
   - *Buruk:* "Submit form", "Klik di sini untuk melanjutkan proses penyimpanan".
