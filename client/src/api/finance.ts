@@ -58,6 +58,28 @@ export interface CreateTransactionInput {
   client_request_id?: string;
 }
 
+export interface UpdateTransactionInput {
+  account_id?: string;
+  category_id?: string;
+  type?: TransactionType;
+  amount?: number;
+  description?: string;
+  transaction_date?: string;
+  transaction_time?: string;
+}
+
+export interface TransactionFilters {
+  search?: string;
+  type?: TransactionType;
+  limit?: number;
+  offset?: number;
+  cursor?: string;
+  account_id?: string;
+  category_id?: string;
+  start_date?: string;
+  end_date?: string;
+}
+
 export interface ParsedTransactionDraft {
   amount: number;
   type: TransactionType;
@@ -90,6 +112,33 @@ export const financeApi = {
 
   getRecentTransactions: (limit = 5): Promise<Transaction[]> =>
     apiFetch<Transaction[]>(`/api/transactions?limit=${limit}`),
+
+  getTransactions: (filters?: TransactionFilters): Promise<Transaction[]> => {
+    const params = new URLSearchParams();
+    if (filters?.search) params.append('search', filters.search);
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.limit !== undefined) params.append('limit', filters.limit.toString());
+    if (filters?.offset !== undefined) params.append('offset', filters.offset.toString());
+    if (filters?.cursor) params.append('cursor', filters.cursor);
+    if (filters?.account_id) params.append('account_id', filters.account_id);
+    if (filters?.category_id) params.append('category_id', filters.category_id);
+    if (filters?.start_date) params.append('start_date', filters.start_date);
+    if (filters?.end_date) params.append('end_date', filters.end_date);
+
+    const query = params.toString();
+    return apiFetch<Transaction[]>(`/api/transactions${query ? `?${query}` : ''}`);
+  },
+
+  updateTransaction: (id: string, data: UpdateTransactionInput): Promise<Transaction> =>
+    apiFetch<Transaction>(`/api/transactions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  deleteTransaction: (id: string): Promise<{ message: string }> =>
+    apiFetch<{ message: string }>(`/api/transactions/${id}`, {
+      method: 'DELETE',
+    }),
 
   createTransaction: (data: CreateTransactionInput): Promise<Transaction> => {
     const client_request_id =

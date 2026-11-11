@@ -3,6 +3,7 @@ import { AppShell, type TabType } from './components/layout';
 import { useAuth } from './features/auth/useAuth';
 import { AuthPages } from './features/auth/AuthPages';
 import { HomeDashboard } from './features/home';
+import { ActivityPage } from './features/activity';
 
 export function AppContent() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -12,12 +13,7 @@ export function AppContent() {
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       {activeTab === 'home' && <HomeDashboard />}
 
-      {activeTab === 'activity' && (
-        <section className="p-4 rounded-2xl bg-[#12141D] border border-[#232738]">
-          <h2 className="text-sm font-semibold text-[#F8FAFC]">Aktivitas Transaksi</h2>
-          <p className="mt-2 text-xs text-[#94A3B8]">Belum ada riwayat transaksi.</p>
-        </section>
-      )}
+      {activeTab === 'activity' && <ActivityPage />}
 
       {activeTab === 'budget' && (
         <section className="p-4 rounded-2xl bg-[#12141D] border border-[#232738]">
