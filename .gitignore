@@ -37,3 +37,4 @@ bun-debug.log*
 next-env.d.ts
 
 .artifacts
+.superpowers/
