@@ -23,6 +23,7 @@ import (
 	authmw "finara/server/internal/delivery/http/middleware"
 	"finara/server/internal/repository/postgres"
 	"finara/server/internal/usecase"
+	"finara/server/migrations"
 )
 
 func main() {
@@ -65,6 +66,10 @@ func main() {
 			e.Logger.Fatalf("failed to connect to database: %v", err)
 		}
 		defer pool.Close()
+
+		if err := migrations.MigrateUp(context.Background(), pool); err != nil {
+			e.Logger.Fatalf("failed to run database migrations: %v", err)
+		}
 
 		userRepo := postgres.NewUserRepository(pool)
 		accountRepo := postgres.NewAccountRepository(pool)

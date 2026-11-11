@@ -31,6 +31,7 @@ func RespondError(c echo.Context, err error) error {
 	case errors.Is(err, domain.ErrAIServiceUnavailable):
 		return c.JSON(nethttp.StatusServiceUnavailable, ErrorResponse{Error: err.Error()})
 	default:
+		c.Logger().Errorf("internal error: %v", err)
 		return c.JSON(nethttp.StatusInternalServerError, ErrorResponse{Error: "internal server error"})
 	}
 }
