@@ -5,7 +5,7 @@
 Finara dirancang dengan standar visual tinggi (*anti-slop*), menolak estetika klise antarmuka AI generik dan dashboard SaaS yang membosankan.
 
 ### Anti-Slop Principles:
-1. **No AI Clichés:** Dilarang menggunakan gradien ungu-biru neon, ikon bintang berkilau (*sparkles* ✨) yang berlebihan, maskot robotik kartun, dan efek *glassmorphism* buram yang mengaburkan teks.
+1. **No AI Clichés:** Dilarang menggunakan gradien ungu-biru neon, ikon bintang berkilau (*sparkles*) yang berlebihan, maskot robotik kartun, dan efek *glassmorphism* buram yang mengaburkan teks.
 2. **No Nested Cards:** Hindari kartu di dalam kartu (*cards inside cards*). Gunakan tipografi yang kuat, garis batas halus (1px hairline dividers), dan whitespace untuk membedakan kelompok informasi.
 3. **Motion with Intent:** Animasi hanya hadir untuk menjelaskan perubahan status fisik antarmuka (misalnya: drawer bawah yang meluncur naik secara pegas saat AI selesai mengurai input, atau bar progres budget yang terisi secara halus). Tidak ada animasi dekoratif yang berputar tanpa tujuan.
 4. **Information Over Decoration:** Angka dan status keuangan adalah bintang utama aplikasi. Setiap warna dan badge harus memiliki makna fungsional.
@@ -95,6 +95,16 @@ Finara mendukung tema **Dark Obsidian** (default untuk kenyamanan mata) dan **Li
 - Menggunakan visual linear terukur, bukan lingkaran grafik donat yang membuang ruang vertikal.
 - Berubah warna secara mulus dari Emerald (0-75%) -> Amber (76-90%) -> Rose (>90%).
 
+### D. Field Input Nominal & Keypad Numerik Mobile
+- **Keypad Numerik Wajib:** Semua input nominal mata uang harus menyertakan atribut `inputMode="numeric"` dan `pattern="[0-9]*"` sehingga hanya keypad angka yang muncul di layar sentuh mobile.
+- **Strict Non-Negative Sanitization:**
+  - Hanya menerima digit angka positif (0–9).
+  - Tanda minus `-`, tanda plus `+`, koma `,`, titik `.`, dan huruf abjad diblokir langsung pada level event `onChange` / `onKeyDown`.
+  - Nilai nominal tidak dapat diisi angka kurang dari 0 (hanya integer positif).
+- **Format Rupiah Real-Time:**
+  - Menampilkan angka berformat mata uang lokal secara visual saat diketik (contoh: input `50000` otomatis ditampilkan sebagai `Rp50.000` dengan font tabular).
+  - State dan payload yang dikirim ke backend tetap berupa nilai integer murni `int64` tanpa simbol.
+
 ---
 
 ## 6. Nada Bahasa & Copywriting (Voice of Finara)
@@ -103,5 +113,5 @@ Finara mendukung tema **Dark Obsidian** (default untuk kenyamanan mata) dan **Li
   - *Baik:* "Simpan pengeluaran", "Coba lagi", "Batal".
   - *Buruk:* "Submit form", "Klik di sini untuk melanjutkan proses penyimpanan".
 - **Netral & Faktual:** Finara tidak pernah menghakimi pengguna atau menggunakan gaya bahasa yang sok menggurui:
-  - *Buruk:* "Aduh, kamu boros banget minggu ini!" ❌
-  - *Baik:* "Pengeluaran minggu ini Rp450.000, 15% lebih tinggi dari minggu lalu." ✅
+  - *Dihindari:* "Aduh, kamu boros banget minggu ini!"
+  - *Direkomendasikan:* "Pengeluaran minggu ini Rp450.000, 15% lebih tinggi dari minggu lalu."

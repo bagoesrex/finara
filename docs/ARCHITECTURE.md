@@ -116,7 +116,7 @@ finara/
 2. **Usecase Layer (`internal/usecase`)**:
    - Mengorkestrasi alur data dan logika bisnis aplikasi.
    - Memastikan setiap aksi divalidasi terhadap kepemilikan user (`userID`).
-   - Melakukan transaksi database atomik (misal: onboarding yang membuat akun awal dan kategori default sekaligus).
+   - Melakukan transaksi database atomik (misal: saat registrasi otomatis membuat akun default "Tunai" dengan saldo 0 dan kumpulan kategori default secara bersamaan tanpa step onboarding terpisah).
 3. **Repository Layer (`internal/repository/postgres`)**:
    - Mengimplementasikan interface domain menggunakan driver `pgx/v5`.
    - Menggunakan raw SQL yang telah dioptimasi dengan query plan PostgreSQL atau `sqlc`.
@@ -295,7 +295,7 @@ AI_RATE_LIMIT_WINDOW_SECONDS=60
    - Bun test runner untuk utility fungsi mata uang IDR, date-fns, dan hook TanStack Query.
 3. **Playwright E2E Tests:**
    - Menjalankan skenario browser nyata dengan viewport mobile (Pixel 7 / iPhone 14):
-     1. Registrasi & Onboarding saldo awal.
+     1. Registrasi & Zero Onboarding (langsung masuk ke Home dengan akun default "Tunai").
      2. Input transaksi melalui AI Composer -> sheet terbuka -> konfirmasi tersimpan.
      3. Input transaksi manual.
      4. Alokasi budget & verifikasi progress bar.

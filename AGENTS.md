@@ -62,11 +62,13 @@ finara/
    - Apply optimistic updates when recording or deleting transactions, with safe rollback on error.
    - Targeted invalidation: only invalidate queries affected by the mutation.
 
-3. **Design & Mobile-First Constraints:**
+3. **Design, Mobile-First & Input Constraints:**
    - Max container width: `440px` centered on larger screens.
    - Minimum touch target: `44x44px` with at least `8px` spacing.
    - Respect safe area insets for notches and mobile home bars.
-   - Anti-slop: strictly adhere to `docs/DESIGN.md` (no generic purple-blue gradients, no decorative sparkles, no cards inside cards, tabular numbers for currency).
+   - **Zero Onboarding:** Registration transitions directly to Home without onboarding wizards.
+   - **Strict Numeric Inputs:** All currency/amount input fields must specify `inputMode="numeric"` and `pattern="[0-9]*"` to trigger numeric keypads on mobile. Block all non-digit characters (`-`, `+`, `,`, `.`, letters) and disallow negative values (< 0).
+   - Anti-slop: strictly adhere to `docs/DESIGN.md` (no emojis in markdown, no generic purple-blue gradients, no decorative sparkles, no cards inside cards, tabular numbers for currency).
 
 ---
 
@@ -74,9 +76,9 @@ finara/
 
 - Test real user flows on mobile viewports (`Pixel 7` and `iPhone 14`).
 - Critical flows to cover:
-  1. Onboarding with initial opening balance.
+  1. Registration and instant jump to Home (Zero Onboarding).
   2. Recording a transaction via natural language AI composer.
-  3. Recording a transaction manually.
+  3. Recording a transaction manually with strict numeric keypad validation.
   4. Setting up a category monthly budget and checking progress.
   5. Verifying zero-reload persisted cache on navigation.
 

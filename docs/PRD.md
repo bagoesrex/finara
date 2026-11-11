@@ -56,15 +56,22 @@ Pengguna dapat mengetik pertanyaan pada AI Composer:
 
 Backend memetakan intent dan menjalankan fungsi analitik PostgreSQL berizin, lalu mengembalikan jawaban ringkas faktual tanpa basa-basi AI.
 
+### D. Standar Input Nominal & Keypad Mobile
+- **Keypad Numerik Murni:** Semua field input nominal uang (manual draft, edit transaksi, alokasi budget) wajib memicu keypad angka pada perangkat mobile (`inputMode="numeric"`, `pattern="[0-9]*"`).
+- **Sanitasi Ketat:** Karakter non-angka (huruf, tanda minus, koma, simbol) diblokir secara langsung saat pengetikan.
+- **Batas Nilai Non-Negatif:** Nominal tidak dapat diisi nilai kurang dari 0 atau bertanda minus. Transaksi mewajibkan nominal positif minimal 1 Rupiah.
+- **Formatting IDR Otomatis:** Input angka diformat secara visual dengan pemisah ribuan titik (misal `Rp25.000`), sementara nilai yang dikirim ke backend tetap integer utuh tanpa desimal.
+
 ---
 
 ## 4. Ruang Lingkup MVP (Scope)
 
 ### Core Features (In Scope):
-1. **Autentikasi & Akun Pengguna:**
+1. **Autentikasi & Zero Onboarding (Pendekatan Instant Jump):**
    - Registrasi & Login sederhana (email + password).
-   - Session authentication yang aman dan berizin per user.
-   - Onboarding cepat: input saldo awal akun pertama (Kas/Bank/E-Wallet).
+   - **Zero Onboarding:** Setelah registrasi berhasil, pengguna langsung diarahkan ke halaman Home tanpa step onboarding sama sekali (Time-to-Value = 0 detik).
+   - Sistem secara otomatis membuat akun default "Tunai" (saldo Rp0) dan kategori standar bawaan (Makanan & Minuman, Transportasi, Belanja, Tagihan, Gaji, dll).
+   - Pengguna dapat menyesuaikan nama akun, menambah rekening baru (Bank/E-Wallet), atau mengatur saldo awal kapan saja melalui menu Pengaturan Akun.
 2. **Dashboard Home:**
    - Total saldo gabungan.
    - Ringkasan pemasukan & pengeluaran bulan berjalan.

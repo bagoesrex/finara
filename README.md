@@ -6,7 +6,7 @@ Mencatat transaksi terasa secepat mengirim pesan instan: cukup ketik `makan sian
 
 ---
 
-## 🚀 Keunggulan Arsitektur Baru (Finara 2.0)
+## Keunggulan Arsitektur Baru (Finara 2.0)
 
 - **Decoupled Monorepo:** Frontend murni (*Client*) dan Backend performa tinggi (*Go Clean Architecture*).
 - **Zero-Reload Persistence:** Didukung oleh **TanStack Query Persist Client** (`@tanstack/react-query-persist-client`) untuk transisi antar halaman instan, caching persisten di storage lokal, dan rendering tanpa blank screen saat membuka aplikasi.
@@ -16,7 +16,7 @@ Mencatat transaksi terasa secepat mengirim pesan instan: cukup ketik `makan sian
 
 ---
 
-## 📁 Struktur Monorepo
+## Struktur Monorepo
 
 ```text
 finara/
@@ -47,7 +47,7 @@ finara/
 
 ---
 
-## 🛠️ Persyaratan Sistem
+## Persyaratan Sistem
 
 - **Bun** (v1.4+)
 - **Go** (v1.24+)
@@ -55,7 +55,7 @@ finara/
 
 ---
 
-## ⚡ Panduan Menjalankan Proyek
+## Panduan Menjalankan Proyek
 
 ### 1. Database PostgreSQL
 Pastikan database PostgreSQL aktif dan buat database baru:
@@ -98,7 +98,7 @@ Akses aplikasi melalui browser di `http://localhost:5173`.
 
 ---
 
-## 🧪 Pengujian & Kualitas
+## Pengujian & Kualitas
 
 ### Unit & Integration Test (Backend Go):
 ```bash
@@ -121,7 +121,7 @@ bun run test
 
 ---
 
-## 📖 Dokumentasi Terkait
+## Dokumentasi Terkait
 
 - [Product Requirements Document (PRD)](./docs/PRD.md)
 - [Technical Architecture & Database Schema](./docs/ARCHITECTURE.md)
