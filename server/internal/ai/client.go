@@ -44,6 +44,7 @@ type ChatCompletionRequest struct {
 	Model          string         `json:"model"`
 	Temperature    float64        `json:"temperature"`
 	MaxTokens      int            `json:"max_tokens"`
+	Stream         bool           `json:"stream"`
 	ResponseFormat ResponseFormat `json:"response_format"`
 	Messages       []ChatMessage  `json:"messages"`
 }
@@ -99,6 +100,7 @@ func (c *Client) CompleteChat(ctx context.Context, systemPrompt, userPrompt stri
 		Model:          c.model,
 		Temperature:    0,
 		MaxTokens:      512,
+		Stream:         false,
 		ResponseFormat: ResponseFormat{Type: "json_object"},
 		Messages: []ChatMessage{
 			{Role: "system", Content: systemPrompt},

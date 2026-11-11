@@ -47,6 +47,9 @@ func TestClient_CompleteChat_Success(t *testing.T) {
 		if req.MaxTokens != 512 {
 			t.Errorf("expected max_tokens 512, got %v", req.MaxTokens)
 		}
+		if req.Stream != false {
+			t.Errorf("expected stream false, got %v", req.Stream)
+		}
 		if req.ResponseFormat.Type != "json_object" {
 			t.Errorf("expected response_format json_object, got %v", req.ResponseFormat.Type)
 		}
