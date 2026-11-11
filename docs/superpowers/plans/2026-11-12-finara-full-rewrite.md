@@ -307,12 +307,12 @@
 **Interfaces:**
 - Produces: Halaman Aktivitas dengan infinite scroll / pagination, filter pencarian teks & nominal IDR, sheet edit transaksi, dan konfirmasi hapus transaksi.
 
-- [ ] **Step 1: Tulis test query dan render daftar transaksi**
-- [ ] **Step 2: Implementasi filter search real-time dengan debouncing**
-- [ ] **Step 3: Implementasi edit transaksi dan soft-delete dengan invalidasi cache terarah**
-- [ ] **Step 4: Jalankan test activity**
+- [x] **Step 1: Tulis test query dan render daftar transaksi**
+- [x] **Step 2: Implementasi filter search real-time dengan debouncing**
+- [x] **Step 3: Implementasi edit transaksi dan soft-delete dengan invalidasi cache terarah**
+- [x] **Step 4: Jalankan test activity**
   `cd client && bun test`.
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   `git commit -m "feat(activity): build transaction history, search, and edit/delete sheet"`
 
 ---
